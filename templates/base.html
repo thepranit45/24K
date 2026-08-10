@@ -19,7 +19,7 @@
 
   <!-- CSS -->
   {% load static %}
-  <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1.1" />
 
   {% block extra_css %}{% endblock %}
 </head>
@@ -121,10 +121,19 @@
     </div>
 
     <div class="footer-contact">
-      <h4>Contact</h4>
-      <p><i class="fa-solid fa-location-dot"></i> 42, MG Road, Mumbai, India</p>
-      <p><i class="fa-solid fa-phone"></i> +91 98765 43210</p>
-      <p><i class="fa-solid fa-envelope"></i> hello@gentlemanscut.in</p>
+      <h4 style="color: #b9f032; font-size: 1.3rem; margin-bottom: 1.2rem; font-weight: 700;">Visit Us</h4>
+      <div style="display: flex; align-items: flex-start; gap: 1rem; margin-bottom: 1.2rem; color: #d1d5db; font-size: 0.95rem; line-height: 1.6;">
+        <i class="fa-solid fa-location-dot" style="color: #b9f032; font-size: 1.2rem; margin-top: 0.2rem;"></i> 
+        <span>SHOP R4, SATYASHIV COMERCIAL PARK, MEDICOVER HOSPITAL ROAD, ShreeRam Nagar, Gunjalwadi, Maharashtra 422605</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.2rem; color: #d1d5db; font-size: 0.95rem;">
+        <i class="fa-solid fa-phone" style="color: #b9f032; font-size: 1.2rem;"></i> 
+        <span>+91 9209597436</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 1rem; color: #d1d5db; font-size: 0.95rem;">
+        <i class="fa-regular fa-clock" style="color: #b9f032; font-size: 1.2rem;"></i> 
+        <span>Tue-Sun: 9 AM - 8 PM</span>
+      </div>
     </div>
   </div>
 
