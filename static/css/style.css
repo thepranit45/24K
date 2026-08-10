@@ -720,3 +720,56 @@ textarea.form-control { resize:vertical; min-height:100px; }
 @media(max-width: 900px) {
   .profile-layout { grid-template-columns: 1fr; }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   MOBILE RESPONSIVENESS (<= 768px)
+═══════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  /* Navbar */
+  .nav-links, .nav-auth { display: none; }
+  .hamburger { 
+    display: flex; flex-direction: column; justify-content: space-between; 
+    width: 26px; height: 18px; background: none; border: none; cursor: pointer; z-index: 1000;
+  }
+  .hamburger span { 
+    width: 100%; height: 2px; background: var(--black); 
+    transition: transform var(--transition), opacity var(--transition); 
+  }
+  
+  /* Mobile Nav Drawer */
+  .mobile-nav {
+    position: fixed; top: 0; right: -300px; width: 280px; height: 100vh;
+    background: var(--bg); box-shadow: var(--shadow-lg); z-index: 999;
+    padding: 6rem 2rem 2rem; transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .mobile-nav.open { right: 0; }
+  .mobile-nav-overlay {
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); 
+    z-index: 998; opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+  }
+  .mobile-nav-overlay.open { opacity: 1; pointer-events: auto; }
+  .mobile-nav ul { list-style: none; display: flex; flex-direction: column; gap: 2rem; }
+  .mobile-nav a { 
+    font-size: 1.1rem; font-weight: 600; display: flex; align-items: center; gap: 1rem; 
+    color: var(--gray-700); transition: color var(--transition);
+  }
+  .mobile-nav a.active, .mobile-nav a:hover { color: var(--gold); }
+
+  /* Typography & Padding */
+  .hero-title { font-size: 2.5rem; }
+  .hero-subtitle { font-size: 1.1rem; padding: 0 1rem; }
+  .section { padding: 4rem 0; }
+  .section-header h2 { font-size: 2rem; }
+  
+  /* Grids */
+  .services-grid, .grid-2 { grid-template-columns: 1fr; }
+  .wizard-grid { grid-template-columns: 1fr; }
+  
+  /* Agenda Timeline adjustments */
+  .agenda-row { flex-direction: column; gap: 1rem; position: relative; padding-left: 2.5rem; }
+  .indicator-line { left: 0.75rem; }
+  .indicator-dot { left: 0.75rem; transform: translateX(-50%); }
+  .time-col { width: 100%; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); text-align: left; }
+  .agenda-card { width: 100%; }
+}
