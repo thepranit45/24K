@@ -1,0 +1,199 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Booking {{ booking.booking_id }} | The Gentleman's Cut{% endblock %}
+
+{% block content %}
+
+<div class="page-hero page-hero-sm">
+  <div class="page-hero-overlay"></div>
+  <div class="page-hero-content" data-animate="fade-up">
+    <a href="{% url 'booking_list' %}" class="back-link"><i class="fa-solid fa-arrow-left"></i> My Bookings</a>
+    <h1 class="page-hero-title">Booking <span class="text-gold">Details</span></h1>
+  </div>
+</div>
+
+<section class="section">
+  <div class="container">
+    <div class="detail-layout">
+
+      <!-- Left: Booking details -->
+      <div class="detail-main" data-animate="fade-up">
+        <div class="detail-card">
+          <div class="detail-card-header">
+            <div>
+              <h2 class="detail-service">{{ booking.service.name }}</h2>
+              <p class="detail-booking-id">Booking ID: <strong>{{ booking.booking_id }}</strong></p>
+            </div>
+            <div class="status-badge status-{{ booking.status|lower }}">{{ booking.status }}</div>
+          </div>
+
+          <div class="detail-grid">
+            <div class="detail-item">
+              <div class="detail-icon"><i class="fa-regular fa-calendar"></i></div>
+              <div>
+                <div class="detail-label">Date</div>
+                <div class="detail-value">{{ booking.booking_date|date:"d F Y" }}</div>
+              </div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-icon"><i class="fa-regular fa-clock"></i></div>
+              <div>
+                <div class="detail-label">Time</div>
+                <div class="detail-value">{{ booking.booking_time|time:"g:i A" }}</div>
+              </div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-icon"><i class="fa-regular fa-hourglass"></i></div>
+              <div>
+                <div class="detail-label">Duration</div>
+                <div class="detail-value">{{ booking.service.duration }} minutes</div>
+              </div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-icon"><i class="fa-solid fa-indian-rupee-sign"></i></div>
+              <div>
+                <div class="detail-label">Amount</div>
+                <div class="detail-value gold">₹{{ booking.amount|floatformat:0 }}</div>
+              </div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-icon"><i class="fa-solid fa-user"></i></div>
+              <div>
+                <div class="detail-label">Customer Name</div>
+                <div class="detail-value">{{ booking.customer_name }}</div>
+              </div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-icon"><i class="fa-solid fa-phone"></i></div>
+              <div>
+                <div class="detail-label">Phone</div>
+                <div class="detail-value">{{ booking.customer_phone }}</div>
+              </div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-icon"><i class="fa-solid fa-envelope"></i></div>
+              <div>
+                <div class="detail-label">Email</div>
+                <div class="detail-value">{{ booking.customer_email }}</div>
+              </div>
+            </div>
+            {% if booking.special_request %}
+            <div class="detail-item detail-item-full">
+              <div class="detail-icon"><i class="fa-solid fa-comment"></i></div>
+              <div>
+                <div class="detail-label">Special Request</div>
+                <div class="detail-value">{{ booking.special_request }}</div>
+              </div>
+            </div>
+            {% endif %}
+          </div>
+
+          <!-- Payment Info -->
+          <div class="detail-section">
+            <h3 class="detail-section-title"><i class="fa-solid fa-credit-card"></i> Payment</h3>
+            {% if booking.payment %}
+            <div class="payment-detail-row">
+              <span>Status</span>
+              <span class="payment-status-badge payment-{{ booking.payment.status|lower }}">{{ booking.payment.status }}</span>
+            </div>
+            {% if booking.payment.transaction_id %}
+            <div class="payment-detail-row">
+              <span>Transaction ID</span>
+              <span class="mono">{{ booking.payment.transaction_id }}</span>
+            </div>
+            {% endif %}
+            <div class="payment-detail-row">
+              <span>Method</span>
+              <span>{{ booking.payment.payment_method }}</span>
+            </div>
+            {% else %}
+            <p class="muted-text">No payment record found.</p>
+            {% endif %}
+          </div>
+
+          <!-- Actions -->
+          <div class="detail-actions">
+            <a href="{% url 'booking_list' %}" class="btn-ghost"><i class="fa-solid fa-arrow-left"></i> Back to Bookings</a>
+            {% if booking.can_be_cancelled %}
+            <button
+              class="btn-danger"
+              onclick="openCancelModal('{{ booking.booking_id }}', '{{ booking.service.name }}', '{{ booking.booking_date|date:"d M Y" }}')"
+            >
+              <i class="fa-solid fa-xmark"></i> Cancel Appointment
+            </button>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Shop info -->
+      <div class="detail-sidebar" data-animate="fade-up" data-delay="100">
+        <div class="sidebar-card">
+          <div class="sidebar-card-icon"><i class="fa-solid fa-store"></i></div>
+          <h3>The Gentleman's Cut</h3>
+          <div class="sidebar-info-list">
+            <div class="sidebar-info-item">
+              <i class="fa-solid fa-location-dot"></i>
+              <span>42, MG Road, Colaba<br>Mumbai – 400 001</span>
+            </div>
+            <div class="sidebar-info-item">
+              <i class="fa-solid fa-phone"></i>
+              <a href="tel:+919876543210">+91 98765 43210</a>
+            </div>
+            <div class="sidebar-info-item">
+              <i class="fa-regular fa-clock"></i>
+              <span>Mon–Sat: 10 AM – 9 PM<br>Sun: 10 AM – 8 PM</span>
+            </div>
+          </div>
+          <div class="sidebar-hours">
+            {% for bh in business_hours %}
+            <div class="sidebar-hour-row {% if bh.is_closed %}closed{% endif %}">
+              <span>{{ bh.get_day_display|slice:":3" }}</span>
+              <span>{% if bh.is_closed %}Closed{% else %}{{ bh.opening_time|time:"g A" }}–{{ bh.closing_time|time:"g A" }}{% endif %}</span>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- Cancel Modal -->
+<div class="modal-backdrop" id="cancelModalBackdrop" style="display:none;" onclick="closeCancelModal()"></div>
+<div class="modal" id="cancelModal" style="display:none;" role="dialog">
+  <div class="modal-header">
+    <div class="modal-icon modal-icon-danger"><i class="fa-solid fa-triangle-exclamation"></i></div>
+    <h3>Cancel Appointment?</h3>
+  </div>
+  <div class="modal-body">
+    <p>Are you sure you want to cancel your <strong id="cancelServiceName"></strong> appointment on <strong id="cancelDateLabel"></strong>?</p>
+    <p class="modal-note">If paid, a refund will be processed within 5–7 business days.</p>
+  </div>
+  <div class="modal-actions">
+    <button class="btn-ghost" onclick="closeCancelModal()">Keep Booking</button>
+    <form id="cancelForm" method="post" action="">
+      {% csrf_token %}
+      <button type="submit" class="btn-danger">Cancel Appointment</button>
+    </form>
+  </div>
+</div>
+
+<script>
+function openCancelModal(bookingId, serviceName, dateLabel) {
+  document.getElementById('cancelServiceName').textContent = serviceName;
+  document.getElementById('cancelDateLabel').textContent = dateLabel;
+  document.getElementById('cancelForm').action = `/bookings/${bookingId}/cancel/`;
+  document.getElementById('cancelModal').style.display = 'block';
+  document.getElementById('cancelModalBackdrop').style.display = 'block';
+  document.body.classList.add('no-scroll');
+}
+function closeCancelModal() {
+  document.getElementById('cancelModal').style.display = 'none';
+  document.getElementById('cancelModalBackdrop').style.display = 'none';
+  document.body.classList.remove('no-scroll');
+}
+</script>
+{% endblock %}

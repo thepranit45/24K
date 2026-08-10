@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Booking Confirmed | The Gentleman's Cut{% endblock %}
+
+{% block content %}
+<section class="section confirm-section">
+  <div class="container">
+    <div class="confirm-card" data-animate="fade-up">
+      <!-- Animated checkmark -->
+      <div class="confirm-check-wrap">
+        <div class="confirm-check">
+          <svg viewBox="0 0 52 52" class="confirm-svg">
+            <circle class="confirm-circle" cx="26" cy="26" r="25" fill="none"/>
+            <path class="confirm-tick" fill="none" d="M14 27l7 7 16-16"/>
+          </svg>
+        </div>
+      </div>
+
+      <h1 class="confirm-title">Booking Confirmed!</h1>
+      <p class="confirm-subtitle">Your appointment has been successfully booked and confirmed.</p>
+
+      <div class="confirm-details">
+        <div class="confirm-service">{{ booking.service.name }}</div>
+
+        <div class="confirm-meta">
+          <div class="confirm-meta-item">
+            <i class="fa-regular fa-calendar"></i>
+            <span>{{ booking.booking_date|date:"d F Y" }}</span>
+          </div>
+          <div class="confirm-meta-item">
+            <i class="fa-regular fa-clock"></i>
+            <span>{{ booking.booking_time|time:"g:i A" }}</span>
+          </div>
+          <div class="confirm-meta-item">
+            <i class="fa-regular fa-hourglass"></i>
+            <span>{{ booking.service.duration }} minutes</span>
+          </div>
+        </div>
+
+        <div class="confirm-id-row">
+          <span class="confirm-label">Booking ID</span>
+          <span class="confirm-id">{{ booking.booking_id }}</span>
+        </div>
+        <div class="confirm-id-row">
+          <span class="confirm-label">Amount Paid</span>
+          <span class="confirm-id gold">₹{{ booking.amount|floatformat:0 }}</span>
+        </div>
+        {% if booking.payment %}
+        <div class="confirm-id-row">
+          <span class="confirm-label">Transaction</span>
+          <span class="confirm-id mono">{{ booking.payment.transaction_id|default:"—" }}</span>
+        </div>
+        {% endif %}
+      </div>
+
+      <div class="confirm-reminder">
+        <i class="fa-solid fa-bell"></i>
+        Please arrive 5 minutes before your appointment. Bring this confirmation ID.
+      </div>
+
+      <div class="confirm-actions">
+        <a href="{% url 'booking_list' %}" class="btn-gold">
+          <i class="fa-solid fa-calendar-check"></i> View My Bookings
+        </a>
+        <a href="{% url 'home' %}" class="btn-ghost">
+          <i class="fa-solid fa-house"></i> Back to Home
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

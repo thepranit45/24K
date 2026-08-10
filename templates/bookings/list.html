@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Bookings | The Gentleman's Cut{% endblock %}
+
+{% block content %}
+
+<div class="page-hero page-hero-sm">
+  <div class="page-hero-overlay"></div>
+  <div class="page-hero-content" data-animate="fade-up">
+    <h1 class="page-hero-title">My <span class="text-gold">Bookings</span></h1>
+    <p class="page-hero-sub">Manage your upcoming and previous appointments.</p>
+  </div>
+</div>
+
+<section class="section">
+  <div class="container">
+
+    <!-- Next Appointment Highlight -->
+    {% if next_booking %}
+    <div class="next-appointment-card" data-animate="fade-up">
+      <div class="next-apt-badge"><i class="fa-solid fa-bolt"></i> NEXT APPOINTMENT</div>
+      <div class="next-apt-body">
+        <div class="next-apt-info">
+          <h2 class="next-apt-service">{{ next_booking.service.name }}</h2>
+          <div class="next-apt-meta">
+            <span><i class="fa-regular fa-calendar"></i>
+              {% if next_booking.booking_date == today %}
+                Today
+              {% elif next_booking.booking_date == today|add:"1" %}
+                Tomorrow
+              {% else %}
+                {{ next_booking.booking_date|date:"d M Y" }}
+              {% endif %}
+            </span>
+            <span><i class="fa-regular fa-clock"></i> {{ next_booking.booking_time|time:"g:i A" }}</span>
+            <span><i class="fa-solid fa-indian-rupee-sign"></i> {{ next_booking.amount|floatformat:0 }}</span>
+          </div>
+        </div>
+        <a href="{% url 'booking_detail' next_booking.booking_id %}" class="btn-gold">View Details</a>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Filter Tabs -->
+    <div class="filter-tabs" data-animate="fade-up">
+      <a href="?status=ALL" class="filter-tab {% if status_filter == 'ALL' %}active{% endif %}">All</a>
+      <a href="?status=UPCOMING" class="filter-tab {% if status_filter == 'UPCOMING' %}active{% endif %}">Upcoming</a>
+      <a href="?status=CONFIRMED" class="filter-tab {% if status_filter == 'CONFIRMED' %}active{% endif %}">Confirmed</a>
+      <a href="?status=COMPLETED" class="filter-tab {% if status_filter == 'COMPLETED' %}active{% endif %}">Completed</a>
+      <a href="?status=CANCELLED" class="filter-tab {% if status_filter == 'CANCELLED' %}active{% endif %}">Cancelled</a>
+    </div>
+
+    <!-- Bookings List -->
+    {% if bookings %}
+    <div class="bookings-list">
+      {% for booking in bookings %}
+      <div class="booking-card {% if booking.status == 'CANCELLED' %}booking-card-cancelled{% endif %}" data-animate="fade-up" data-delay="{{ forloop.counter0 }}00">
+        <div class="booking-card-header">
+          <div class="booking-service-name">{{ booking.service.name }}</div>
+          <div class="status-badge status-{{ booking.status|lower }}">{{ booking.status }}</div>
+        </div>
+
+        <div class="booking-card-body">
+          <div class="booking-meta-row">
+            <div class="booking-meta-item">
+              <i class="fa-regular fa-calendar"></i>
+              <span>{{ booking.booking_date|date:"d M Y" }}</span>
+            </div>
+            <div class="booking-meta-item">
+              <i class="fa-regular fa-clock"></i>
+              <span>{{ booking.booking_time|time:"g:i A" }}</span>
+            </div>
+            <div class="booking-meta-item">
+              <i class="fa-regular fa-hourglass"></i>
+              <span>{{ booking.service.duration }} min</span>
+            </div>
+          </div>
+
+          <div class="booking-footer-row">
+            <div class="booking-amount-row">
+              <span class="booking-label">Amount</span>
+              <span class="booking-amount-val">₹{{ booking.amount|floatformat:0 }}</span>
+            </div>
+            <div class="booking-id-row">
+              <span class="booking-id-label">ID:</span>
+              <span class="booking-id-val">{{ booking.booking_id }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="booking-card-actions">
+          <a href="{% url 'booking_detail' booking.booking_id %}" class="btn-outline-sm">
+            <i class="fa-solid fa-eye"></i> View Details
+          </a>
+          {% if booking.can_be_cancelled %}
+          <button
+            class="btn-danger-sm"
+            onclick="openCancelModal('{{ booking.booking_id }}', '{{ booking.service.name }}', '{{ booking.booking_date|date:"d M Y" }}')"
+          >
+            <i class="fa-solid fa-xmark"></i> Cancel
+          </button>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    {% else %}
+    <!-- Empty State -->
+    <div class="empty-state" data-animate="fade-up">
+      <div class="empty-icon"><i class="fa-solid fa-calendar-xmark"></i></div>
+      <h3>No Appointments Yet</h3>
+      {% if status_filter != 'ALL' %}
+      <p>No {{ status_filter|lower }} appointments found.</p>
+      <a href="?status=ALL" class="btn-ghost">View All Bookings</a>
+      {% else %}
+      <p>You haven't booked an appointment yet.</p>
+      <a href="{% url 'home' %}#services" class="btn-gold">
+        <i class="fa-solid fa-scissors"></i> Book Your First Appointment
+      </a>
+      {% endif %}
+    </div>
+    {% endif %}
+
+  </div>
+</section>
+
+<!-- Cancel Confirmation Modal -->
+<div class="modal-backdrop" id="cancelModalBackdrop" style="display:none;" onclick="closeCancelModal()"></div>
+<div class="modal" id="cancelModal" style="display:none;" role="dialog" aria-modal="true">
+  <div class="modal-header">
+    <div class="modal-icon modal-icon-danger"><i class="fa-solid fa-triangle-exclamation"></i></div>
+    <h3>Cancel Appointment?</h3>
+  </div>
+  <div class="modal-body">
+    <p>Are you sure you want to cancel your <strong id="cancelServiceName"></strong> appointment on <strong id="cancelDateLabel"></strong>?</p>
+    <p class="modal-note">If you've already paid, a refund will be processed within 5–7 business days.</p>
+  </div>
+  <div class="modal-actions">
+    <button class="btn-ghost" onclick="closeCancelModal()">Keep Booking</button>
+    <form id="cancelForm" method="post" action="">
+      {% csrf_token %}
+      <button type="submit" class="btn-danger">Cancel Appointment</button>
+    </form>
+  </div>
+</div>
+
+<script>
+function openCancelModal(bookingId, serviceName, dateLabel) {
+  document.getElementById('cancelServiceName').textContent = serviceName;
+  document.getElementById('cancelDateLabel').textContent = dateLabel;
+  document.getElementById('cancelForm').action = `/bookings/${bookingId}/cancel/`;
+  document.getElementById('cancelModal').style.display = 'block';
+  document.getElementById('cancelModalBackdrop').style.display = 'block';
+  document.body.classList.add('no-scroll');
+}
+function closeCancelModal() {
+  document.getElementById('cancelModal').style.display = 'none';
+  document.getElementById('cancelModalBackdrop').style.display = 'none';
+  document.body.classList.remove('no-scroll');
+}
+</script>
+
+{% endblock %}

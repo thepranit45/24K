@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Secure Payment | The Gentleman's Cut{% endblock %}
+
+{% block content %}
+<section class="section payment-section">
+  <div class="container">
+    <div class="payment-layout" data-animate="fade-up">
+
+      <!-- Booking Summary -->
+      <div class="payment-summary-card">
+        <div class="payment-summary-header">
+          <i class="fa-solid fa-receipt"></i>
+          <h2>Order Summary</h2>
+        </div>
+        <div class="payment-summary-body">
+          <div class="psum-row">
+            <span>Service</span>
+            <strong>{{ booking.service.name }}</strong>
+          </div>
+          <div class="psum-row">
+            <span>Date</span>
+            <strong>{{ booking.booking_date|date:"d F Y" }}</strong>
+          </div>
+          <div class="psum-row">
+            <span>Time</span>
+            <strong>{{ booking.booking_time|time:"g:i A" }}</strong>
+          </div>
+          <div class="psum-row">
+            <span>Duration</span>
+            <strong>{{ booking.service.duration }} min</strong>
+          </div>
+          <div class="psum-row">
+            <span>Customer</span>
+            <strong>{{ booking.customer_name }}</strong>
+          </div>
+          <div class="psum-divider"></div>
+          <div class="psum-row psum-total">
+            <span>Total Amount</span>
+            <strong class="gold">₹{{ booking.amount|floatformat:0 }}</strong>
+          </div>
+        </div>
+        <div class="payment-booking-id">
+          Booking ID: <span>{{ booking.booking_id }}</span>
+        </div>
+      </div>
+
+      <!-- Payment Panel -->
+      <div class="payment-panel">
+        <div class="payment-panel-header">
+          <div class="payment-secure-badge">
+            <i class="fa-solid fa-lock"></i> Secure Payment
+          </div>
+          <h2 class="payment-amount">₹{{ booking.amount|floatformat:0 }}</h2>
+          <p class="payment-desc">{{ booking.service.name }}</p>
+        </div>
+
+        {% if payment_mode == 'MOCK' %}
+        <!-- Mock Payment -->
+        <div class="mock-payment-info">
+          <div class="mock-badge"><i class="fa-solid fa-flask"></i> Demo Payment Mode</div>
+          <p>This is a demo environment. No real money will be charged.</p>
+        </div>
+
+        <div id="payBtn">
+          <form method="post" action="{% url 'process_mock_payment' booking.booking_id %}">
+            {% csrf_token %}
+            <button type="submit" class="btn-pay" id="paySubmitBtn" onclick="handlePayClick(this)">
+              <span id="payBtnText"><i class="fa-solid fa-lock"></i> Pay ₹{{ booking.amount|floatformat:0 }}</span>
+              <span id="payBtnSpinner" style="display:none;">
+                <span class="spinner-inline"></span> Processing…
+              </span>
+            </button>
+          </form>
+        </div>
+
+        <p class="payment-note">
+          <i class="fa-solid fa-shield-halved"></i>
+          Demo mode — click Pay to simulate a successful payment.
+        </p>
+
+        {% else %}
+        <!-- Real payment gateway placeholder -->
+        <div id="razorpay-container">
+          <p class="muted-text">Payment gateway loading…</p>
+        </div>
+        {% endif %}
+
+        <a href="{% url 'booking_list' %}" class="payment-cancel-link">
+          <i class="fa-solid fa-xmark"></i> Cancel & go back
+        </a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<script>
+function handlePayClick(btn) {
+  const textEl = document.getElementById('payBtnText');
+  const spinnerEl = document.getElementById('payBtnSpinner');
+  textEl.style.display = 'none';
+  spinnerEl.style.display = 'inline-flex';
+  
+  // Submit the form programmatically before disabling the button
+  btn.closest('form').submit();
+  
+  // Disable the button to prevent double clicks
+  btn.disabled = true;
+}
+</script>
+{% endblock %}

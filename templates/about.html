@@ -1,0 +1,206 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}About Us | The Gentleman's Cut{% endblock %}
+{% block meta_description %}Learn about The Gentleman's Cut — our story, our barbers, and why we're Mumbai's premium barbershop.{% endblock %}
+
+{% block content %}
+
+<!-- Page Hero -->
+<div class="page-hero">
+  <div class="page-hero-overlay"></div>
+  <div class="page-hero-content" data-animate="fade-up">
+    <p class="section-eyebrow">Our Story</p>
+    <h1 class="page-hero-title">About <span class="text-gold">The Gentleman's Cut</span></h1>
+    <p class="page-hero-sub">Where tradition meets modernity.</p>
+  </div>
+</div>
+
+<!-- About Story -->
+<section class="section">
+  <div class="container">
+    <div class="about-grid">
+      <div class="about-image" data-animate="fade-up">
+        <div class="about-img-wrapper">
+          <div class="about-img-placeholder">
+            <i class="fa-solid fa-scissors"></i>
+          </div>
+          <div class="about-badge">
+            <div class="about-badge-num">10+</div>
+            <div class="about-badge-text">Years of Excellence</div>
+          </div>
+        </div>
+      </div>
+      <div class="about-text" data-animate="fade-up" data-delay="100">
+        <p class="section-eyebrow">Our Story</p>
+        <h2 class="section-title">More Than Just a <span class="text-gold">Haircut</span></h2>
+        <p class="about-desc">
+          Founded in 2015 in the heart of Mumbai, The Gentleman's Cut was born from a single belief:
+          every man deserves to look and feel his absolute best. What started as a two-chair shop
+          on MG Road has grown into one of the city's most trusted grooming destinations.
+        </p>
+        <p class="about-desc">
+          Our philosophy is simple — premium service, precision cuts, and an experience that sends
+          you out looking sharp and feeling confident. Every appointment is treated with the same
+          level of care and attention, whether it's a classic trim or a complete grooming session.
+        </p>
+        <div class="about-stats">
+          <div class="about-stat">
+            <div class="about-stat-num">5,000+</div>
+            <div class="about-stat-label">Happy Clients</div>
+          </div>
+          <div class="about-stat">
+            <div class="about-stat-num">8</div>
+            <div class="about-stat-label">Expert Barbers</div>
+          </div>
+          <div class="about-stat">
+            <div class="about-stat-num">4.9★</div>
+            <div class="about-stat-label">Average Rating</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Why Choose Us -->
+<section class="section bg-dark-alt">
+  <div class="container">
+    <div class="section-header" data-animate="fade-up">
+      <p class="section-eyebrow">Why Choose Us</p>
+      <h2 class="section-title">The <span class="text-gold">Gentleman's</span> Promise</h2>
+    </div>
+    <div class="why-grid">
+      <div class="why-card" data-animate="fade-up">
+        <div class="why-number">01</div>
+        <div class="why-icon"><i class="fa-solid fa-user-tie"></i></div>
+        <h3>Experienced Barbers</h3>
+        <p>Each barber holds years of professional training and is passionate about the craft of grooming.</p>
+      </div>
+      <div class="why-card" data-animate="fade-up" data-delay="100">
+        <div class="why-number">02</div>
+        <div class="why-icon"><i class="fa-solid fa-star"></i></div>
+        <h3>Premium Products</h3>
+        <p>We source only from trusted brands — Baxter of California, Bumble & Bumble, and more.</p>
+      </div>
+      <div class="why-card" data-animate="fade-up" data-delay="200">
+        <div class="why-number">03</div>
+        <div class="why-icon"><i class="fa-solid fa-shield-halved"></i></div>
+        <h3>Hygienic Environment</h3>
+        <p>Tools are sterilized after every use. Stations are deep cleaned daily. No exceptions.</p>
+      </div>
+      <div class="why-card" data-animate="fade-up" data-delay="300">
+        <div class="why-number">04</div>
+        <div class="why-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+        <h3>Modern Styling</h3>
+        <p>From classic fades to textured crops — we stay current on every trending technique.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Opening Hours -->
+<section class="section">
+  <div class="container">
+    <div class="hours-contact-grid">
+      <!-- Hours -->
+      <div class="hours-card" data-animate="fade-up">
+        <div class="card-icon"><i class="fa-solid fa-clock"></i></div>
+        <h2 class="card-title">Opening Hours</h2>
+        <div class="hours-table">
+          {% for bh in business_hours %}
+          <div class="hours-row {% if bh.is_closed %}hours-closed{% endif %}">
+            <span class="hours-day">{{ bh.get_day_display }}</span>
+            <span class="hours-time">
+              {% if bh.is_closed %}
+                Closed
+              {% else %}
+                {{ bh.opening_time|time:"g:i A" }} – {{ bh.closing_time|time:"g:i A" }}
+              {% endif %}
+            </span>
+          </div>
+          {% empty %}
+          <div class="hours-row">
+            <span class="hours-day">Monday – Saturday</span>
+            <span class="hours-time">10:00 AM – 9:00 PM</span>
+          </div>
+          <div class="hours-row">
+            <span class="hours-day">Sunday</span>
+            <span class="hours-time">10:00 AM – 8:00 PM</span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Contact -->
+      <div class="contact-card" data-animate="fade-up" data-delay="100">
+        <div class="card-icon"><i class="fa-solid fa-address-card"></i></div>
+        <h2 class="card-title">Get in Touch</h2>
+        <div class="contact-list">
+          <div class="contact-item">
+            <div class="contact-icon"><i class="fa-solid fa-location-dot"></i></div>
+            <div>
+              <div class="contact-label">Address</div>
+              <div class="contact-value">42, MG Road, Colaba, Mumbai – 400 001</div>
+            </div>
+          </div>
+          <div class="contact-item">
+            <div class="contact-icon"><i class="fa-solid fa-phone"></i></div>
+            <div>
+              <div class="contact-label">Phone</div>
+              <div class="contact-value"><a href="tel:+919876543210">+91 98765 43210</a></div>
+            </div>
+          </div>
+          <div class="contact-item">
+            <div class="contact-icon"><i class="fa-solid fa-envelope"></i></div>
+            <div>
+              <div class="contact-label">Email</div>
+              <div class="contact-value"><a href="mailto:hello@gentlemanscut.in">hello@gentlemanscut.in</a></div>
+            </div>
+          </div>
+          <div class="contact-item">
+            <div class="contact-icon"><i class="fab fa-instagram"></i></div>
+            <div>
+              <div class="contact-label">Instagram</div>
+              <div class="contact-value"><a href="#">@gentlemanscut</a></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Map Section -->
+<section class="section bg-dark-alt">
+  <div class="container">
+    <div class="section-header" data-animate="fade-up">
+      <p class="section-eyebrow">Find Us</p>
+      <h2 class="section-title">Our <span class="text-gold">Location</span></h2>
+    </div>
+    <div class="map-placeholder" data-animate="fade-up">
+      <div class="map-pin-anim">
+        <i class="fa-solid fa-location-dot"></i>
+      </div>
+      <p>42, MG Road, Colaba, Mumbai – 400 001</p>
+      <a href="https://maps.google.com/?q=MG+Road+Mumbai" target="_blank" rel="noopener" class="btn-ghost">
+        <i class="fa-brands fa-google"></i> Open in Google Maps
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-band">
+  <div class="container">
+    <div class="cta-content" data-animate="fade-up">
+      <h2>Ready for Your Best Look?</h2>
+      <p>Book your appointment in under 2 minutes.</p>
+      <a href="{% url 'home' %}#services" class="btn-hero">
+        <i class="fa-solid fa-scissors"></i> Book Appointment
+      </a>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

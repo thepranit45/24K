@@ -1,0 +1,361 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}24 K | Book Your Premium Appointment{% endblock %}
+{% block meta_description %}Book a premium haircut, beard styling or grooming appointment at 24 K — Mumbai's finest barbershop.{% endblock %}
+
+{% block content %}
+
+<!-- ══════════════════════════════════════════════════════════
+     HERO
+══════════════════════════════════════════════════════════ -->
+<section class="hero" id="hero">
+  <div class="hero-overlay"></div>
+  <div class="hero-content" data-animate="fade-up">
+    <p class="hero-eyebrow">Est. 2015 · Mumbai's Finest</p>
+    <h1 class="hero-title">
+      24-KARAT<br>
+      GROOMING.<br>
+      <span class="hero-title-gold">ZERO COMPROMISE.</span>
+    </h1>
+    <p class="hero-subtitle">The sharpest cuts in Mumbai, booked in seconds.</p>
+    <a href="#services" class="btn-hero">
+      <i class="fa-solid fa-scissors"></i>
+      Book Appointment
+    </a>
+  </div>
+
+  <!-- Trust badges -->
+  <div class="hero-trust" data-animate="fade-up" data-delay="200">
+    <div class="trust-item">
+      <div class="trust-stars">★★★★★</div>
+      <div class="trust-label">4.9/5 Customer Rating</div>
+    </div>
+    <div class="trust-divider"></div>
+    <div class="trust-item">
+      <div class="trust-number">10+</div>
+      <div class="trust-label">Years Experience</div>
+    </div>
+    <div class="trust-divider"></div>
+    <div class="trust-item">
+      <div class="trust-number">5,000+</div>
+      <div class="trust-label">Happy Customers</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════
+     SERVICES SECTION
+══════════════════════════════════════════════════════════ -->
+<section class="section services-section" id="services">
+  <div class="container mockup-container">
+    <div class="mockup-intro">Professional care for your style and confidence</div>
+    
+    <!-- Male Services -->
+    {% if male_services %}
+    <div class="mockup-category-header">
+      <i class="fa-solid fa-scissors mockup-gold"></i>
+      <span class="mockup-category-title">Male Services</span>
+      <div class="mockup-gold-line"></div>
+    </div>
+    
+    <div class="mockup-services-grid">
+      {% for service in male_services %}
+      <div class="mockup-service-card" onclick="selectService(this)"
+           data-service-id="{{ service.pk }}"
+           data-service-name="{{ service.name }}"
+           data-service-price="{{ service.price|floatformat:0 }}"
+           data-service-duration="{{ service.duration }}">
+        <div class="mockup-card-image">
+          {% if service.image %}
+            <img src="{{ service.image.url }}" alt="{{ service.name }}" loading="lazy" />
+          {% else %}
+            <div class="service-icon-placeholder"><i class="fa-solid fa-{{ service.icon|default:'scissors' }}"></i></div>
+          {% endif %}
+        </div>
+        <div class="mockup-card-body">
+          <div class="mockup-service-name">{{ service.name }}</div>
+          <div class="mockup-service-meta">
+            <span class="mockup-price">₹ {{ service.price|floatformat:0 }}</span>
+            <span class="mockup-duration"><i class="fa-regular fa-clock"></i> {{ service.duration }} min</span>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Female Services -->
+    {% if female_services %}
+    <div class="mockup-category-header" style="margin-top: 2rem;">
+      <i class="fa-regular fa-user mockup-gold"></i>
+      <span class="mockup-category-title">Female Services</span>
+      <div class="mockup-gold-line"></div>
+    </div>
+    
+    <div class="mockup-services-grid female-grid">
+      {% for service in female_services %}
+      <div class="mockup-service-card" onclick="selectService(this)"
+           data-service-id="{{ service.pk }}"
+           data-service-name="{{ service.name }}"
+           data-service-price="{{ service.price|floatformat:0 }}"
+           data-service-duration="{{ service.duration }}">
+        <div class="mockup-card-image">
+          {% if service.image %}
+            <img src="{{ service.image.url }}" alt="{{ service.name }}" loading="lazy" />
+          {% else %}
+            <div class="service-icon-placeholder"><i class="fa-solid fa-{{ service.icon|default:'scissors' }}"></i></div>
+          {% endif %}
+        </div>
+        <div class="mockup-card-body">
+          <div class="mockup-service-name">{{ service.name }}</div>
+          <div class="mockup-service-meta">
+            <span class="mockup-price">₹ {{ service.price|floatformat:0 }}</span>
+            <span class="mockup-duration"><i class="fa-regular fa-clock"></i> {{ service.duration }} min</span>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════
+     BOOKING WIZARD (inline drawer)
+══════════════════════════════════════════════════════════ -->
+<div class="booking-backdrop" id="bookingBackdrop" onclick="closeBookingWizard()"></div>
+
+<div class="booking-wizard" id="bookingWizard" role="dialog" aria-modal="true" aria-label="Book Appointment">
+  <!-- Step indicator -->
+  <div class="wizard-header">
+    <button class="wizard-close" onclick="closeBookingWizard()" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+    <div class="wizard-steps">
+      <div class="wizard-step active" id="wstep-1"><span>1</span> Service</div>
+      <div class="wizard-step" id="wstep-2"><span>2</span> Date</div>
+      <div class="wizard-step" id="wstep-3"><span>3</span> Time</div>
+      <div class="wizard-step" id="wstep-4"><span>4</span> Details</div>
+      <div class="wizard-step" id="wstep-5"><span>5</span> Review</div>
+    </div>
+  </div>
+
+  <!-- Step 1: Selected service preview -->
+  <div class="wizard-panel active" id="wizard-panel-1">
+    <div class="wizard-panel-inner">
+      <h2 class="wizard-heading">Selected Service</h2>
+      <div class="selected-service-card">
+        <div class="ssc-icon"><i class="fa-solid fa-scissors"></i></div>
+        <div class="ssc-info">
+          <h3 id="wiz-service-name">—</h3>
+          <div class="ssc-meta">
+            <span id="wiz-service-duration"></span>
+            <span id="wiz-service-price" class="ssc-price"></span>
+          </div>
+        </div>
+      </div>
+      <button class="btn-wizard-next" onclick="wizardGoTo(2)">
+        Choose Date <i class="fa-solid fa-arrow-right"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Step 2: Date -->
+  <div class="wizard-panel" id="wizard-panel-2">
+    <div class="wizard-panel-inner">
+      <h2 class="wizard-heading">Select Date</h2>
+      <div class="date-strip-wrapper">
+        <button class="date-strip-arrow" id="dateArrowLeft" onclick="scrollDates(-1)"><i class="fa-solid fa-chevron-left"></i></button>
+        <div class="date-strip" id="dateStrip">
+          {% for d in available_dates %}
+          <button
+            class="date-chip"
+            data-date="{{ d|date:'Y-m-d' }}"
+            onclick="selectDate(this)"
+          >
+            <span class="date-chip-day">{{ d|date:'D' }}</span>
+            <span class="date-chip-num">{{ d|date:'j' }}</span>
+            <span class="date-chip-mon">{{ d|date:'M' }}</span>
+          </button>
+          {% endfor %}
+        </div>
+        <button class="date-strip-arrow" id="dateArrowRight" onclick="scrollDates(1)"><i class="fa-solid fa-chevron-right"></i></button>
+      </div>
+      <div class="wizard-nav">
+        <button class="btn-wizard-back" onclick="wizardGoTo(1)"><i class="fa-solid fa-arrow-left"></i> Back</button>
+        <button class="btn-wizard-next" id="btnDateNext" disabled onclick="wizardGoTo(3)">
+          Choose Time <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 3: Time -->
+  <div class="wizard-panel" id="wizard-panel-3">
+    <div class="wizard-panel-inner">
+      <h2 class="wizard-heading">Select Time</h2>
+      <p class="wizard-sub" id="selectedDateLabel"></p>
+      <div class="time-grid" id="timeGrid">
+        <div class="time-loading">
+          <div class="spinner"></div>
+          <p>Loading available slots…</p>
+        </div>
+      </div>
+      <div class="wizard-nav">
+        <button class="btn-wizard-back" onclick="wizardGoTo(2)"><i class="fa-solid fa-arrow-left"></i> Back</button>
+        <button class="btn-wizard-next" id="btnTimeNext" disabled onclick="wizardGoTo(4)">
+          Enter Details <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 4: Customer Details -->
+  <div class="wizard-panel" id="wizard-panel-4">
+    <div class="wizard-panel-inner">
+      <h2 class="wizard-heading">Your Details</h2>
+      <form id="detailsForm" novalidate>
+        <div class="form-group">
+          <label class="form-label">Full Name <span class="required">*</span></label>
+          <input type="text" id="inp-name" class="form-control" placeholder="Your full name" required />
+          <div class="field-error" id="err-name"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Mobile Number <span class="required">*</span></label>
+          <input type="tel" id="inp-phone" class="form-control" placeholder="+91 9876543210" required />
+          <div class="field-error" id="err-phone"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Special Request <span class="muted">(optional)</span></label>
+          <textarea id="inp-request" class="form-control" rows="3" placeholder="Any special styling or grooming preferences…"></textarea>
+        </div>
+      </form>
+      <div class="wizard-nav">
+        <button class="btn-wizard-back" onclick="wizardGoTo(3)"><i class="fa-solid fa-arrow-left"></i> Back</button>
+        <button class="btn-wizard-next" onclick="goToReview()">
+          Review Booking <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 5: Review -->
+  <div class="wizard-panel" id="wizard-panel-5">
+    <div class="wizard-panel-inner">
+      <h2 class="wizard-heading">Booking Summary</h2>
+      <div class="summary-card">
+        <div class="summary-row">
+          <span class="summary-label">Service</span>
+          <span class="summary-value" id="sum-service">—</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Date</span>
+          <span class="summary-value" id="sum-date">—</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Time</span>
+          <span class="summary-value" id="sum-time">—</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Duration</span>
+          <span class="summary-value" id="sum-duration">—</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Name</span>
+          <span class="summary-value" id="sum-name">—</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Phone</span>
+          <span class="summary-value" id="sum-phone">—</span>
+        </div>
+        <div class="summary-divider"></div>
+        <div class="summary-row summary-total">
+          <span class="summary-label">TOTAL</span>
+          <span class="summary-value gold" id="sum-total">₹0</span>
+        </div>
+      </div>
+
+      <div class="wizard-nav">
+        <button class="btn-wizard-back" onclick="wizardGoTo(4)"><i class="fa-solid fa-arrow-left"></i> Back</button>
+        <button class="btn-confirm" id="btnConfirm" onclick="submitBooking()">
+          <i class="fa-solid fa-lock"></i> Proceed to Payment
+        </button>
+      </div>
+
+      <div id="bookingError" class="booking-error" style="display:none;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     WHY CHOOSE US SECTION
+══════════════════════════════════════════════════════════ -->
+<section class="section why-section">
+  <div class="container">
+    <div class="section-header" data-animate="fade-up">
+      <p class="section-eyebrow">Why Choose Us</p>
+      <h2 class="section-title">The <span class="text-gold">Gentleman's</span> Difference</h2>
+    </div>
+    <div class="why-grid">
+      <div class="why-card" data-animate="fade-up" data-delay="0">
+        <div class="why-number">01</div>
+        <div class="why-icon"><i class="fa-solid fa-user-tie"></i></div>
+        <h3>Expert Barbers</h3>
+        <p>Our barbers bring 10+ years of experience and stay up to date with the latest trends.</p>
+      </div>
+      <div class="why-card" data-animate="fade-up" data-delay="100">
+        <div class="why-number">02</div>
+        <div class="why-icon"><i class="fa-solid fa-star"></i></div>
+        <h3>Premium Products</h3>
+        <p>We only use top-tier grooming products that nourish and protect your hair and skin.</p>
+      </div>
+      <div class="why-card" data-animate="fade-up" data-delay="200">
+        <div class="why-number">03</div>
+        <div class="why-icon"><i class="fa-solid fa-shield-halved"></i></div>
+        <h3>Hygienic Environment</h3>
+        <p>Sterile tools, clean stations, and a strict hygiene protocol — always.</p>
+      </div>
+      <div class="why-card" data-animate="fade-up" data-delay="300">
+        <div class="why-number">04</div>
+        <div class="why-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+        <h3>Modern Styling</h3>
+        <p>Classic techniques meet modern aesthetics for a look that's uniquely yours.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════
+     CTA BAND
+══════════════════════════════════════════════════════════ -->
+<section class="cta-band">
+  <div class="container">
+    <div class="cta-content" data-animate="fade-up">
+      <h2>Ready for Your Best Look?</h2>
+      <p>Book at 24 K in under 2 minutes.</p>
+      <a href="#services" class="btn-hero">
+        <i class="fa-solid fa-scissors"></i> Book Now
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Wizard state in JS -->
+<script>
+  // Prefill user details if logged in
+  {% if user.is_authenticated %}
+  window._userData = {
+    name: "{{ user.get_full_name|default:user.username }}",
+    email: "{{ user.email }}",
+    phone: "{% if user.profile %}{{ user.profile.phone }}{% endif %}",
+  };
+  {% else %}
+  window._userData = null;
+  {% endif %}
+
+  window.CSRF_TOKEN = "{{ csrf_token }}";
+  window.SLOTS_URL = "{% url 'get_time_slots' %}";
+  window.BOOK_URL = "{% url 'create_booking' %}";
+</script>
+
+{% endblock %}

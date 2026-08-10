@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}My Profile | The Gentleman's Cut{% endblock %}
+
+{% block content %}
+
+<div class="page-hero page-hero-sm">
+  <div class="page-hero-overlay"></div>
+  <div class="page-hero-content" data-animate="fade-up">
+    <h1 class="page-hero-title">My <span class="text-gold">Profile</span></h1>
+  </div>
+</div>
+
+<section class="section">
+  <div class="container">
+    <div class="profile-layout">
+
+      <!-- Left: Avatar + stats -->
+      <div class="profile-sidebar" data-animate="fade-up">
+        <div class="profile-avatar-card">
+          <div class="profile-avatar-large">
+            {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
+          </div>
+          <h2 class="profile-name">{{ user.get_full_name|default:user.username }}</h2>
+          <p class="profile-email">{{ user.email }}</p>
+          {% if user.profile.phone %}
+          <p class="profile-phone"><i class="fa-solid fa-phone"></i> {{ user.profile.phone }}</p>
+          {% endif %}
+          <div class="profile-stats">
+            <div class="profile-stat">
+              <div class="profile-stat-num">{{ user.profile.total_bookings }}</div>
+              <div class="profile-stat-label">Total Bookings</div>
+            </div>
+            <div class="profile-stat">
+              <div class="profile-stat-num">{{ user.profile.completed_bookings }}</div>
+              <div class="profile-stat-label">Completed</div>
+            </div>
+          </div>
+        </div>
+
+        <a href="{% url 'booking_list' %}" class="btn-gold profile-bookings-btn">
+          <i class="fa-solid fa-calendar-check"></i> My Bookings
+        </a>
+      </div>
+
+      <!-- Right: Edit form + recent bookings -->
+      <div class="profile-main" data-animate="fade-up" data-delay="100">
+
+        <!-- Edit Profile -->
+        <div class="profile-card">
+          <h3 class="profile-card-title"><i class="fa-solid fa-user-pen"></i> Edit Profile</h3>
+          <form method="post" novalidate>
+            {% csrf_token %}
+            <div class="form-row-2">
+              <div class="form-group">
+                <label class="form-label">First Name</label>
+                {{ form.first_name }}
+              </div>
+              <div class="form-group">
+                <label class="form-label">Last Name</label>
+                {{ form.last_name }}
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Phone Number</label>
+              {{ form.phone }}
+            </div>
+            <button type="submit" class="btn-gold">
+              <i class="fa-solid fa-floppy-disk"></i> Save Changes
+            </button>
+          </form>
+        </div>
+
+        <!-- Recent Bookings -->
+        {% if recent_bookings %}
+        <div class="profile-card">
+          <h3 class="profile-card-title"><i class="fa-solid fa-clock-rotate-left"></i> Recent Bookings</h3>
+          <div class="recent-bookings-list">
+            {% for booking in recent_bookings %}
+            <a href="{% url 'booking_detail' booking.booking_id %}" class="recent-booking-item">
+              <div class="recent-booking-info">
+                <div class="recent-booking-service">{{ booking.service.name }}</div>
+                <div class="recent-booking-date">{{ booking.booking_date|date:"d M Y" }} · {{ booking.booking_time|time:"g:i A" }}</div>
+              </div>
+              <div class="status-badge status-{{ booking.status|lower }}">{{ booking.status }}</div>
+            </a>
+            {% endfor %}
+          </div>
+          <a href="{% url 'booking_list' %}" class="profile-view-all">View all bookings <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+        {% endif %}
+
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

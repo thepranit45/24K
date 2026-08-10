@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block title %}Login | The Gentleman's Cut{% endblock %}
+
+{% block content %}
+<section class="auth-section">
+  <div class="auth-card" data-animate="fade-up">
+    <div class="auth-logo">
+      <i class="fa-solid fa-scissors"></i>
+      <span>24 K</span>
+    </div>
+    <h1 class="auth-title">Welcome Back</h1>
+    <p class="auth-subtitle">Sign in to manage your appointments.</p>
+
+    <form method="post" novalidate>
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ next }}" />
+
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        {{ form.username }}
+        {% if form.username.errors %}
+        <div class="field-error">{{ form.username.errors.0 }}</div>
+        {% endif %}
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        {{ form.password }}
+        {% if form.password.errors %}
+        <div class="field-error">{{ form.password.errors.0 }}</div>
+        {% endif %}
+      </div>
+
+      {% if form.non_field_errors %}
+      <div class="form-error-box">
+        <i class="fa-solid fa-circle-xmark"></i>
+        {{ form.non_field_errors.0 }}
+      </div>
+      {% endif %}
+
+      <button type="submit" class="btn-submit">
+        <i class="fa-solid fa-right-to-bracket"></i> Sign In
+      </button>
+    </form>
+
+    <p class="auth-switch">
+      Don't have an account? <a href="{% url 'register' %}">Create one</a>
+    </p>
+  </div>
+</section>
+{% endblock %}

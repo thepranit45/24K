@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="{% block meta_description %}Premium barbershop — book your appointment online. Expert haircuts, beard styling, and grooming services.{% endblock %}" />
+  <meta property="og:title" content="{% block og_title %}The Gentleman's Cut | Premium Barbershop{% endblock %}" />
+  <meta property="og:description" content="Premium grooming, booked your way." />
+  <meta property="og:type" content="website" />
+  <title>{% block title %}24 K | Premium Barbershop{% endblock %}</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+  <!-- CSS -->
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<!-- ══════════════════════════════════════
+     NAVBAR
+══════════════════════════════════════ -->
+<nav class="navbar" id="navbar">
+  <div class="nav-container">
+    <a href="{% url 'home' %}" class="nav-logo">
+      <span class="logo-icon"><i class="fa-solid fa-scissors"></i></span>
+      <span class="logo-text">24 K</span>
+    </a>
+
+    <ul class="nav-links" id="navLinks">
+      <li><a href="{% url 'home' %}" class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">Home</a></li>
+      <li><a href="{% url 'booking_list' %}" class="nav-link {% if 'booking' in request.resolver_match.url_name %}active{% endif %}">Bookings</a></li>
+      <li><a href="{% url 'barber_agenda' %}" target="_blank" class="nav-link {% if request.resolver_match.url_name == 'barber_agenda' %}active{% endif %}">Barber Stack</a></li>
+      <li><a href="{% url 'about' %}" class="nav-link {% if request.resolver_match.url_name == 'about' %}active{% endif %}">About</a></li>
+    </ul>
+
+    <button class="hamburger" id="hamburger" aria-label="Menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- Mobile Nav Drawer -->
+<div class="mobile-nav-overlay" id="mobileNavOverlay"></div>
+<div class="mobile-nav" id="mobileNav">
+  <ul>
+    <li><a href="{% url 'home' %}" class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}"><i class="fa-solid fa-house"></i> Home</a></li>
+    <li><a href="{% url 'booking_list' %}"><i class="fa-solid fa-calendar-check"></i> Bookings</a></li>
+    <li><a href="{% url 'barber_agenda' %}" target="_blank" class="{% if request.resolver_match.url_name == 'barber_agenda' %}active{% endif %}"><i class="fa-solid fa-layer-group"></i> Barber Stack</a></li>
+    <li><a href="{% url 'about' %}" class="{% if request.resolver_match.url_name == 'about' %}active{% endif %}"><i class="fa-solid fa-store"></i> About</a></li>
+
+  </ul>
+</div>
+
+<!-- ══════════════════════════════════════
+     MESSAGES / TOASTS
+══════════════════════════════════════ -->
+<div class="toast-container" id="toastContainer">
+  {% for message in messages %}
+    <div class="toast toast-{{ message.tags }}" data-autohide="true">
+      <div class="toast-icon">
+        {% if message.tags == 'success' %}<i class="fa-solid fa-circle-check"></i>
+        {% elif message.tags == 'error' %}<i class="fa-solid fa-circle-xmark"></i>
+        {% elif message.tags == 'warning' %}<i class="fa-solid fa-triangle-exclamation"></i>
+        {% else %}<i class="fa-solid fa-circle-info"></i>{% endif %}
+      </div>
+      <span class="toast-message">{{ message }}</span>
+      <button class="toast-close" onclick="this.parentElement.remove()">×</button>
+    </div>
+  {% endfor %}
+</div>
+
+<!-- ══════════════════════════════════════
+     MAIN CONTENT
+══════════════════════════════════════ -->
+<main>
+  {% block content %}{% endblock %}
+</main>
+
+<!-- ══════════════════════════════════════
+     FOOTER
+══════════════════════════════════════ -->
+<footer class="footer">
+  <div class="footer-container">
+    <div class="footer-brand">
+      <div class="footer-logo">
+        <i class="fa-solid fa-scissors"></i>
+        24 K
+      </div>
+      <p class="footer-tagline">24-karat grooming. Zero compromise.</p>
+      <div class="footer-social">
+        <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+        <a href="#" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+        <a href="#" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+      </div>
+    </div>
+
+    <div class="footer-links">
+      <h4>Navigate</h4>
+      <ul>
+        <li><a href="{% url 'home' %}">Home</a></li>
+        <li><a href="{% url 'booking_list' %}">My Bookings</a></li>
+        <li><a href="{% url 'barber_agenda' %}" target="_blank">Barber Stack</a></li>
+        <li><a href="{% url 'about' %}">About</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-links">
+      <h4>Account</h4>
+      <ul>
+        <li><a href="{% url 'booking_list' %}">My Bookings</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-contact">
+      <h4>Contact</h4>
+      <p><i class="fa-solid fa-location-dot"></i> 42, MG Road, Mumbai, India</p>
+      <p><i class="fa-solid fa-phone"></i> +91 98765 43210</p>
+      <p><i class="fa-solid fa-envelope"></i> hello@gentlemanscut.in</p>
+    </div>
+  </div>
+
+  <div class="footer-bottom">
+    <p>© 2026 24 K Barbershop. All rights reserved.</p>
+  </div>
+</footer>
+
+<!-- Mobile Bottom Nav -->
+<nav class="mobile-bottom-nav">
+  <a href="{% url 'home' %}" class="bottom-nav-item {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+    <i class="fa-solid fa-house"></i><span>Home</span>
+  </a>
+  <a href="{% url 'booking_list' %}" class="bottom-nav-item {% if 'booking' in request.resolver_match.url_name %}active{% endif %}">
+    <i class="fa-solid fa-calendar-check"></i><span>Bookings</span>
+  </a>
+  <a href="{% url 'about' %}" class="bottom-nav-item {% if request.resolver_match.url_name == 'about' %}active{% endif %}">
+    <i class="fa-solid fa-store"></i><span>About</span>
+  </a>
+
+</nav>
+
+{% load static %}
+<script src="{% static 'js/main.js' %}"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>
