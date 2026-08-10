@@ -721,9 +721,12 @@ textarea.form-control { resize:vertical; min-height:100px; }
   .profile-layout { grid-template-columns: 1fr; }
 }
 
-/* ═══════════════════════════════════════════════════════════════
+/* Default Mobile Elements Hidden on Desktop */
+.hamburger, .mobile-nav, .mobile-nav-overlay { display: none; }
+
+/* ===============================================================
    MOBILE RESPONSIVENESS (<= 768px)
-═══════════════════════════════════════════════════════════════ */
+=============================================================== */
 @media (max-width: 768px) {
   /* Navbar */
   .nav-links, .nav-auth { display: none; }
