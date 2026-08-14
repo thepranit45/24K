@@ -19,7 +19,7 @@
 
   <!-- CSS -->
   {% load static %}
-  <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1.1" />
+  <link rel="stylesheet" href="{% static 'css/style.css' %}?v={% now 'U' %}" />
 
   {% block extra_css %}{% endblock %}
 </head>
@@ -38,6 +38,7 @@
     <ul class="nav-links" id="navLinks">
       <li><a href="{% url 'home' %}" class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">Home</a></li>
       <li><a href="{% url 'booking_list' %}" class="nav-link {% if 'booking' in request.resolver_match.url_name %}active{% endif %}">Bookings</a></li>
+      <li><a href="{% url 'admin_dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">Dashboard</a></li>
       <li><a href="{% url 'barber_agenda' %}" target="_blank" class="nav-link {% if request.resolver_match.url_name == 'barber_agenda' %}active{% endif %}">Barber Stack</a></li>
       <li><a href="{% url 'about' %}" class="nav-link {% if request.resolver_match.url_name == 'about' %}active{% endif %}">About</a></li>
     </ul>
@@ -51,12 +52,16 @@
 <!-- Mobile Nav Drawer -->
 <div class="mobile-nav-overlay" id="mobileNavOverlay"></div>
 <div class="mobile-nav" id="mobileNav">
+  <div class="mobile-nav-header">
+    <div class="mobile-nav-logo"><i class="fa-solid fa-scissors"></i> 24 K</div>
+    <button class="mobile-nav-close" onclick="closeMobileNav()">&times;</button>
+  </div>
   <ul>
     <li><a href="{% url 'home' %}" class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}"><i class="fa-solid fa-house"></i> Home</a></li>
-    <li><a href="{% url 'booking_list' %}"><i class="fa-solid fa-calendar-check"></i> Bookings</a></li>
+    <li><a href="{% url 'booking_list' %}" class="{% if 'booking' in request.resolver_match.url_name %}active{% endif %}"><i class="fa-solid fa-calendar-check"></i> Bookings</a></li>
+    <li><a href="{% url 'admin_dashboard' %}" class="{% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}"><i class="fa-solid fa-chart-line"></i> Dashboard</a></li>
     <li><a href="{% url 'barber_agenda' %}" target="_blank" class="{% if request.resolver_match.url_name == 'barber_agenda' %}active{% endif %}"><i class="fa-solid fa-layer-group"></i> Barber Stack</a></li>
     <li><a href="{% url 'about' %}" class="{% if request.resolver_match.url_name == 'about' %}active{% endif %}"><i class="fa-solid fa-store"></i> About</a></li>
-
   </ul>
 </div>
 
@@ -120,18 +125,18 @@
       </ul>
     </div>
 
-    <div class="footer-contact">
-      <h4 style="color: #b9f032; font-size: 1.3rem; margin-bottom: 1.2rem; font-weight: 700;">Visit Us</h4>
-      <div style="display: flex; align-items: flex-start; gap: 1rem; margin-bottom: 1.2rem; color: #d1d5db; font-size: 0.95rem; line-height: 1.6;">
-        <i class="fa-solid fa-location-dot" style="color: #b9f032; font-size: 1.2rem; margin-top: 0.2rem;"></i> 
-        <span>SHOP R4, SATYASHIV COMERCIAL PARK, MEDICOVER HOSPITAL ROAD, ShreeRam Nagar, Gunjalwadi, Maharashtra 422605</span>
+    <div class="footer-contact black-theme-card">
+      <h4 class="footer-contact-title">Visit Us</h4>
+      <div class="footer-contact-item">
+        <i class="fa-solid fa-location-dot contact-icon"></i> 
+        <a href="https://maps.app.goo.gl/61eA3wFErnLmcgUD9" target="_blank" rel="noopener noreferrer">SHOP R4, SATYASHIV COMERCIAL PARK, MEDICOVER HOSPITAL ROAD, ShreeRam Nagar, Gunjalwadi, Maharashtra 422605</a>
       </div>
-      <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.2rem; color: #d1d5db; font-size: 0.95rem;">
-        <i class="fa-solid fa-phone" style="color: #b9f032; font-size: 1.2rem;"></i> 
-        <span>+91 9209597436</span>
+      <div class="footer-contact-item">
+        <i class="fa-solid fa-phone contact-icon"></i> 
+        <a href="tel:+919209597436">+91 9209597436</a>
       </div>
-      <div style="display: flex; align-items: center; gap: 1rem; color: #d1d5db; font-size: 0.95rem;">
-        <i class="fa-regular fa-clock" style="color: #b9f032; font-size: 1.2rem;"></i> 
+      <div class="footer-contact-item">
+        <i class="fa-regular fa-clock contact-icon"></i> 
         <span>Tue-Sun: 9 AM - 8 PM</span>
       </div>
     </div>
@@ -153,11 +158,10 @@
   <a href="{% url 'about' %}" class="bottom-nav-item {% if request.resolver_match.url_name == 'about' %}active{% endif %}">
     <i class="fa-solid fa-store"></i><span>About</span>
   </a>
-
 </nav>
 
 {% load static %}
-<script src="{% static 'js/main.js' %}"></script>
+<script src="{% static 'js/main.js' %}?v={% now 'U' %}"></script>
 {% block extra_js %}{% endblock %}
 </body>
 </html>

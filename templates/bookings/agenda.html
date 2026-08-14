@@ -4,19 +4,36 @@
 {% block title %}Barber Stack | The Gentleman's Cut{% endblock %}
 
 {% block content %}
-<section class="section agenda-bg">
+<section class="agenda-bg">
   <div class="container">
-    <div class="header-left" data-animate="fade-up">
-      <h2 class="agenda-title">Today's Appointments</h2>
+
+    <!-- ═══════ Header ═══════ -->
+    <div class="agenda-header" data-animate="fade-up">
+      <div>
+        <h2 class="agenda-title">Today's Appointments</h2>
+        <p class="agenda-sub">
+          <i class="fa-regular fa-calendar-days"></i> {{ date|date:"l, d M Y" }}
+        </p>
+      </div>
+      <div class="agenda-clock">
+        <span id="liveClock">--:--:--</span>
+      </div>
     </div>
 
-    <div class="agenda-timeline" data-animate="fade-up">
+    <!-- ═══════ Summary chips ═══════ -->
+    <div class="agenda-chips" data-animate="fade-up" data-delay="50">
+      <div class="chip"><span class="chip-dot ongoing-dot"></span> Now Serving: <strong>{{ ongoing_bookings|length }}</strong></div>
+      <div class="chip"><span class="chip-dot upcoming-dot"></span> Upcoming: <strong>{{ upcoming_bookings|length }}</strong></div>
+      <div class="chip"><span class="chip-dot done-dot"></span> Completed: <strong>{{ completed_count }}</strong></div>
+    </div>
+
+    <div class="agenda-timeline" data-animate="fade-up" data-delay="100">
       <div class="timeline-line"></div>
-      
+
       {% if bookings %}
         {% for b in bookings %}
-          <div class="agenda-row {% if b.is_ongoing %}ongoing{% elif b.is_past %}past{% endif %}">
-            
+          <div class="agenda-row {% if b.is_ongoing %}ongoing{% endif %}">
+
             <div class="timeline-indicator">
               <div class="indicator-dot"></div>
             </div>
@@ -26,24 +43,25 @@
                 <div class="time-main">{{ b.booking_time|time:"h:i" }}<span class="time-ampm">{{ b.booking_time|time:"A" }}</span></div>
                 <div class="time-duration"><i class="fa-regular fa-clock"></i> {{ b.service.duration }} min</div>
               </div>
-              
+
               <div class="agenda-details">
                 <h3>{{ b.customer_name }}</h3>
                 <p class="service-name"><i class="fa-solid fa-scissors gold-icon"></i> {{ b.service.name }}</p>
                 <p class="customer-phone"><i class="fa-solid fa-phone"></i> {{ b.customer_phone }}</p>
+                {% if b.barber %}
+                  <p class="customer-phone"><i class="fa-solid fa-user-tie gold-icon"></i> {{ b.barber.name }}</p>
+                {% endif %}
               </div>
 
               <div class="agenda-right">
                 <div class="badge-wrapper">
                   {% if b.is_ongoing %}
                     <span class="badge badge-ongoing"><i class="fa-solid fa-circle"></i> Ongoing</span>
-                  {% elif b.is_past %}
-                    <span class="badge badge-past">Completed</span>
                   {% else %}
-                    <span class="badge badge-pending">{{ b.get_status_display }}</span>
+                    <span class="badge badge-pending"><i class="fa-regular fa-clock"></i> Upcoming</span>
                   {% endif %}
                 </div>
-                
+
                 {% if b.special_request %}
                   <p class="agenda-request">{{ b.special_request }}</p>
                 {% endif %}
@@ -51,40 +69,146 @@
             </div>
           </div>
         {% endfor %}
+
+        <!-- Upcoming preview footer -->
+        {% if upcoming_bookings %}
+          <div class="agenda-upcoming-note">
+            <i class="fa-solid fa-users-viewfinder gold-icon"></i>
+            <strong>{{ upcoming_bookings|length }}</strong> customer(s) waiting — next up:
+            <strong>{{ upcoming_bookings.0.customer_name }}</strong>
+            <span class="next-time">@ {{ upcoming_bookings.0.booking_time|time:"g:i A" }}</span>
+          </div>
+        {% endif %}
       {% else %}
-        <div class="empty-state">
-          <i class="fa-solid fa-mug-hot"></i>
-          <h3>No appointments today</h3>
-          <p>Time to take a break or promote your services!</p>
+        <!-- Premium Empty State Card -->
+        <div class="agenda-empty-card">
+          <div class="empty-icon-box">
+            <i class="fa-solid fa-chair"></i>
+          </div>
+          <h3>All Clear for Now</h3>
+          <p>No active ongoing or upcoming appointments scheduled at this moment.</p>
+          <a href="{% url 'home' %}" class="empty-book-btn">
+            <i class="fa-solid fa-scissors"></i> Book New Appointment
+          </a>
         </div>
       {% endif %}
-      
+
       <div class="agenda-footer">
-        <i class="fa-solid fa-sun gold-icon"></i> Thank you for being a part of <span class="gold-text">24 K</span> family <i class="fa-solid fa-sun gold-icon"></i>
+        <i class="fa-solid fa-crown gold-icon"></i> Thank you for being a part of <span class="gold-text">24 K</span> family <i class="fa-solid fa-crown gold-icon"></i>
       </div>
     </div>
   </div>
 </section>
 
+<!-- ═══════ Floating Solid Black & Gold Promo Card (Every 20s, disappears in 6s) ═══════ -->
+<div class="promo-area" id="promoArea">
+  <div class="promo-card">
+    <span class="promo-close" onclick="hidePromo()"><i class="fa-solid fa-xmark"></i></span>
+
+    <!-- Slide 1 — About / Developer -->
+    <div class="promo-slide active" id="promoAbout">
+      <div class="promo-icon"><i class="fa-solid fa-user-graduate"></i></div>
+      <div class="promo-badge">About the Developer</div>
+      <h3 class="promo-title">Crafted by <span class="gold-text2">24 K Barbershop</span></h3>
+      <p class="promo-text">
+        Proudly serving <strong>Sangamner</strong> — we're a small team making grooming effortless:
+        online booking, live service board, instant reminders & more, all in one place.
+      </p>
+      <div class="promo-links">
+        <span><i class="fa-solid fa-location-dot gold-text2"></i> Sangamner, Maharashtra</span>
+        <span><i class="fa-solid fa-phone gold-text2"></i> +91 92095 97436</span>
+      </div>
+      <div class="promo-credit">
+        <i class="fa-regular fa-copyright"></i> {{ date|date:"Y" }} All Rights Reserved to <strong>ThePranit</strong>
+      </div>
+    </div>
+
+    <!-- Slide 2 — Install App QR -->
+    <div class="promo-slide" id="promoApp">
+      <div class="promo-icon"><i class="fa-solid fa-mobile-screen-button"></i></div>
+      <div class="promo-badge">Install Our App</div>
+      <h3 class="promo-title">Get the <span class="gold-text2">24 K</span> App</h3>
+      <div class="promo-qr">
+        <i class="fa-solid fa-qrcode"></i>
+        <span>QR Code Coming Soon</span>
+      </div>
+      <p class="promo-text">Scan to install — book faster, skip the queue, get special offers.</p>
+      <div class="promo-links">
+        <span><i class="fa-solid fa-globe gold-text2"></i> Website: your-website.com</span>
+      </div>
+    </div>
+  </div>
+</div>
+
 <style>
 .agenda-bg {
   background: #fafafa;
   min-height: calc(100vh - 80px);
-  padding-top: 3rem;
+  padding-top: 8rem;
+  padding-bottom: 4rem;
   font-family: 'Inter', sans-serif;
 }
-.header-left {
-  text-align: left;
-  margin-bottom: 2rem;
+
+/* ── Header ─────────────────────────────── */
+.agenda-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 1rem;
   max-width: 900px;
-  margin-left: auto;
-  margin-right: auto;
+  margin: 0 auto 1.5rem;
+  border-bottom: 1px solid #eaeaea;
+  padding-bottom: 1.2rem;
 }
 .agenda-title {
   font-size: 1.4rem;
   font-weight: 600;
   color: #333;
+  margin: 0;
 }
+.agenda-sub {
+  color: #888;
+  font-size: 0.9rem;
+  margin: 0.3rem 0 0;
+}
+.agenda-clock {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #111;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Summary chips ──────────────────────── */
+.agenda-chips {
+  display: flex;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+  max-width: 900px;
+  margin: 0 auto 1.8rem;
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 999px;
+  padding: 0.45rem 1.1rem;
+  font-size: 0.85rem;
+  color: #555;
+}
+.chip-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.chip-dot.ongoing-dot  { background: #22c55e; }
+.chip-dot.upcoming-dot { background: #d4af37; }
+.chip-dot.done-dot     { background: #cbd5e1; }
+
+/* ── Timeline ───────────────────────────── */
 .agenda-timeline {
   max-width: 900px;
   margin: 0 auto;
@@ -144,12 +268,6 @@
 .agenda-row.ongoing .indicator-dot::after {
   background: #22c55e;
 }
-.agenda-row.past .indicator-dot {
-  border-color: #ccc;
-}
-.agenda-row.past .indicator-dot::after {
-  background: #ccc;
-}
 
 .agenda-card {
   flex: 1;
@@ -176,10 +294,6 @@
   background: #22c55e;
   border-top-left-radius: 12px;
   border-bottom-left-radius: 12px;
-}
-.agenda-row.past .agenda-card {
-  opacity: 0.6;
-  box-shadow: none;
 }
 
 .agenda-time {
@@ -255,17 +369,84 @@
   color: #16a34a;
   background: transparent;
 }
-.badge-past {
-  border: 1px solid #ccc;
-  color: #888;
-  background: transparent;
-}
 .agenda-request {
   margin-top: 1rem;
   color: #888;
   font-size: 0.8rem;
   text-align: right;
   font-style: italic;
+}
+
+/* Premium Empty State */
+.agenda-empty-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 3.5rem 2rem;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+  margin: 1.5rem 0;
+}
+.empty-icon-box {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 1.2rem;
+  border-radius: 50%;
+  background: rgba(212, 175, 55, 0.12);
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  color: #d4af37;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+}
+.agenda-empty-card h3 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #111;
+  margin-bottom: 0.5rem;
+}
+.agenda-empty-card p {
+  color: #666;
+  font-size: 0.95rem;
+  max-width: 380px;
+  margin: 0 auto 1.5rem;
+}
+.empty-book-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #000;
+  color: #d4af37;
+  font-weight: 600;
+  padding: 0.75rem 1.4rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  text-decoration: none;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+  transition: all 0.2s;
+}
+.empty-book-btn:hover { background: #d4af37; color: #000; }
+
+/* Next up note */
+.agenda-upcoming-note {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  background: #fff8e6;
+  border: 1px solid rgba(212, 175, 55, 0.45);
+  color: #6b5b1e;
+  font-size: 0.9rem;
+  border-radius: 10px;
+  padding: 0.8rem 1.2rem;
+  margin: 0.5rem 0 1rem;
+}
+.next-time {
+  color: #a5851f;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
 }
 
 .agenda-footer {
@@ -275,6 +456,160 @@
   font-size: 0.9rem;
 }
 .gold-text { color: #d4af37; font-weight: 600; }
+
+/* ── Floating Solid Black & Gold Promo Card ─────────────────── */
+.promo-area {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 420px;
+  max-width: calc(100vw - 2.5rem);
+  z-index: 9500;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.92);
+  pointer-events: none;
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.promo-area.visible {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+  pointer-events: auto;
+}
+.promo-card {
+  position: relative;
+  padding: 2.4rem 2rem;
+  border-radius: 16px;
+  text-align: center;
+  overflow: hidden;
+  color: #fff;
+  background: #08080a;
+  border: 1.5px solid #d4af37;
+  box-shadow:
+    0 0 0 3px rgba(212, 175, 55, 0.25),
+    0 0 45px rgba(212, 175, 55, 0.18),
+    0 24px 70px rgba(0, 0, 0, 0.6);
+}
+.promo-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, transparent, #d4af37, transparent);
+  pointer-events: none;
+}
+.promo-card::after {
+  content: '';
+  position: absolute;
+  bottom: -80px;
+  left: -60px;
+  width: 240px;
+  height: 160px;
+  background: radial-gradient(closest-side, rgba(212, 175, 55, 0.08), transparent);
+  pointer-events: none;
+}
+.promo-close {
+  position: absolute;
+  top: 0.8rem;
+  right: 1rem;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 1.1rem;
+  cursor: pointer;
+  z-index: 2;
+  transition: color 0.2s;
+}
+.promo-close:hover { color: #fff; }
+.promo-slide {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  animation: promoFade 0.6s ease;
+}
+.promo-slide.active { display: flex; }
+@keyframes promoFade {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: none; }
+}
+.promo-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(212, 175, 55, 0.2);
+  border: 1px solid rgba(212, 175, 55, 0.55);
+  color: #f5d97a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  margin-bottom: 0.8rem;
+  box-shadow: 0 0 30px rgba(212, 175, 55, 0.2);
+}
+.promo-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #d4af37;
+  border: 1px solid rgba(212, 175, 55, 0.5);
+  border-radius: 999px;
+  padding: 0.28rem 0.9rem;
+  margin-bottom: 0.8rem;
+}
+.promo-title {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #f9fafb;
+  margin: 0 0 0.45rem;
+}
+.promo-text {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.88rem;
+  max-width: 320px;
+  margin: 0 auto 0.8rem;
+  line-height: 1.6;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.35);
+}
+.promo-links {
+  display: flex;
+  gap: 1.1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  color: rgba(148, 163, 184, 0.95);
+  font-size: 0.82rem;
+}
+.promo-links span { display: inline-flex; align-items: center; gap: 0.45rem; }
+.gold-text2 { color: #d4af37; font-weight: 700; }
+.promo-qr {
+  width: 132px;
+  height: 132px;
+  background: rgba(255, 255, 255, 0.94);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  color: #111;
+  margin-bottom: 0.8rem;
+  border: 2px dashed #d4af37;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+.promo-qr i { font-size: 2.6rem; color: #111827; }
+.promo-qr span { font-size: 0.68rem; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: 0.06em; }
+.promo-credit {
+  margin-top: 0.9rem;
+  padding-top: 0.8rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.18);
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.promo-credit strong { color: #f5d97a; font-weight: 700; }
 
 @media (max-width: 768px) {
   .agenda-card {
@@ -302,4 +637,44 @@
   }
 }
 </style>
+
+<script>
+// Live clock
+(function tick() {
+  const el = document.getElementById('liveClock');
+  if (el) {
+    el.textContent = new Date().toLocaleTimeString('en-IN', { hour12: true });
+  }
+  setTimeout(tick, 1000);
+})();
+
+// Auto-refresh every 2 minutes so timing stays live
+setTimeout(function () { window.location.reload(); }, 120000);
+
+// Floating promo card — show every 20s, hide after 6s, alternate slides
+(function promoCycle() {
+  const area = document.getElementById('promoArea');
+  if (!area) return;
+  const slides = area.querySelectorAll('.promo-slide');
+  let idx = 0;
+  let hideTimer = null;
+
+  function showPromo() {
+    slides.forEach(s => s.classList.remove('active'));
+    idx = (idx + 1) % slides.length;
+    slides[idx].classList.add('active');
+    area.classList.add('visible');
+    clearTimeout(hideTimer);
+    hideTimer = setTimeout(hidePromo, 6000); // hides after 6 seconds
+  }
+
+  function hidePromo() {
+    area.classList.remove('visible');
+  }
+
+  window.hidePromo = hidePromo;
+
+  setInterval(showPromo, 20000); // shows every 20 seconds
+})();
+</script>
 {% endblock %}

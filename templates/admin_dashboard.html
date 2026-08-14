@@ -1,0 +1,422 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Admin Management Dashboard | 24 K Barbershop{% endblock %}
+
+{% block content %}
+<div class="admin-dashboard-wrapper">
+  <div class="container">
+
+    <!-- Dashboard Header -->
+    <div class="dashboard-header" data-animate="fade-up">
+      <div>
+        <div class="dashboard-eyebrow">
+          <i class="fa-solid fa-chart-line"></i> Management Operations
+        </div>
+        <h1 class="dashboard-title">Barbershop Admin Control Center</h1>
+        <p class="dashboard-subtitle">Real-time revenue metrics, barber scheduling, & client notification suite</p>
+      </div>
+
+      <div class="header-actions">
+        <a href="{% url 'barber_agenda' %}" target="_blank" class="btn-ghost" style="padding: 0.7rem 1.2rem; font-size: 0.9rem; background: #161924; color: #d4af37; border: 1px solid #282e42;">
+          <i class="fa-solid fa-list-check"></i> Live Barber Agenda
+        </a>
+        <a href="{% url 'admin_dashboard' %}" class="btn-gold" style="padding: 0.7rem 1.2rem; font-size: 0.9rem;">
+          <i class="fa-solid fa-rotate"></i> Refresh Metrics
+        </a>
+      </div>
+    </div>
+
+    <!-- Executive Stats Grid -->
+    <div class="stats-grid" data-animate="fade-up" data-delay="50">
+      <!-- Total Lifetime Revenue -->
+      <div class="stat-card gold-border">
+        <div class="stat-icon-wrap gold-bg">
+          <i class="fa-solid fa-indian-rupee-sign"></i>
+        </div>
+        <div class="stat-info">
+          <span class="stat-label">Total Revenue</span>
+          <span class="stat-value text-gold">₹ {{ total_revenue|floatformat:0 }}</span>
+          <span class="stat-sub">Lifetime collected sales</span>
+        </div>
+      </div>
+
+      <!-- Today's Revenue -->
+      <div class="stat-card">
+        <div class="stat-icon-wrap cyan-bg">
+          <i class="fa-solid fa-money-bill-trend-up"></i>
+        </div>
+        <div class="stat-info">
+          <span class="stat-label">Today's Revenue</span>
+          <span class="stat-value">₹ {{ today_revenue|floatformat:0 }}</span>
+          <span class="stat-sub">Collected {{ today|date:"d M Y" }}</span>
+        </div>
+      </div>
+
+      <!-- Total Bookings -->
+      <div class="stat-card">
+        <div class="stat-icon-wrap blue-bg">
+          <i class="fa-solid fa-calendar-check"></i>
+        </div>
+        <div class="stat-info">
+          <span class="stat-label">Total Bookings</span>
+          <span class="stat-value">{{ total_bookings }}</span>
+          <span class="stat-sub">All-time reservations</span>
+        </div>
+      </div>
+
+      <!-- Today's Appointments -->
+      <div class="stat-card">
+        <div class="stat-icon-wrap green-bg">
+          <i class="fa-solid fa-clock-rotate-left"></i>
+        </div>
+        <div class="stat-info">
+          <span class="stat-label">Today's Appointments</span>
+          <span class="stat-value">{{ today_bookings }}</span>
+          <span class="stat-sub">Scheduled for today</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Status Counter Summary Bar -->
+    <div class="status-summary-bar" data-animate="fade-up" data-delay="100">
+      <div class="summary-pill pending">
+        <span class="pill-dot"></span> Pending: <strong>{{ pending_count }}</strong>
+      </div>
+      <div class="summary-pill confirmed">
+        <span class="pill-dot"></span> Confirmed: <strong>{{ confirmed_count }}</strong>
+      </div>
+      <div class="summary-pill completed">
+        <span class="pill-dot"></span> Completed: <strong>{{ completed_count }}</strong>
+      </div>
+      <div class="summary-pill cancelled">
+        <span class="pill-dot"></span> Cancelled: <strong>{{ cancelled_count }}</strong>
+      </div>
+    </div>
+
+    <!-- Barber Roster Management -->
+    <div class="dashboard-section" data-animate="fade-up" data-delay="150">
+      <div class="section-title-wrap">
+        <h2><i class="fa-solid fa-user-tie text-gold"></i> Master Barber Roster & Duty Toggle</h2>
+        <span class="section-badge">{{ barbers|length }} Active Experts</span>
+      </div>
+
+      <div class="barbers-roster-grid">
+        {% for b in barbers %}
+        <div class="barber-status-card {% if not b.is_active %}inactive{% endif %}">
+          <div class="barber-avatar-box">
+            <i class="fa-solid fa-{{ b.avatar_icon|default:'user-tie' }}"></i>
+          </div>
+          <div class="barber-details">
+            <div class="barber-name-row">
+              <h3>{{ b.name }}</h3>
+              <span class="barber-rating">★ {{ b.rating }}</span>
+            </div>
+            <p class="barber-title">{{ b.title }}</p>
+            <p class="barber-specs">{{ b.specialties }}</p>
+
+            <div class="barber-stats-mini">
+              <div>
+                <span>Appointments</span>
+                <strong>{{ b.total_appointments }}</strong>
+              </div>
+              <div>
+                <span>Revenue</span>
+                <strong>₹ {{ b.revenue|floatformat:0 }}</strong>
+              </div>
+            </div>
+
+            <form action="{% url 'admin_toggle_barber' b.id %}" method="POST">
+              {% csrf_token %}
+              <button type="submit" class="btn-toggle {% if b.is_active %}active{% else %}inactive{% endif %}">
+                {% if b.is_active %}
+                  <i class="fa-solid fa-circle-check"></i> Available / On Duty
+                {% else %}
+                  <i class="fa-solid fa-circle-pause"></i> Off Duty / Paused
+                {% endif %}
+              </button>
+            </form>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Appointments Table Section -->
+    <div class="dashboard-section" data-animate="fade-up" data-delay="200">
+      <div class="appointments-header">
+        <div class="section-title-wrap" style="margin-bottom: 0;">
+          <h2><i class="fa-solid fa-list-ol text-gold"></i> Customer Appointments Queue</h2>
+        </div>
+
+        <!-- Filters & Search -->
+        <form method="GET" action="{% url 'admin_dashboard' %}" class="admin-filter-form">
+          <div class="filter-controls">
+            <!-- Search -->
+            <div class="search-input-wrap">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" name="q" value="{{ search_q }}" placeholder="Search ID, Name, Phone..." />
+            </div>
+
+            <!-- Date Filter -->
+            <div class="date-input-wrap">
+              <input type="date" name="date" value="{{ date_filter }}" />
+            </div>
+
+            <!-- Status Tabs -->
+            <select name="status" class="admin-select-filter" onchange="this.form.submit()">
+              <option value="ALL" {% if status_filter == 'ALL' %}selected{% endif %}>All Statuses</option>
+              <option value="TODAY" {% if status_filter == 'TODAY' %}selected{% endif %}>Today's Only</option>
+              <option value="PENDING" {% if status_filter == 'PENDING' %}selected{% endif %}>Pending</option>
+              <option value="CONFIRMED" {% if status_filter == 'CONFIRMED' %}selected{% endif %}>Confirmed</option>
+              <option value="COMPLETED" {% if status_filter == 'COMPLETED' %}selected{% endif %}>Completed</option>
+              <option value="CANCELLED" {% if status_filter == 'CANCELLED' %}selected{% endif %}>Cancelled</option>
+            </select>
+
+            <button type="submit" class="btn-filter"><i class="fa-solid fa-filter"></i> Filter</button>
+            {% if search_q or date_filter or status_filter != 'ALL' %}
+              <a href="{% url 'admin_dashboard' %}" class="btn-clear">Reset</a>
+            {% endif %}
+          </div>
+        </form>
+      </div>
+
+      <!-- Bookings Table -->
+      <div class="table-responsive">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Customer</th>
+              <th>Service</th>
+              <th>Barber</th>
+              <th>Date & Time</th>
+              <th>Amount</th>
+              <th>Status</th>
+              <th>Payment</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for booking in bookings %}
+            <tr>
+              <td>
+                <span class="booking-id-tag">{{ booking.booking_id }}</span>
+              </td>
+              <td>
+                <div class="customer-info-box">
+                  <span class="cust-name">{{ booking.customer_name }}</span>
+                  <span class="cust-phone"><i class="fa-solid fa-phone"></i> {{ booking.customer_phone }}</span>
+                </div>
+              </td>
+              <td>
+                <span class="service-name-tag">{{ booking.service.name }}</span>
+                <span class="service-dur">({{ booking.service.duration }} min)</span>
+              </td>
+              <td>
+                {% if booking.barber %}
+                  <span class="barber-assigned-tag"><i class="fa-solid fa-user-tie text-gold"></i> {{ booking.barber.name }}</span>
+                {% else %}
+                  <span class="barber-any-tag">Any Available</span>
+                {% endif %}
+              </td>
+              <td>
+                <div class="date-time-box">
+                  <span class="b-date"><i class="fa-regular fa-calendar"></i> {{ booking.booking_date|date:"d M Y" }}</span>
+                  <span class="b-time"><i class="fa-regular fa-clock text-gold"></i> {{ booking.booking_time|time:"g:i A" }}</span>
+                </div>
+              </td>
+              <td>
+                <span class="amount-tag">₹ {{ booking.amount|floatformat:0 }}</span>
+              </td>
+              <td>
+                <span class="status-badge status-{{ booking.status|lower }}">
+                  {{ booking.get_status_display }}
+                </span>
+              </td>
+              <td>
+                {% if booking.payment %}
+                  <span class="payment-badge pay-{{ booking.payment.status|lower }}">
+                    {{ booking.payment.get_status_display }}
+                  </span>
+                {% else %}
+                  <span class="payment-badge">—</span>
+                {% endif %}
+              </td>
+              <td>
+                <div class="action-buttons">
+                  <!-- Quick Notify / Message Button -->
+                  <button type="button" class="btn-action" style="background: rgba(212,175,55,0.15); color: #d4af37; border: 1px solid rgba(212,175,55,0.3);" title="Send Message or WhatsApp Notification" onclick="openNotifyModal('{{ booking.booking_id }}', '{{ booking.customer_name|escapejs }}', '{{ booking.customer_phone|escapejs }}', '{{ booking.service.name|escapejs }}', '{{ booking.booking_date|date:"d M Y" }}', '{{ booking.booking_time|time:"g:i A" }}')">
+                    <i class="fa-solid fa-paper-plane"></i> Notify
+                  </button>
+
+                  {% if booking.status != 'CONFIRMED' and booking.status != 'COMPLETED' and booking.status != 'CANCELLED' %}
+                    <form action="{% url 'admin_update_status' booking.booking_id %}" method="POST" style="display:inline;">
+                      {% csrf_token %}
+                      <input type="hidden" name="status" value="CONFIRMED" />
+                      <button type="submit" class="btn-action btn-confirm" title="Confirm Appointment">
+                        <i class="fa-solid fa-check"></i> Confirm
+                      </button>
+                    </form>
+                  {% endif %}
+
+                  {% if booking.status != 'COMPLETED' and booking.status != 'CANCELLED' %}
+                    <form action="{% url 'admin_update_status' booking.booking_id %}" method="POST" style="display:inline;">
+                      {% csrf_token %}
+                      <input type="hidden" name="status" value="COMPLETED" />
+                      <button type="submit" class="btn-action btn-complete" title="Mark Completed">
+                        <i class="fa-solid fa-star"></i> Complete
+                      </button>
+                    </form>
+                  {% endif %}
+
+                  {% if booking.status != 'CANCELLED' and booking.status != 'COMPLETED' %}
+                    <form action="{% url 'admin_update_status' booking.booking_id %}" method="POST" style="display:inline;">
+                      {% csrf_token %}
+                      <input type="hidden" name="status" value="CANCELLED" />
+                      <button type="submit" class="btn-action btn-cancel" title="Cancel Appointment" onclick="return confirm('Are you sure you want to cancel this booking?')">
+                        <i class="fa-solid fa-xmark"></i>
+                      </button>
+                    </form>
+                  {% endif %}
+                </div>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="9" class="empty-table-msg">
+                <i class="fa-solid fa-inbox"></i>
+                <p>No appointments match the selected filters.</p>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- CLIENT NOTIFICATION / MESSAGING MODAL -->
+<div class="modal-backdrop" id="notifyModalBackdrop" style="display:none;" onclick="closeNotifyModal()"></div>
+<div class="modal" id="notifyModal" style="display:none; max-width: 520px; background: #12141c; color: #fff; border: 1px solid #232736; border-radius: 16px; padding: 2rem; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10000; box-shadow: 0 15px 50px rgba(0,0,0,0.8);" role="dialog">
+  <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #232736; padding-bottom: 1rem; margin-bottom: 1.5rem;">
+    <h3 style="font-size: 1.2rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 0.6rem; margin: 0;">
+      <i class="fa-solid fa-comment-dots text-gold"></i> Client Messaging Suite
+    </h3>
+    <button onclick="closeNotifyModal()" style="background: none; border: none; color: #9ca3af; font-size: 1.4rem; cursor: pointer;">&times;</button>
+  </div>
+
+  <div class="modal-body" style="text-align: left;">
+    <div style="background: #171a24; padding: 1rem; border-radius: 10px; border: 1px solid #252a3a; margin-bottom: 1.5rem;">
+      <p style="margin: 0 0 0.4rem; font-size: 0.95rem;"><strong>Client:</strong> <span id="notifyCustName" style="color: #fff;"></span> (<span id="notifyCustPhone" style="color: #d4af37;"></span>)</p>
+      <p style="margin: 0; font-size: 0.85rem; color: #9ca3af;"><strong>Appointment:</strong> <span id="notifyServiceInfo"></span></p>
+    </div>
+
+    <!-- Quick Phone & WhatsApp Direct Launchers -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin-bottom: 1.5rem;">
+      <div>
+        <label style="display: block; font-size: 0.78rem; font-weight: 700; color: #38bdf8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.4rem;">
+          <i class="fa-solid fa-comment-sms"></i> Native Phone SMS App
+        </label>
+        <a id="btnSMSDirect" href="#" target="_blank" rel="noopener noreferrer" style="width: 100%; padding: 0.8rem; background: #0284c7; color: #fff; font-weight: 700; font-size: 0.88rem; border-radius: 8px; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 0.5rem; box-shadow: 0 4px 15px rgba(2,132,199,0.25); transition: all 0.2s;">
+          <i class="fa-solid fa-message" style="font-size: 1.1rem;"></i> Open Phone SMS
+        </a>
+      </div>
+
+      <div>
+        <label style="display: block; font-size: 0.78rem; font-weight: 700; color: #25d366; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.4rem;">
+          <i class="fa-brands fa-whatsapp"></i> WhatsApp Chat
+        </label>
+        <a id="btnWhatsAppDirect" href="#" target="_blank" rel="noopener noreferrer" style="width: 100%; padding: 0.8rem; background: #25d366; color: #000; font-weight: 700; font-size: 0.88rem; border-radius: 8px; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 0.5rem; box-shadow: 0 4px 15px rgba(37,211,102,0.25); transition: all 0.2s;">
+          <i class="fa-brands fa-whatsapp" style="font-size: 1.1rem;"></i> Open WhatsApp
+        </a>
+      </div>
+    </div>
+
+    <!-- Quick Template Selector -->
+    <div style="margin-bottom: 1rem;">
+      <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.4rem;">Select Message Preset</label>
+      <select id="tplSelect" class="admin-select-filter" style="width: 100%; background: #171a24; border: 1px solid #252a3a; color: #fff; padding: 0.6rem; border-radius: 8px;" onchange="applyTemplate(this.value)">
+        <option value="REMINDER">⏰ Standard Appointment Reminder</option>
+        <option value="BARBER_READY">✂️ Barber is Ready for You</option>
+        <option value="DELAY">⏳ 15 Minute Delay Notice</option>
+        <option value="CUSTOM">✏️ Custom Message</option>
+      </select>
+    </div>
+
+    <!-- Notification Form -->
+    <form id="notifyForm" method="POST" action="">
+      {% csrf_token %}
+      <div style="margin-bottom: 1.5rem;">
+        <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.4rem;">Message Body</label>
+        <textarea id="notifyMessageText" name="message" rows="4" style="width: 100%; background: #171a24; border: 1px solid #252a3a; color: #fff; padding: 0.8rem; border-radius: 8px; font-size: 0.9rem; font-family: inherit; resize: vertical;" placeholder="Type message to client..."></textarea>
+      </div>
+
+      <div style="display: flex; gap: 0.8rem;">
+        <button type="submit" class="btn-filter" style="flex: 1; padding: 0.8rem; background: #d4af37; color: #000; font-weight: 700; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+          <i class="fa-solid fa-paper-plane"></i> Log & Send Notification
+        </button>
+        <button type="button" onclick="closeNotifyModal()" style="padding: 0.8rem 1.2rem; background: #252a3a; color: #aaa; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
+          Close
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+let currentNotifyData = {};
+
+function openNotifyModal(bookingId, custName, custPhone, serviceName, dateStr, timeStr) {
+  currentNotifyData = { bookingId, custName, custPhone, serviceName, dateStr, timeStr };
+
+  document.getElementById('notifyCustName').textContent = custName;
+  document.getElementById('notifyCustPhone').textContent = custPhone;
+  document.getElementById('notifyServiceInfo').textContent = `${serviceName} on ${dateStr} at ${timeStr}`;
+  document.getElementById('notifyForm').action = `/dashboard/notify/${bookingId}/`;
+
+  // Default template: REMINDER
+  applyTemplate('REMINDER');
+
+  document.getElementById('notifyModal').style.display = 'block';
+  document.getElementById('notifyModalBackdrop').style.display = 'block';
+  document.body.classList.add('no-scroll');
+}
+
+function applyTemplate(tplKey) {
+  const { custName, serviceName, dateStr, timeStr, custPhone } = currentNotifyData;
+  let text = "";
+
+  if (tplKey === 'REMINDER') {
+    text = `Hello ${custName}, this is a reminder for your upcoming ${serviceName} appointment on ${dateStr} at ${timeStr} at 24 K Barbershop. See you soon!`;
+  } else if (tplKey === 'BARBER_READY') {
+    text = `Hello ${custName}, your master barber is ready for your ${serviceName} appointment at 24 K Barbershop! Please step inside.`;
+  } else if (tplKey === 'DELAY') {
+    text = `Hello ${custName}, your ${serviceName} appointment at 24 K Barbershop is running ~15 minutes behind schedule. Thank you for your patience!`;
+  } else {
+    text = `Hello ${custName}, `;
+  }
+
+  document.getElementById('notifyMessageText').value = text;
+
+  // Update Direct Phone SMS link
+  const cleanPhone = (custPhone || '').replace(/\D/g, '');
+  const smsPhone = cleanPhone.length === 10 ? '+91' + cleanPhone : '+' + cleanPhone;
+  const smsUrl = `sms:${smsPhone}?body=${encodeURIComponent(text)}`;
+  document.getElementById('btnSMSDirect').href = smsUrl;
+
+  // Update WhatsApp link
+  const waPhone = cleanPhone.length === 10 ? '91' + cleanPhone : cleanPhone;
+  const waUrl = `https://wa.me/${waPhone}?text=${encodeURIComponent(text)}`;
+  document.getElementById('btnWhatsAppDirect').href = waUrl;
+}
+
+function closeNotifyModal() {
+  document.getElementById('notifyModal').style.display = 'none';
+  document.getElementById('notifyModalBackdrop').style.display = 'none';
+  document.body.classList.remove('no-scroll');
+}
+</script>
+{% endblock %}

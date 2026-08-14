@@ -3,7 +3,16 @@ from django.utils.html import format_html
 from django.urls import reverse
 from django.utils import timezone
 
-from .models import Service, BusinessHour, Booking, Payment
+from .models import Service, BusinessHour, Booking, Payment, Barber
+
+
+@admin.register(Barber)
+class BarberAdmin(admin.ModelAdmin):
+    list_display = ['name', 'title', 'rating', 'experience_years', 'is_active', 'specialties']
+    list_editable = ['is_active', 'title', 'rating']
+    list_filter = ['is_active']
+    search_fields = ['name', 'title', 'specialties']
+
 
 
 # ──────────────────────────────────────────────────────────────
@@ -91,10 +100,10 @@ class PaymentInline(admin.StackedInline):
 @admin.register(Booking)
 class BookingAdmin(admin.ModelAdmin):
     list_display = [
-        'booking_id', 'customer_name', 'service', 'booking_date',
+        'booking_id', 'customer_name', 'service', 'barber', 'booking_date',
         'booking_time_display', 'status_badge', 'amount_display', 'payment_status'
     ]
-    list_filter = ['status', 'booking_date', 'service']
+    list_filter = ['status', 'booking_date', 'service', 'barber']
     search_fields = ['booking_id', 'customer_name', 'customer_email', 'customer_phone']
     readonly_fields = ['booking_id', 'created_at', 'updated_at', 'amount']
     date_hierarchy = 'booking_date'
@@ -104,7 +113,7 @@ class BookingAdmin(admin.ModelAdmin):
 
     fieldsets = (
         ('Booking Info', {
-            'fields': ('booking_id', 'service', 'booking_date', 'booking_time', 'amount', 'status')
+            'fields': ('booking_id', 'service', 'barber', 'booking_date', 'booking_time', 'amount', 'status')
         }),
         ('Customer Details', {
             'fields': ('customer_name', 'customer_phone', 'customer_email', 'special_request')

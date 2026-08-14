@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════
-   THE GENTLEMAN'S CUT — Main JS
+   24 K BARBERSHOP — Main JS
 ═══════════════════════════════════════════════════════════════ */
 
 'use strict';
@@ -12,6 +12,8 @@ const wizard = {
   serviceName:  null,
   servicePrice: null,
   serviceDuration: null,
+  barberId:     '',
+  barberName:   'Any Available Barber',
   date:         null,       // 'YYYY-MM-DD'
   dateDisplay:  null,       // 'Mon 10 Aug'
   time:         null,       // '10:00'
@@ -42,6 +44,9 @@ document.addEventListener('DOMContentLoaded', () => {
       document.body.classList.toggle('no-scroll', open);
     });
     overlay.addEventListener('click', closeMobileNav);
+    document.querySelectorAll('#mobileNav a').forEach(link => {
+      link.addEventListener('click', closeMobileNav);
+    });
   }
 
   // Auto-dismiss toasts
@@ -95,6 +100,8 @@ function selectService(btn) {
   wizard.serviceName     = btn.dataset.serviceName;
   wizard.servicePrice    = btn.dataset.servicePrice;
   wizard.serviceDuration = btn.dataset.serviceDuration;
+  wizard.barberId        = '';
+  wizard.barberName      = 'Any Available Barber';
 
   // Populate step 1
   document.getElementById('wiz-service-name').textContent     = wizard.serviceName;
@@ -112,8 +119,25 @@ function selectService(btn) {
     if (phoneEl && !phoneEl.value && u.phone) phoneEl.value = u.phone;
   }
 
+  // Pre-select first date chip if date is not selected yet
+  const dateChip = document.querySelector('.date-chip.selected') || document.querySelector('.date-chip');
+  if (dateChip) {
+    selectDate(dateChip);
+  }
+
   wizardGoTo(1);
   openBookingWizard();
+}
+
+function selectBarber(card, id, name) {
+  document.querySelectorAll('.barber-select-card').forEach(c => c.classList.remove('selected'));
+  card.classList.add('selected');
+  wizard.barberId   = id || '';
+  wizard.barberName = name || 'Any Available Barber';
+
+  if (wizard.date) {
+    loadTimeSlots();
+  }
 }
 
 function openBookingWizard() {
@@ -128,35 +152,68 @@ function closeBookingWizard() {
   document.body.classList.remove('no-scroll');
 }
 
+let currentStepIndex = 1;
+
 /** Navigate between wizard panels */
 function wizardGoTo(step) {
-  document.querySelectorAll('.wizard-panel').forEach(p => p.classList.remove('active'));
+  const isForward = step >= currentStepIndex;
+  currentStepIndex = step;
+
+  document.querySelectorAll('.wizard-panel').forEach(p => {
+    p.classList.remove('active', 'slide-from-right', 'slide-from-left');
+  });
+
   document.querySelectorAll('.wizard-step').forEach((s, i) => {
     s.classList.remove('active', 'done');
     if (i + 1 < step)  s.classList.add('done');
     if (i + 1 === step) s.classList.add('active');
   });
+
   const panel = document.getElementById(`wizard-panel-${step}`);
   if (panel) {
-    panel.classList.add('active');
+    const animClass = isForward ? 'slide-from-right' : 'slide-from-left';
+    panel.classList.add('active', animClass);
     panel.scrollTop = 0;
+
+    // Trigger stagger animation for date chips on step 3
+    if (step === 3) {
+      document.querySelectorAll('#dateStrip .date-chip').forEach((chip, idx) => {
+        chip.style.animation = 'none';
+        chip.offsetHeight; // trigger reflow
+        chip.style.animation = `chipStaggerIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) ${0.04 * idx}s forwards`;
+      });
+    }
+
+    // Trigger stagger animation for barber cards on step 2
+    if (step === 2) {
+      document.querySelectorAll('.barber-select-card').forEach((card, idx) => {
+        card.style.animation = 'none';
+        card.offsetHeight;
+        card.style.animation = `barberStaggerIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) ${0.05 * idx}s forwards`;
+      });
+    }
   }
 
-  // Load time slots when going to step 3
-  if (step === 3 && wizard.date) loadTimeSlots();
+  // Load time slots when going to step 4 (Time)
+  if (step === 4) {
+    loadTimeSlots();
+  }
 }
 
 // ── Date picker ───────────────────────────────────────────────
 function selectDate(chip) {
-  document.querySelectorAll('.date-chip').forEach(c => c.classList.remove('selected'));
-  chip.classList.add('selected');
+  document.querySelectorAll('.date-chip').forEach(c => c.classList.remove('selected', 'pulse-pop'));
+  chip.classList.add('selected', 'pulse-pop');
+
+  setTimeout(() => chip.classList.remove('pulse-pop'), 450);
 
   wizard.date = chip.dataset.date;
   const d = new Date(wizard.date + 'T00:00:00');
   const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
   wizard.dateDisplay = d.toLocaleDateString('en-IN', options);
 
-  document.getElementById('selectedDateLabel').textContent = wizard.dateDisplay;
+  const labelEl = document.getElementById('selectedDateLabel');
+  if (labelEl) labelEl.textContent = wizard.dateDisplay;
 
   const btn = document.getElementById('btnDateNext');
   if (btn) btn.disabled = false;
@@ -166,26 +223,47 @@ function selectDate(chip) {
   wizard.timeDisplay = null;
   const btnTime = document.getElementById('btnTimeNext');
   if (btnTime) btnTime.disabled = true;
+
+  // Immediately load time slots for this date
+  loadTimeSlots();
 }
 
 function scrollDates(dir) {
   const strip = document.getElementById('dateStrip');
-  if (strip) strip.scrollBy({ left: dir * 200, behavior: 'smooth' });
+  if (strip) strip.scrollBy({ left: dir * 220, behavior: 'smooth' });
 }
 
 // ── Time slots ────────────────────────────────────────────────
 async function loadTimeSlots() {
   const grid = document.getElementById('timeGrid');
-  if (!grid || !wizard.date) return;
+  if (!grid) return;
 
-  grid.innerHTML = '<div class="time-loading"><div class="spinner"></div><p>Loading slots…</p></div>';
+  if (!wizard.date) {
+    const chip = document.querySelector('.date-chip.selected') || document.querySelector('.date-chip');
+    if (chip) {
+      wizard.date = chip.dataset.date;
+      const d = new Date(wizard.date + 'T00:00:00');
+      const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+      wizard.dateDisplay = d.toLocaleDateString('en-IN', options);
+      const labelEl = document.getElementById('selectedDateLabel');
+      if (labelEl) labelEl.textContent = wizard.dateDisplay;
+    }
+  }
+
+  if (!wizard.date) {
+    grid.innerHTML = '<div class="time-loading"><p style="color:#f59e0b">Please select a date first.</p></div>';
+    return;
+  }
+
+  grid.innerHTML = '<div class="time-loading"><div class="spinner"></div><p>Loading available slots…</p></div>';
   wizard.time = null;
   wizard.timeDisplay = null;
   const btnNext = document.getElementById('btnTimeNext');
   if (btnNext) btnNext.disabled = true;
 
   try {
-    const url = `${window.SLOTS_URL}?date=${wizard.date}&service_id=${wizard.serviceId}`;
+    const slotsBaseUrl = window.SLOTS_URL || '/api/slots/';
+    const url = `${slotsBaseUrl}?date=${wizard.date}&service_id=${wizard.serviceId || ''}&barber_id=${wizard.barberId || ''}`;
     const res = await fetch(url);
     const data = await res.json();
 
@@ -199,18 +277,25 @@ async function loadTimeSlots() {
       return;
     }
 
-    grid.innerHTML = data.slots.map(slot => {
+    const availableSlots = data.slots.filter(s => !s.booked);
+    let noticeBanner = '';
+    if (availableSlots.length === 0) {
+      noticeBanner = '<div class="time-loading" style="grid-column: 1 / -1;"><p style="color:#f59e0b; margin-bottom: 1rem;"><i class="fa-solid fa-clock"></i> All slots for this date are past business hours or booked. Please pick another date.</p></div>';
+    }
+
+    grid.innerHTML = noticeBanner + data.slots.map((slot, index) => {
+      const delay = (0.03 * (index % 12)).toFixed(2);
       if (slot.booked) {
-        return `<button class="time-slot booked" disabled>
+        return `<button class="time-slot booked" disabled title="Slot unavailable or past" style="animation: slotPopIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) ${delay}s forwards">
           ${slot.display}
-          <span class="time-slot-booked-label">Booked</span>
         </button>`;
       }
-      return `<button class="time-slot" data-time="${slot.time}" data-display="${slot.display}" onclick="selectTimeSlot(this)">
+      return `<button class="time-slot" data-time="${slot.time}" data-display="${slot.display}" onclick="selectTimeSlot(this)" style="animation: slotPopIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) ${delay}s forwards">
         ${slot.display}
       </button>`;
     }).join('');
   } catch (err) {
+    console.error("loadTimeSlots error:", err);
     grid.innerHTML = '<div class="time-loading"><p style="color:#fca5a5">Network error. Please try again.</p></div>';
   }
 }
@@ -243,6 +328,7 @@ function goToReview() {
 
   // Build summary
   document.getElementById('sum-service').textContent  = wizard.serviceName;
+  document.getElementById('sum-barber').textContent   = wizard.barberName;
   document.getElementById('sum-date').textContent     = wizard.dateDisplay;
   document.getElementById('sum-time').textContent     = wizard.timeDisplay;
   document.getElementById('sum-duration').textContent = wizard.serviceDuration + ' minutes';
@@ -250,7 +336,7 @@ function goToReview() {
   document.getElementById('sum-phone').textContent    = phone;
   document.getElementById('sum-total').textContent    = '₹' + wizard.servicePrice;
 
-  wizardGoTo(5);
+  wizardGoTo(6);
 }
 
 function clearErrors() {
@@ -275,6 +361,7 @@ async function submitBooking() {
 
   const payload = {
     service_id:    wizard.serviceId,
+    barber_id:     wizard.barberId,
     booking_date:  wizard.date,
     booking_time:  wizard.time,
     full_name:     document.getElementById('inp-name')?.value.trim(),

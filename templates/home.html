@@ -12,7 +12,7 @@
 <section class="hero" id="hero">
   <div class="hero-overlay"></div>
   <div class="hero-content" data-animate="fade-up">
-    <p class="hero-eyebrow">Est. 2015 · Mumbai's Finest</p>
+    <p class="hero-eyebrow">Sangamner's Finest</p>
     <h1 class="hero-title">
       24-KARAT<br>
       GROOMING.<br>
@@ -133,10 +133,11 @@
     <button class="wizard-close" onclick="closeBookingWizard()" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
     <div class="wizard-steps">
       <div class="wizard-step active" id="wstep-1"><span>1</span> Service</div>
-      <div class="wizard-step" id="wstep-2"><span>2</span> Date</div>
-      <div class="wizard-step" id="wstep-3"><span>3</span> Time</div>
-      <div class="wizard-step" id="wstep-4"><span>4</span> Details</div>
-      <div class="wizard-step" id="wstep-5"><span>5</span> Review</div>
+      <div class="wizard-step" id="wstep-2"><span>2</span> Barber</div>
+      <div class="wizard-step" id="wstep-3"><span>3</span> Date</div>
+      <div class="wizard-step" id="wstep-4"><span>4</span> Time</div>
+      <div class="wizard-step" id="wstep-5"><span>5</span> Details</div>
+      <div class="wizard-step" id="wstep-6"><span>6</span> Review</div>
     </div>
   </div>
 
@@ -155,13 +156,52 @@
         </div>
       </div>
       <button class="btn-wizard-next" onclick="wizardGoTo(2)">
-        Choose Date <i class="fa-solid fa-arrow-right"></i>
+        Choose Barber <i class="fa-solid fa-arrow-right"></i>
       </button>
     </div>
   </div>
 
-  <!-- Step 2: Date -->
+  <!-- Step 2: Barber Selection -->
   <div class="wizard-panel" id="wizard-panel-2">
+    <div class="wizard-panel-inner">
+      <h2 class="wizard-heading">Choose Your Barber</h2>
+      <p class="wizard-sub">Select your preferred master barber or let us assign the fastest available expert.</p>
+
+      <div class="barber-selection-grid">
+        <!-- Any Available Option -->
+        <div class="barber-select-card selected" onclick="selectBarber(this, '', 'Any Available Barber')">
+          <div class="barber-card-icon"><i class="fa-solid fa-bolt text-gold"></i></div>
+          <div class="barber-card-info">
+            <h4>Any Available Barber</h4>
+            <p>Fastest slot match for your chosen service</p>
+          </div>
+          <div class="barber-check-badge"><i class="fa-solid fa-check"></i></div>
+        </div>
+
+        {% for b in barbers %}
+        <div class="barber-select-card" onclick="selectBarber(this, '{{ b.id }}', '{{ b.name }}')">
+          <div class="barber-card-icon"><i class="fa-solid fa-{{ b.avatar_icon|default:'user-tie' }}"></i></div>
+          <div class="barber-card-info">
+            <h4>{{ b.name }} <span class="b-rating">★ {{ b.rating }}</span></h4>
+            <p class="b-role">{{ b.title }}</p>
+            <p class="b-spec">{{ b.specialties }}</p>
+          </div>
+          <div class="barber-check-badge"><i class="fa-solid fa-check"></i></div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <div class="wizard-nav">
+        <button class="btn-wizard-back" onclick="wizardGoTo(1)"><i class="fa-solid fa-arrow-left"></i> Back</button>
+        <button class="btn-wizard-next" onclick="wizardGoTo(3)">
+          Choose Date <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 3: Date -->
+  <div class="wizard-panel" id="wizard-panel-3">
     <div class="wizard-panel-inner">
       <h2 class="wizard-heading">Select Date</h2>
       <div class="date-strip-wrapper">
@@ -169,7 +209,7 @@
         <div class="date-strip" id="dateStrip">
           {% for d in available_dates %}
           <button
-            class="date-chip"
+            class="date-chip {% if forloop.first %}selected{% endif %}"
             data-date="{{ d|date:'Y-m-d' }}"
             onclick="selectDate(this)"
           >
@@ -182,16 +222,16 @@
         <button class="date-strip-arrow" id="dateArrowRight" onclick="scrollDates(1)"><i class="fa-solid fa-chevron-right"></i></button>
       </div>
       <div class="wizard-nav">
-        <button class="btn-wizard-back" onclick="wizardGoTo(1)"><i class="fa-solid fa-arrow-left"></i> Back</button>
-        <button class="btn-wizard-next" id="btnDateNext" disabled onclick="wizardGoTo(3)">
+        <button class="btn-wizard-back" onclick="wizardGoTo(2)"><i class="fa-solid fa-arrow-left"></i> Back</button>
+        <button class="btn-wizard-next" id="btnDateNext" onclick="wizardGoTo(4)">
           Choose Time <i class="fa-solid fa-arrow-right"></i>
         </button>
       </div>
     </div>
   </div>
 
-  <!-- Step 3: Time -->
-  <div class="wizard-panel" id="wizard-panel-3">
+  <!-- Step 4: Time -->
+  <div class="wizard-panel" id="wizard-panel-4">
     <div class="wizard-panel-inner">
       <h2 class="wizard-heading">Select Time</h2>
       <p class="wizard-sub" id="selectedDateLabel"></p>
@@ -202,16 +242,16 @@
         </div>
       </div>
       <div class="wizard-nav">
-        <button class="btn-wizard-back" onclick="wizardGoTo(2)"><i class="fa-solid fa-arrow-left"></i> Back</button>
-        <button class="btn-wizard-next" id="btnTimeNext" disabled onclick="wizardGoTo(4)">
+        <button class="btn-wizard-back" onclick="wizardGoTo(3)"><i class="fa-solid fa-arrow-left"></i> Back</button>
+        <button class="btn-wizard-next" id="btnTimeNext" disabled onclick="wizardGoTo(5)">
           Enter Details <i class="fa-solid fa-arrow-right"></i>
         </button>
       </div>
     </div>
   </div>
 
-  <!-- Step 4: Customer Details -->
-  <div class="wizard-panel" id="wizard-panel-4">
+  <!-- Step 5: Customer Details -->
+  <div class="wizard-panel" id="wizard-panel-5">
     <div class="wizard-panel-inner">
       <h2 class="wizard-heading">Your Details</h2>
       <form id="detailsForm" novalidate>
@@ -231,7 +271,7 @@
         </div>
       </form>
       <div class="wizard-nav">
-        <button class="btn-wizard-back" onclick="wizardGoTo(3)"><i class="fa-solid fa-arrow-left"></i> Back</button>
+        <button class="btn-wizard-back" onclick="wizardGoTo(4)"><i class="fa-solid fa-arrow-left"></i> Back</button>
         <button class="btn-wizard-next" onclick="goToReview()">
           Review Booking <i class="fa-solid fa-arrow-right"></i>
         </button>
@@ -239,14 +279,18 @@
     </div>
   </div>
 
-  <!-- Step 5: Review -->
-  <div class="wizard-panel" id="wizard-panel-5">
+  <!-- Step 6: Review -->
+  <div class="wizard-panel" id="wizard-panel-6">
     <div class="wizard-panel-inner">
       <h2 class="wizard-heading">Booking Summary</h2>
       <div class="summary-card">
         <div class="summary-row">
           <span class="summary-label">Service</span>
           <span class="summary-value" id="sum-service">—</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Barber</span>
+          <span class="summary-value" id="sum-barber">Any Available Barber</span>
         </div>
         <div class="summary-row">
           <span class="summary-label">Date</span>
@@ -276,7 +320,7 @@
       </div>
 
       <div class="wizard-nav">
-        <button class="btn-wizard-back" onclick="wizardGoTo(4)"><i class="fa-solid fa-arrow-left"></i> Back</button>
+        <button class="btn-wizard-back" onclick="wizardGoTo(5)"><i class="fa-solid fa-arrow-left"></i> Back</button>
         <button class="btn-confirm" id="btnConfirm" onclick="submitBooking()">
           <i class="fa-solid fa-lock"></i> Proceed to Payment
         </button>

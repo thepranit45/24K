@@ -28,6 +28,30 @@
             <div class="status-badge status-{{ booking.status|lower }}">{{ booking.status }}</div>
           </div>
 
+          <!-- Live Countdown Block -->
+          <div class="countdown-card" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border-radius: 14px; padding: 1.2rem; color: #fff; margin-bottom: 1.5rem; text-align: center; border: 1px solid #334155;">
+            <div style="font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #d4af37; margin-bottom: 0.6rem; display: flex; align-items: center; justify-content: center; gap: 0.4rem;">
+              <i class="fa-solid fa-clock-rotate-left"></i> Remaining Time for Scheduled Slot
+            </div>
+            <div id="bookingCountdown" style="display: flex; justify-content: center; gap: 0.75rem;">
+              <div style="background: rgba(255,255,255,0.08); padding: 0.5rem 0.8rem; border-radius: 8px; min-width: 60px;">
+                <span id="cd-hours" style="font-size: 1.5rem; font-weight: 800; color: #fff; display: block; line-height: 1;">00</span>
+                <span style="font-size: 0.65rem; color: #94a3b8; text-transform: uppercase;">Hours</span>
+              </div>
+              <div style="background: rgba(255,255,255,0.08); padding: 0.5rem 0.8rem; border-radius: 8px; min-width: 60px;">
+                <span id="cd-mins" style="font-size: 1.5rem; font-weight: 800; color: #fff; display: block; line-height: 1;">00</span>
+                <span style="font-size: 0.65rem; color: #94a3b8; text-transform: uppercase;">Mins</span>
+              </div>
+              <div style="background: rgba(255,255,255,0.08); padding: 0.5rem 0.8rem; border-radius: 8px; min-width: 60px;">
+                <span id="cd-secs" style="font-size: 1.5rem; font-weight: 800; color: #d4af37; display: block; line-height: 1;">00</span>
+                <span style="font-size: 0.65rem; color: #94a3b8; text-transform: uppercase;">Secs</span>
+              </div>
+            </div>
+            <div id="cd-status-msg" style="font-size: 0.85rem; color: #cbd5e1; margin-top: 0.6rem; font-weight: 500;">
+              Scheduled for {{ booking.booking_date|date:"D, d M Y" }} at {{ booking.booking_time|time:"g:i A" }}
+            </div>
+          </div>
+
           <div class="detail-grid">
             <div class="detail-item">
               <div class="detail-icon"><i class="fa-regular fa-calendar"></i></div>
@@ -48,6 +72,13 @@
               <div>
                 <div class="detail-label">Duration</div>
                 <div class="detail-value">{{ booking.service.duration }} minutes</div>
+              </div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-icon"><i class="fa-solid fa-user-tie"></i></div>
+              <div>
+                <div class="detail-label">Assigned Barber</div>
+                <div class="detail-value gold">{{ booking.barber.name|default:"Any Master Barber" }}</div>
               </div>
             </div>
             <div class="detail-item">
@@ -127,25 +158,40 @@
         </div>
       </div>
 
-      <!-- Right: Shop info -->
+      <!-- Right: Shop info & Map -->
       <div class="detail-sidebar" data-animate="fade-up" data-delay="100">
         <div class="sidebar-card">
           <div class="sidebar-card-icon"><i class="fa-solid fa-store"></i></div>
-          <h3>The Gentleman's Cut</h3>
+          <h3>24 K Barbershop</h3>
           <div class="sidebar-info-list">
             <div class="sidebar-info-item">
               <i class="fa-solid fa-location-dot"></i>
-              <span>42, MG Road, Colaba<br>Mumbai – 400 001</span>
+              <span>SHOP R4, SATYASHIV COMERCIAL PARK, MEDICOVER HOSPITAL ROAD, ShreeRam Nagar, Gunjalwadi, Maharashtra 422605</span>
             </div>
             <div class="sidebar-info-item">
               <i class="fa-solid fa-phone"></i>
-              <a href="tel:+919876543210">+91 98765 43210</a>
+              <a href="tel:+919209597436">+91 9209597436</a>
             </div>
             <div class="sidebar-info-item">
               <i class="fa-regular fa-clock"></i>
-              <span>Mon–Sat: 10 AM – 9 PM<br>Sun: 10 AM – 8 PM</span>
+              <span>Tue–Sun: 9 AM – 8 PM</span>
             </div>
           </div>
+          
+          <!-- Direction Map Card -->
+          <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #eaeaea;">
+            <a href="https://maps.app.goo.gl/61eA3wFErnLmcgUD9" target="_blank" rel="noopener noreferrer" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem; text-decoration: none; padding: 0.8rem; border-radius: 10px; font-weight: 700; background: #059669; color: #fff; box-shadow: 0 4px 15px rgba(5,150,105,0.2);">
+              <i class="fa-solid fa-diamond-turn-right"></i> Get Directions
+            </a>
+            <div style="width: 100%; height: 180px; border-radius: 12px; overflow: hidden; margin-top: 1rem; border: 1px solid #e5e7eb;">
+              <iframe
+                src="https://maps.google.com/maps?q=SHOP%20R4,%20SATYASHIV%20COMERCIAL%20PARK,%20MEDICOVER%20HOSPITAL%20ROAD,%20ShreeRam%20Nagar,%20Gunjalwadi,%20Maharashtra%20422605&t=&z=16&ie=UTF8&iwloc=&output=embed"
+                width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy">
+              </iframe>
+            </div>
+          </div>
+        </div>
+      </div>
           <div class="sidebar-hours">
             {% for bh in business_hours %}
             <div class="sidebar-hour-row {% if bh.is_closed %}closed{% endif %}">
@@ -195,5 +241,41 @@ function closeCancelModal() {
   document.getElementById('cancelModalBackdrop').style.display = 'none';
   document.body.classList.remove('no-scroll');
 }
+
+(function() {
+  const targetDateStr = "{{ booking.booking_date|date:'Y-m-d' }}T{{ booking.booking_time|time:'H:i:s' }}";
+  const targetDate = new Date(targetDateStr).getTime();
+
+  function updateCountdown() {
+    const now = new Date().getTime();
+    const distance = targetDate - now;
+
+    const hrsEl = document.getElementById('cd-hours');
+    const minsEl = document.getElementById('cd-mins');
+    const secsEl = document.getElementById('cd-secs');
+    const msgEl = document.getElementById('cd-status-msg');
+
+    if (!hrsEl || !minsEl || !secsEl) return;
+
+    if (isNaN(targetDate) || distance < 0) {
+      hrsEl.textContent = "00";
+      minsEl.textContent = "00";
+      secsEl.textContent = "00";
+      if (msgEl) msgEl.innerHTML = '<span style="color:#10b981; font-weight:700;"><i class="fa-solid fa-circle-check"></i> Appointment slot is active or completed!</span>';
+      return;
+    }
+
+    const hours = Math.floor(distance / (1000 * 60 * 60));
+    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+    hrsEl.textContent = String(hours).padStart(2, '0');
+    minsEl.textContent = String(minutes).padStart(2, '0');
+    secsEl.textContent = String(seconds).padStart(2, '0');
+  }
+
+  updateCountdown();
+  setInterval(updateCountdown, 1000);
+})();
 </script>
 {% endblock %}

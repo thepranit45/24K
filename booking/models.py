@@ -72,6 +72,30 @@ class BusinessHour(models.Model):
         return f"{self.get_day_display()} — {self.opening_time.strftime('%I:%M %p')} to {self.closing_time.strftime('%I:%M %p')}"
 
 
+class Barber(models.Model):
+    name = models.CharField(max_length=100)
+    title = models.CharField(max_length=100, default='Master Barber')
+    bio = models.TextField(blank=True, default='Expert in precision cuts, fades, and traditional hot towel grooming.')
+    avatar_icon = models.CharField(
+        max_length=50,
+        default='user-tie',
+        help_text="Font Awesome icon name (e.g. user-tie, user-ninja, user-doctor, crown)"
+    )
+    specialties = models.CharField(max_length=200, default='Skin Fade, Beard Styling, Hair Design')
+    rating = models.DecimalField(max_digits=3, decimal_places=1, default=4.9)
+    experience_years = models.PositiveIntegerField(default=5)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['name']
+        verbose_name = 'Barber'
+        verbose_name_plural = 'Barbers'
+
+    def __str__(self):
+        return f"{self.name} ({self.title})"
+
+
 class Booking(models.Model):
     STATUS_PENDING = 'PENDING'
     STATUS_CONFIRMED = 'CONFIRMED'
@@ -88,6 +112,7 @@ class Booking(models.Model):
     booking_id = models.CharField(max_length=20, unique=True, editable=False)
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='bookings')
     service = models.ForeignKey(Service, on_delete=models.PROTECT, related_name='bookings')
+    barber = models.ForeignKey(Barber, on_delete=models.SET_NULL, null=True, blank=True, related_name='bookings')
 
     booking_date = models.DateField()
     booking_time = models.TimeField()

@@ -1,73 +1,438 @@
 {% extends 'base.html' %}
-{% load static %}
 
-{% block title %}Booking Confirmed | The Gentleman's Cut{% endblock %}
+{% block title %}Booking Confirmed | 24 K Barbershop{% endblock %}
+
+{% block extra_css %}
+<style>
+  .receipt-experience {
+    --thermal-navy: #0a1628;
+    --thermal-navy-light: #122240;
+    --thermal-navy-lighter: #1a3055;
+    --thermal-gold: #c9a227;
+    --thermal-gold-bright: #e8c84a;
+    --thermal-paper: #fcfbf7;
+    --thermal-emerald: #10b981;
+    --thermal-emerald-dark: #059669;
+    --thermal-ink: #111111;
+    --thermal-muted: #727272;
+    --thermal-mono: "Courier New", Courier, monospace;
+    --thermal-ease: cubic-bezier(0.22, 1, 0.36, 1);
+    --thermal-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+    align-items: flex-start;
+    background: #ffffff;
+    display: flex;
+    justify-content: center;
+    min-height: calc(100vh - 78px);
+    overflow: hidden;
+    padding: 2.5rem 1rem 5rem;
+    position: relative;
+  }
+
+  .receipt-experience::before {
+    background: rgba(232, 200, 74, 0.06);
+    border-radius: 50%;
+    content: "";
+    filter: blur(88px);
+    height: 310px;
+    left: 50%;
+    pointer-events: none;
+    position: absolute;
+    top: 16%;
+    transform: translateX(-50%);
+    width: 310px;
+  }
+
+  .receipt-particles { inset: 0; overflow: hidden; pointer-events: none; position: absolute; }
+  .receipt-particle {
+    animation: thermal-float linear infinite;
+    background: var(--thermal-gold-bright);
+    border-radius: 50%;
+    box-shadow: 0 0 10px var(--thermal-gold-bright), 0 0 20px var(--thermal-gold);
+    opacity: 0;
+    position: absolute;
+  }
+
+  .thermal-screen {
+    max-width: 720px;
+    position: relative;
+    width: 100%;
+    z-index: 1;
+  }
+
+  .thermal-toolbar { align-items: center; display: flex; justify-content: space-between; margin: 0 4px 0.8rem; }
+  .thermal-live { align-items: center; color: #64748b; display: inline-flex; font-size: 0.68rem; font-weight: 800; gap: 0.45rem; letter-spacing: 0.12em; text-transform: uppercase; }
+  .thermal-live-dot { animation: thermal-live-pulse 1.4s ease-in-out infinite; background: #34d399; border-radius: 50%; box-shadow: 0 0 0 4px rgba(52, 211, 153, 0.1), 0 0 12px rgba(52, 211, 153, 0.85); height: 7px; width: 7px; }
+  .thermal-replay { background: #ffffff; border: 1px solid #dbe3ee; border-radius: 999px; box-shadow: 0 3px 9px rgba(15,23,42,0.06); color: var(--thermal-navy); cursor: pointer; font: 700 0.72rem var(--font-body, Inter, sans-serif); padding: 0.48rem 0.8rem; transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease; }
+  .thermal-replay:hover { background: #f8fafc; border-color: rgba(201,162,39,0.6); transform: translateY(-2px); }
+
+  .thermal-printer {
+    background: linear-gradient(160deg, #102745 0%, #071322 54%, #030914 100%);
+    border: 1px solid #2c4b73;
+    border-bottom: 0;
+    border-radius: 22px 22px 10px 10px;
+    box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.4), inset 0 2px 0 rgba(255,255,255,0.11);
+    min-height: 190px;
+    padding: 1.25rem 1.6rem 1rem;
+    position: relative;
+  }
+  .thermal-printer.is-printing { animation: printer-vibration 0.15s linear infinite; }
+  .thermal-printer.is-cutting { animation: printer-cut 0.55s var(--thermal-bounce) forwards; }
+  .printer-highlight { background: linear-gradient(90deg, transparent, rgba(255,255,255,0.09), transparent); height: 1px; left: 18px; position: absolute; right: 18px; top: 10px; }
+  .printer-top-row { align-items: center; display: flex; justify-content: space-between; margin-bottom: 1rem; }
+  .printer-brand { align-items: center; display: flex; gap: 0.65rem; }
+  .printer-brand-icon { align-items: center; background: linear-gradient(135deg, var(--thermal-gold), var(--thermal-gold-bright)); border-radius: 7px; box-shadow: 0 2px 8px rgba(201, 162, 39, 0.45), inset 0 1px 2px rgba(255,255,255,0.4); color: var(--thermal-navy); display: flex; font-size: 0.95rem; height: 30px; justify-content: center; width: 30px; }
+  .printer-brand-text { color: rgba(255,255,255,0.62); font-size: 0.72rem; font-weight: 800; letter-spacing: 0.19em; text-transform: uppercase; }
+  .printer-brand-text span { color: var(--thermal-gold-bright); }
+  .printer-leds { background: rgba(0,0,0,0.38); border: 1px solid rgba(255,255,255,0.06); border-radius: 999px; display: flex; gap: 0.45rem; padding: 0.38rem 0.62rem; }
+  .printer-led { animation: printer-led-blink 1s ease-in-out infinite; border-radius: 50%; height: 8px; width: 8px; }
+  .printer-led-green { background: #22c55e; box-shadow: 0 0 8px #22c55e, 0 0 12px #22c55e; }
+  .printer-led-gold { animation-delay: 0.25s; background: #eab308; box-shadow: 0 0 8px #eab308, 0 0 12px #eab308; }
+  .thermal-printer.is-complete .printer-led-green { animation: none; opacity: 1; }
+  .thermal-printer.is-complete .printer-led-gold { animation: none; opacity: 0.28; }
+
+  .printer-display { align-items: center; background: linear-gradient(180deg, #020811, #081321); border: 1px solid #1d385c; border-radius: 8px; box-shadow: inset 0 2px 8px rgba(0,0,0,0.82); display: flex; justify-content: space-between; min-height: 48px; padding: 0.55rem 0.75rem; }
+  .printer-display-left { align-items: center; display: flex; gap: 0.55rem; }
+  .printer-display-icon { color: var(--thermal-gold-bright); font-size: 1.1rem; }
+  .printer-display-text { color: #f9fafb; display: flex; flex-direction: column; font-family: var(--thermal-mono); font-size: 0.75rem; letter-spacing: 0.08em; }
+  .printer-display-text small { color: #99aac1; font-family: var(--font-body, Inter, sans-serif); font-size: 0.54rem; font-weight: 700; letter-spacing: 0.12em; margin-top: 0.1rem; }
+  .thermal-printer.is-complete .printer-display-text { color: #6ee7b7; }
+  .printer-percent { color: var(--thermal-gold-bright); font-family: var(--thermal-mono); font-size: 0.95rem; font-weight: 800; }
+  .printer-progress { background: rgba(0,0,0,0.55); border: 1px solid rgba(255,255,255,0.05); border-radius: 999px; height: 5px; margin: 0.75rem 0 0.65rem; overflow: hidden; }
+  .printer-progress-bar { background: linear-gradient(90deg, var(--thermal-gold), var(--thermal-gold-bright), #fff); border-radius: inherit; box-shadow: 0 0 12px rgba(232, 200, 74, 0.85); height: 100%; transition: width 0.08s linear; width: 0; }
+  .printer-feed { background: #081222; border: 1px solid rgba(255,255,255,0.05); border-bottom: 0; border-radius: 5px 5px 0 0; display: flex; height: 12px; justify-content: space-evenly; padding: 0 1rem; }
+  .printer-tooth { animation: feed-tooth 0.32s infinite alternate; background: #1a3055; border-radius: 2px; height: 6px; width: 8px; }
+  .printer-tooth:nth-child(even) { animation-delay: 0.16s; }
+  .thermal-printer.is-complete .printer-tooth { animation: none; }
+  .printer-slot { background: #020711; border-bottom: 1px solid rgba(255,255,255,0.13); border-radius: 4px; box-shadow: inset 0 4px 8px rgba(0,0,0,0.95); height: 22px; overflow: hidden; position: relative; }
+  .printer-thermal-glow { background: linear-gradient(90deg, transparent, rgba(232,200,74,0.72), transparent); box-shadow: 0 0 13px rgba(232,200,74,0.9); height: 2px; left: 8%; position: absolute; right: 8%; top: 4px; }
+  .printer-roller { background: repeating-linear-gradient(90deg, #101d30 0 5px, #1b2e4d 5px 7px); border-radius: 999px; bottom: 3px; height: 5px; left: 7%; position: absolute; right: 7%; }
+  .printer-cutter { background: rgba(255,255,255,0.2); height: 2px; left: 0; opacity: 0; position: absolute; top: 50%; transform: scaleX(0); width: 100%; }
+  .thermal-printer.is-cutting .printer-cutter { animation: thermal-cutter 0.35s cubic-bezier(0.8,0,0.2,1) forwards; }
+  .printer-bottom-detail { align-items: center; display: flex; justify-content: space-between; padding: 0.65rem 0.5rem 0; }
+  .printer-screw { background: radial-gradient(circle at 35% 30%, #8390a0 0 18%, #202a36 35%, #060a10 70%); border-radius: 50%; box-shadow: 0 1px 1px #000; height: 5px; width: 5px; }
+  .printer-speaker { display: flex; gap: 4px; opacity: 0.48; }
+  .printer-speaker i { background: #000; border-radius: 50%; box-shadow: inset 0 1px 1px rgba(255,255,255,.18); display: block; height: 3px; width: 3px; }
+
+  .thermal-preview-shell { margin: 0 auto; max-height: 0; overflow: hidden; transition: max-height 0.15s linear; width: min(350px, 76%); }
+  .thermal-printer.is-printing + .thermal-preview-shell { animation: preview-expand 3.5s var(--thermal-ease) forwards; }
+  .thermal-preview { background: var(--thermal-paper); box-shadow: 0 10px 20px rgba(0,0,0,0.5); padding: 0.75rem 0 0.9rem; transform: translateY(-100%); }
+  .thermal-printer.is-printing + .thermal-preview-shell .thermal-preview { animation: preview-slide 3.5s cubic-bezier(.35,.05,.35,1) forwards; }
+  .preview-line { color: #202020; font-family: var(--thermal-mono); font-size: 0.62rem; font-weight: 700; line-height: 1.45; opacity: 0; overflow: hidden; padding: 0.1rem 0.75rem; text-overflow: ellipsis; white-space: nowrap; }
+  .preview-line.is-revealed { animation: preview-text 0.14s linear forwards; }
+
+  .thermal-receipt-stage { margin: 0 auto; max-height: 0; overflow: hidden; width: min(510px, 94%); }
+  .thermal-receipt-stage.is-visible { animation: receipt-stage-expand 0.8s var(--thermal-ease) forwards; }
+  .thermal-receipt { background: var(--thermal-paper); box-shadow: 0 24px 60px rgba(0,0,0,0.42), 0 4px 14px rgba(0,0,0,0.18); opacity: 0; position: relative; transform: translateY(-42px) scale(0.98); }
+  .thermal-receipt::before { background: radial-gradient(circle at 6px -1px, transparent 6px, var(--thermal-paper) 6.5px) 0 0 / 12px 12px repeat-x; content: ""; height: 10px; left: 0; position: absolute; right: 0; top: -1px; z-index: 2; }
+  .thermal-receipt::after { background: linear-gradient(180deg, rgba(200,180,140,0.05), transparent 23%); content: ""; inset: 0; pointer-events: none; position: absolute; }
+  .thermal-receipt-stage.is-visible .thermal-receipt { animation: receipt-drop 0.8s var(--thermal-bounce) forwards, receipt-sheen 1.2s ease 0.25s both; }
+  .receipt-content { padding: 2.15rem 1.5rem 1.5rem; position: relative; z-index: 1; }
+  .receipt-header { margin-bottom: 1.5rem; text-align: center; }
+  .receipt-check { align-items: center; background: linear-gradient(135deg, var(--thermal-emerald), var(--thermal-emerald-dark)); border-radius: 50%; box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35); color: #fff; display: inline-flex; font-size: 1.45rem; height: 56px; justify-content: center; transform: scale(0); width: 56px; }
+  .thermal-receipt-stage.is-visible .receipt-check { animation: receipt-check-pop 0.6s var(--thermal-bounce) 0.3s forwards; }
+  .receipt-title { color: var(--thermal-navy); font-size: 1.55rem; font-weight: 800; letter-spacing: -0.03em; margin: 1rem 0 0.3rem; }
+  .receipt-subtitle { color: #4a4a4a; font-size: 0.88rem; font-weight: 500; margin: 0; }
+
+  .receipt-countdown { align-items: center; background: linear-gradient(135deg, rgba(10,22,40,0.035), rgba(201,162,39,0.09)); border: 1px solid rgba(201,162,39,0.24); border-radius: 12px; display: flex; justify-content: space-between; margin-bottom: 1.25rem; padding: 1rem; }
+  .receipt-countdown-label { color: #666; font-size: 0.63rem; font-weight: 800; letter-spacing: 0.12em; margin-bottom: 0.28rem; text-transform: uppercase; }
+  .receipt-countdown-values { color: var(--thermal-navy); font-family: var(--thermal-mono); font-size: clamp(1.15rem, 5vw, 1.55rem); font-weight: 800; letter-spacing: -0.06em; }
+  .receipt-countdown-values small { color: #8a8a8a; font-family: var(--font-body, Inter, sans-serif); font-size: 0.65rem; letter-spacing: 0; margin-right: 0.12rem; }
+  .receipt-countdown-icon { color: var(--thermal-gold); font-size: 1.7rem; opacity: 0.85; }
+
+  .receipt-details { display: flex; flex-direction: column; gap: 0; }
+  .receipt-detail { align-items: flex-start; border-bottom: 1px solid rgba(0,0,0,0.055); display: flex; gap: 0.85rem; padding: 0.75rem 0; }
+  .receipt-detail:last-child { border-bottom: 0; }
+  .receipt-detail-icon { align-items: center; border-radius: 10px; display: inline-flex; flex: 0 0 36px; font-size: 0.95rem; height: 36px; justify-content: center; }
+  .receipt-detail-icon.navy { background: rgba(10,22,40,0.07); color: var(--thermal-navy); }
+  .receipt-detail-icon.gold { background: rgba(201,162,39,0.13); color: var(--thermal-gold); }
+  .receipt-detail-icon.emerald { background: rgba(16,185,129,0.12); color: var(--thermal-emerald-dark); }
+  .receipt-detail-label { color: #8a8a8a; font-size: 0.62rem; font-weight: 800; letter-spacing: 0.1em; margin-bottom: 0.2rem; text-transform: uppercase; }
+  .receipt-detail-value { color: var(--thermal-ink); font-size: 0.88rem; font-weight: 800; line-height: 1.38; }
+  .receipt-detail-sub { color: #626262; font-size: 0.78rem; line-height: 1.35; margin-top: 0.12rem; }
+  .receipt-divider { border: 0; border-top: 2px dashed #d4c9a8; margin: 1.15rem 0; position: relative; }
+  .receipt-divider::after { background: var(--thermal-paper); color: #b5a987; content: "\f0c4"; font-family: "Font Awesome 6 Free"; font-size: 0.8rem; font-weight: 900; left: 50%; padding: 0 0.75rem; position: absolute; top: 50%; transform: translate(-50%,-50%); }
+  .receipt-id-row { align-items: center; background: #f4f3ec; border-radius: 8px; display: flex; justify-content: space-between; margin-bottom: 0.5rem; padding: 0.75rem 0.85rem; }
+  .receipt-id-label { color: #5f5f5f; font-size: 0.62rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; }
+  .receipt-id-value { color: var(--thermal-navy); font-family: var(--thermal-mono); font-size: 0.76rem; font-weight: 800; overflow-wrap: anywhere; text-align: right; }
+  .receipt-amount { padding: 1.2rem 0 0.75rem; text-align: center; }
+  .receipt-amount-label { color: #626262; font-size: 0.67rem; font-weight: 800; letter-spacing: 0.13em; margin-bottom: 0.28rem; text-transform: uppercase; }
+  .receipt-amount-value { color: var(--thermal-navy); font-size: 2.4rem; font-weight: 800; letter-spacing: -0.06em; }
+  .receipt-amount-value span { color: var(--thermal-gold); font-size: 1.35rem; vertical-align: super; }
+
+  .receipt-map-link { background: linear-gradient(135deg, #dfe5dd, #f1eee1); border: 1px solid rgba(0,0,0,0.08); border-radius: 12px; color: var(--thermal-navy); display: block; margin-bottom: 1rem; min-height: 102px; overflow: hidden; position: relative; text-decoration: none; }
+  .receipt-map-link::before { background-image: linear-gradient(rgba(255,255,255,0.44) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.44) 1px, transparent 1px); background-size: 18px 18px; content: ""; inset: 0; position: absolute; }
+  .receipt-map-link::after { background: rgba(10,22,40,0.88); border-radius: 999px; bottom: 9px; color: #fff; content: "Get directions"; font-size: 0.58rem; font-weight: 800; letter-spacing: 0.06em; padding: 0.32rem 0.55rem; position: absolute; right: 9px; text-transform: uppercase; }
+  .receipt-map-road { background: rgba(255,255,255,0.8); box-shadow: 0 0 0 1px rgba(0,0,0,0.05); position: absolute; }
+  .receipt-map-road.horizontal { height: 13px; left: -5%; right: -5%; top: 52%; transform: rotate(-10deg); }
+  .receipt-map-road.vertical { bottom: -5%; left: 50%; top: -5%; transform: rotate(21deg); width: 12px; }
+  .receipt-map-pin { align-items: center; background: var(--thermal-emerald-dark); border: 3px solid rgba(255,255,255,0.88); border-radius: 50% 50% 50% 0; box-shadow: 0 4px 11px rgba(5,150,105,0.35); color: #fff; display: flex; font-size: 0.75rem; height: 30px; justify-content: center; left: 49%; position: absolute; top: 37%; transform: rotate(-45deg); width: 30px; z-index: 1; }
+  .receipt-map-pin i { transform: rotate(45deg); }
+  .receipt-reminder { align-items: flex-start; background: #fff9d9; border: 1px solid #f1df9b; border-radius: 10px; color: #795c10; display: flex; font-size: 0.76rem; gap: 0.55rem; line-height: 1.45; margin: 0 0 1rem; padding: 0.75rem; }
+  .receipt-reminder i { color: #c89111; margin-top: 0.08rem; }
+  .receipt-reminder strong { color: #5c4405; }
+  .receipt-meta { display: flex; flex-wrap: wrap; gap: 0.4rem; justify-content: center; margin-bottom: 1rem; }
+  .receipt-meta span { background: #f3f1e9; border: 1px solid rgba(10,22,40,.06); border-radius: 999px; color: #62625c; font-size: 0.55rem; font-weight: 800; letter-spacing: 0.04em; padding: 0.36rem 0.48rem; text-transform: uppercase; }
+  .receipt-meta span:first-child i { color: var(--thermal-emerald); }
+
+  .receipt-quick-actions { display: grid; gap: 0.5rem; grid-template-columns: repeat(3, 1fr); margin-bottom: 1.15rem; }
+  .receipt-quick-action { align-items: center; background: linear-gradient(145deg, #fbfaf5, #f2f0e7); border: 1px solid rgba(10,22,40,.08); border-radius: 11px; color: var(--thermal-navy); cursor: pointer; display: flex; font: inherit; gap: 0.35rem; justify-content: center; min-height: 48px; padding: 0.4rem; transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease; }
+  .receipt-quick-action:hover { border-color: rgba(201,162,39,.45); box-shadow: 0 8px 18px rgba(10,22,40,.09); transform: translateY(-2px); }
+  .receipt-quick-action i { background: rgba(201,162,39,.14); border-radius: 7px; color: var(--thermal-gold); display: inline-grid; font-size: 0.72rem; height: 25px; place-items: center; width: 25px; }
+  .receipt-quick-action b, .receipt-quick-action small { display: block; text-align: left; }
+  .receipt-quick-action b { font-size: 0.59rem; }
+  .receipt-quick-action small { color: #898989; font-size: 0.49rem; margin-top: 0.08rem; max-width: 42px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .receipt-actions { display: flex; gap: 0.55rem; margin-top: 0.25rem; }
+  .receipt-action { align-items: center; border-radius: 9px; display: inline-flex; flex: 1; font-size: 0.7rem; font-weight: 800; gap: 0.35rem; justify-content: center; min-height: 40px; text-decoration: none; transition: transform 0.2s ease; }
+  .receipt-action:hover { transform: translateY(-2px); }
+  .receipt-action.primary { background: var(--thermal-navy); color: #fff; }
+  .receipt-action.gold { background: linear-gradient(135deg, var(--thermal-gold), var(--thermal-gold-bright)); color: #201b08; }
+  .receipt-footer { color: #848484; font-size: 0.67rem; line-height: 1.4; margin-top: 1.25rem; text-align: center; }
+  .receipt-toast { background: rgba(6,13,26,.94); border: 1px solid rgba(232,200,74,.28); border-radius: 999px; bottom: 24px; box-shadow: 0 14px 35px rgba(0,0,0,.35); color: #fff; font-size: 0.7rem; font-weight: 700; left: 50%; opacity: 0; padding: 0.68rem 0.9rem; pointer-events: none; position: fixed; transform: translate(-50%,20px); transition: opacity .3s ease, transform .3s ease; z-index: 20; }
+  .receipt-toast.is-visible { opacity: 1; transform: translate(-50%,0); }
+
+  @keyframes thermal-float { 0% { opacity: 0; transform: translateY(105vh) scale(.5); } 20% { opacity: .55; } 85% { opacity: .15; } 100% { opacity: 0; transform: translate(40px,-12vh) scale(.5); } }
+  @keyframes thermal-live-pulse { 50% { opacity: .55; transform: scale(.72); } }
+  @keyframes printer-vibration { 50% { transform: translateY(-1px) translateX(.5px); } }
+  @keyframes printer-cut { 18% { transform: translateY(-3px); } 38% { transform: translateY(2px); } 60% { transform: translateY(-1px); } }
+  @keyframes printer-led-blink { 50% { opacity: .2; } }
+  @keyframes feed-tooth { 0% { background: #1a3055; transform: translateY(1px); } 100% { background: #2a4a7a; transform: translateY(-2px); } }
+  @keyframes thermal-cutter { 0% { opacity: 1; transform: scaleX(0); transform-origin: left; } 48% { opacity: 1; transform: scaleX(1); transform-origin: left; } 52% { transform-origin: right; } 100% { opacity: 0; transform: scaleX(0); transform-origin: right; } }
+  @keyframes preview-expand { 0% { max-height: 0; } 100% { max-height: 290px; } }
+  @keyframes preview-slide { 0% { opacity: 1; transform: translateY(-100%) scaleX(.985); } 100% { opacity: 1; transform: translateY(0) scaleX(1); } }
+  @keyframes preview-text { from { border-right: 2px solid #4a4a4a; opacity: 0; } to { border-right-color: transparent; opacity: 1; } }
+  @keyframes receipt-stage-expand { from { max-height: 0; } to { max-height: 1850px; } }
+  @keyframes receipt-drop { 0% { opacity: 1; transform: translateY(-42px) scale(.98); } 42% { transform: translateY(9px) rotate(1deg); } 70% { transform: translateY(-2px) rotate(-.5deg); } 100% { opacity: 1; transform: translateY(0) rotate(0); } }
+  @keyframes receipt-check-pop { 0% { transform: scale(0); } 70% { transform: scale(1.15); } 100% { transform: scale(1); } }
+  @keyframes receipt-sheen { 50% { box-shadow: 0 24px 70px rgba(0,0,0,.46), 0 0 35px rgba(232,200,74,.18); } }
+
+  @media (max-width: 560px) {
+    .receipt-experience { padding: 1.6rem 0.75rem 4rem; }
+    .thermal-printer { border-radius: 17px 17px 8px 8px; min-height: 178px; padding: 1rem; }
+    .printer-brand-text { font-size: 0.59rem; letter-spacing: 0.12em; }
+    .receipt-content { padding: 2rem 1rem 1.15rem; }
+    .receipt-title { font-size: 1.35rem; }
+    .receipt-quick-actions { gap: 0.35rem; }
+    .receipt-quick-action { flex-direction: column; gap: 0.18rem; }
+    .receipt-quick-action small { display: none; }
+    .receipt-actions { flex-direction: column; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .receipt-experience *, .receipt-experience *::before, .receipt-experience *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    .thermal-preview-shell { display: none; }
+    .thermal-receipt-stage { max-height: 1850px; }
+    .thermal-receipt { opacity: 1; transform: none; }
+  }
+
+  @media print {
+    .navbar, .footer, .mobile-bottom-nav, .receipt-particles, .receipt-experience::before, .thermal-toolbar, .thermal-printer, .thermal-preview-shell, .receipt-quick-actions, .receipt-meta, .receipt-toast { display: none !important; }
+    .receipt-experience { background: #fff; display: block; min-height: 0; padding: 0; }
+    .thermal-screen, .thermal-receipt-stage { margin: 0; max-width: none; max-height: none !important; overflow: visible; width: 100%; }
+    .thermal-receipt { box-shadow: none; opacity: 1; transform: none; }
+    .receipt-map-link, .receipt-actions { display: none; }
+  }
+</style>
+{% endblock %}
 
 {% block content %}
-<section class="section confirm-section">
-  <div class="container">
-    <div class="confirm-card" data-animate="fade-up">
-      <!-- Animated checkmark -->
-      <div class="confirm-check-wrap">
-        <div class="confirm-check">
-          <svg viewBox="0 0 52 52" class="confirm-svg">
-            <circle class="confirm-circle" cx="26" cy="26" r="25" fill="none"/>
-            <path class="confirm-tick" fill="none" d="M14 27l7 7 16-16"/>
-          </svg>
-        </div>
+<section class="receipt-experience" aria-label="Booking receipt printing experience">
+  <div class="receipt-particles" id="receiptParticles" aria-hidden="true"></div>
+  <div class="thermal-screen">
+    <div class="thermal-toolbar">
+      <span class="thermal-live"><span class="thermal-live-dot"></span> Live receipt</span>
+      <button type="button" class="thermal-replay" id="replayReceipt"><i class="fa-solid fa-rotate-right"></i> Replay</button>
+    </div>
+
+    <div class="thermal-printer is-printing" id="thermalPrinter">
+      <div class="printer-highlight"></div>
+      <div class="printer-top-row">
+        <div class="printer-brand"><span class="printer-brand-icon"><i class="fa-solid fa-scissors"></i></span><span class="printer-brand-text">24 K <span>Thermal</span></span></div>
+        <div class="printer-leds" aria-label="Printer status"><i class="printer-led printer-led-green"></i><i class="printer-led printer-led-gold"></i></div>
       </div>
-
-      <h1 class="confirm-title">Booking Confirmed!</h1>
-      <p class="confirm-subtitle">Your appointment has been successfully booked and confirmed.</p>
-
-      <div class="confirm-details">
-        <div class="confirm-service">{{ booking.service.name }}</div>
-
-        <div class="confirm-meta">
-          <div class="confirm-meta-item">
-            <i class="fa-regular fa-calendar"></i>
-            <span>{{ booking.booking_date|date:"d F Y" }}</span>
-          </div>
-          <div class="confirm-meta-item">
-            <i class="fa-regular fa-clock"></i>
-            <span>{{ booking.booking_time|time:"g:i A" }}</span>
-          </div>
-          <div class="confirm-meta-item">
-            <i class="fa-regular fa-hourglass"></i>
-            <span>{{ booking.service.duration }} minutes</span>
-          </div>
-        </div>
-
-        <div class="confirm-id-row">
-          <span class="confirm-label">Booking ID</span>
-          <span class="confirm-id">{{ booking.booking_id }}</span>
-        </div>
-        <div class="confirm-id-row">
-          <span class="confirm-label">Amount Paid</span>
-          <span class="confirm-id gold">₹{{ booking.amount|floatformat:0 }}</span>
-        </div>
-        {% if booking.payment %}
-        <div class="confirm-id-row">
-          <span class="confirm-label">Transaction</span>
-          <span class="confirm-id mono">{{ booking.payment.transaction_id|default:"—" }}</span>
-        </div>
-        {% endif %}
+      <div class="printer-display">
+        <div class="printer-display-left"><i class="fa-solid fa-receipt printer-display-icon"></i><span class="printer-display-text" id="printerStatus"><span>PRINTING</span><small>RECEIPT IN PROGRESS</small></span></div>
+        <span class="printer-percent"><b id="printPercent">0</b>%</span>
       </div>
+      <div class="printer-progress"><div class="printer-progress-bar" id="printerProgress"></div></div>
+      <div class="printer-feed" aria-hidden="true"><i class="printer-tooth"></i><i class="printer-tooth"></i><i class="printer-tooth"></i><i class="printer-tooth"></i><i class="printer-tooth"></i><i class="printer-tooth"></i><i class="printer-tooth"></i><i class="printer-tooth"></i></div>
+      <div class="printer-slot" aria-hidden="true"><i class="printer-thermal-glow"></i><i class="printer-roller"></i><i class="printer-cutter"></i></div>
+      <div class="printer-bottom-detail" aria-hidden="true"><i class="printer-screw"></i><span class="printer-speaker"><i></i><i></i><i></i><i></i><i></i><i></i></span><i class="printer-screw"></i></div>
+    </div>
 
-      <div class="confirm-reminder">
-        <i class="fa-solid fa-bell"></i>
-        Please arrive 5 minutes before your appointment. Bring this confirmation ID.
-      </div>
-
-      <div class="confirm-actions">
-        <a href="{% url 'booking_list' %}" class="btn-gold">
-          <i class="fa-solid fa-calendar-check"></i> View My Bookings
-        </a>
-        <a href="{% url 'home' %}" class="btn-ghost">
-          <i class="fa-solid fa-house"></i> Back to Home
-        </a>
+    <div class="thermal-preview-shell">
+      <div class="thermal-preview" id="receiptPreview">
+        <p class="preview-line">24 K BARBERSHOP</p>
+        <p class="preview-line">BOOKING CONFIRMED</p>
+        <p class="preview-line">{{ booking.service.name }}</p>
+        <p class="preview-line">{{ booking.booking_date|date:"D, d M Y" }} · {{ booking.booking_time|time:"g:i A" }}</p>
+        <p class="preview-line">Booking: {{ booking.booking_id }}</p>
+        <p class="preview-line">Paid: &#8377;{{ booking.amount|floatformat:0 }}</p>
       </div>
     </div>
+
+    <div class="thermal-receipt-stage" id="receiptStage">
+      <article class="thermal-receipt" aria-label="Booking receipt">
+        <div class="receipt-content">
+          <header class="receipt-header">
+            <span class="receipt-check"><i class="fa-solid fa-check"></i></span>
+            <h1 class="receipt-title">Booking Confirmed</h1>
+            <p class="receipt-subtitle">Your appointment is locked in.</p>
+          </header>
+
+          <section class="receipt-countdown" aria-label="Time remaining until appointment">
+            <div><p class="receipt-countdown-label">Appointment in</p><p class="receipt-countdown-values"><span id="receiptDays">00</span><small>d</small> <span id="receiptHours">00</span><small>h</small> <span id="receiptMinutes">00</span><small>m</small> <span id="receiptSeconds">00</span><small>s</small></p></div>
+            <i class="fa-regular fa-hourglass-half receipt-countdown-icon"></i>
+          </section>
+
+          <section class="receipt-details" aria-label="Appointment details">
+            <div class="receipt-detail"><span class="receipt-detail-icon navy"><i class="fa-solid fa-scissors"></i></span><div><p class="receipt-detail-label">Service</p><p class="receipt-detail-value">{{ booking.service.name }}</p><p class="receipt-detail-sub">{{ booking.service.duration }} minute appointment</p></div></div>
+            <div class="receipt-detail"><span class="receipt-detail-icon gold"><i class="fa-regular fa-calendar"></i></span><div><p class="receipt-detail-label">Date &amp; time</p><p class="receipt-detail-value">{{ booking.booking_date|date:"l, d F Y" }}</p><p class="receipt-detail-sub">{{ booking.booking_time|time:"g:i A" }} · {{ booking.service.duration }} minutes</p></div></div>
+            <div class="receipt-detail"><span class="receipt-detail-icon emerald"><i class="fa-solid fa-user-tie"></i></span><div><p class="receipt-detail-label">Barber</p><p class="receipt-detail-value">{{ booking.barber.name|default:"Any Master Barber" }}</p><p class="receipt-detail-sub">24 K professional grooming</p></div></div>
+          </section>
+
+          <hr class="receipt-divider">
+          <div class="receipt-id-row"><span class="receipt-id-label">Booking ID</span><span class="receipt-id-value" id="receiptBookingId">{{ booking.booking_id }}</span></div>
+          {% if booking.payment %}<div class="receipt-id-row"><span class="receipt-id-label">Transaction ID</span><span class="receipt-id-value">{{ booking.payment.transaction_id|default:"Not available" }}</span></div>{% endif %}
+          <div class="receipt-amount"><p class="receipt-amount-label">Amount paid</p><p class="receipt-amount-value"><span>&#8377;</span>{{ booking.amount|floatformat:0 }}</p></div>
+
+          <a class="receipt-map-link" href="https://maps.app.goo.gl/61eA3wFErnLmcgUD9" target="_blank" rel="noopener noreferrer" aria-label="Get directions to 24 K Barbershop"><i class="receipt-map-road horizontal"></i><i class="receipt-map-road vertical"></i><span class="receipt-map-pin"><i class="fa-solid fa-location-dot"></i></span></a>
+          <p class="receipt-reminder"><i class="fa-solid fa-bell"></i><span>Please arrive <strong>5 minutes early</strong>. Show your booking ID at the counter when you arrive.</span></p>
+          <div class="receipt-meta"><span><i class="fa-solid fa-circle"></i> Payment verified</span><span><i class="fa-solid fa-lock"></i> Secure booking</span><span>{{ booking.service.duration }} min service</span></div>
+
+          <div class="receipt-quick-actions" aria-label="Receipt tools">
+            <button class="receipt-quick-action" id="shareReceipt" type="button"><i class="fa-solid fa-share-nodes"></i><span><b>Share</b><small>Booking</small></span></button>
+            <button class="receipt-quick-action" id="copyBookingId" type="button"><i class="fa-regular fa-copy"></i><span><b>Copy ID</b><small>{{ booking.booking_id }}</small></span></button>
+            <button class="receipt-quick-action" id="printReceipt" type="button"><i class="fa-solid fa-print"></i><span><b>Print</b><small>Receipt</small></span></button>
+          </div>
+
+          <nav class="receipt-actions" aria-label="Booking actions"><a class="receipt-action primary" href="{% url 'booking_list' %}"><i class="fa-solid fa-calendar-check"></i> My bookings</a><a class="receipt-action gold" href="{% url 'home' %}"><i class="fa-solid fa-house"></i> Home</a></nav>
+          <p class="receipt-footer">Thank you for choosing 24 K Barbershop. See you soon!</p>
+        </div>
+      </article>
+    </div>
   </div>
+  <div class="receipt-toast" id="receiptToast" role="status" aria-live="polite"></div>
 </section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  (() => {
+    const printer = document.getElementById('thermalPrinter');
+    const stage = document.getElementById('receiptStage');
+    const progress = document.getElementById('printerProgress');
+    const percent = document.getElementById('printPercent');
+    const status = document.getElementById('printerStatus');
+    const lines = [...document.querySelectorAll('.preview-line')];
+    const toast = document.getElementById('receiptToast');
+    const duration = 3500;
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let animationFrame;
+    let finishTimer;
+    let toastTimer;
+    let lineTimers = [];
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add('is-visible');
+      window.clearTimeout(toastTimer);
+      toastTimer = window.setTimeout(() => toast.classList.remove('is-visible'), 2400);
+    }
+
+    function markComplete() {
+      window.cancelAnimationFrame(animationFrame);
+      printer.classList.remove('is-printing', 'is-cutting');
+      printer.classList.add('is-complete');
+      stage.classList.add('is-visible');
+      progress.style.width = '100%';
+      percent.textContent = '100';
+      status.innerHTML = '<span>READY</span><small>PRINT COMPLETE</small>';
+    }
+
+    function runPrintAnimation() {
+      window.clearTimeout(finishTimer);
+      window.cancelAnimationFrame(animationFrame);
+      lineTimers.forEach(window.clearTimeout);
+      lineTimers = [];
+      printer.classList.remove('is-complete', 'is-cutting');
+      stage.classList.remove('is-visible');
+      lines.forEach(line => line.classList.remove('is-revealed'));
+      progress.style.width = '0%';
+      percent.textContent = '0';
+      status.innerHTML = '<span>PRINTING</span><small>RECEIPT IN PROGRESS</small>';
+      void printer.offsetWidth;
+      printer.classList.add('is-printing');
+
+      if (reducedMotion) {
+        markComplete();
+        return;
+      }
+
+      const startedAt = performance.now();
+      const updateProgress = now => {
+        const value = Math.min(100, Math.round(((now - startedAt) / duration) * 100));
+        progress.style.width = `${value}%`;
+        percent.textContent = String(value);
+        if (value < 100) animationFrame = requestAnimationFrame(updateProgress);
+      };
+      animationFrame = requestAnimationFrame(updateProgress);
+      lines.forEach((line, index) => {
+        lineTimers.push(window.setTimeout(() => line.classList.add('is-revealed'), index * (duration / lines.length)));
+      });
+      finishTimer = window.setTimeout(() => {
+        printer.classList.remove('is-printing');
+        printer.classList.add('is-cutting');
+        window.setTimeout(markComplete, 260);
+      }, duration);
+    }
+
+    const appointment = new Date(document.querySelector('.receipt-experience').dataset.appointment || '{{ booking.booking_date|date:"Y-m-d" }}T{{ booking.booking_time|time:"H:i:s" }}');
+    const countdown = { days: document.getElementById('receiptDays'), hours: document.getElementById('receiptHours'), minutes: document.getElementById('receiptMinutes'), seconds: document.getElementById('receiptSeconds') };
+    function updateCountdown() {
+      const distance = appointment.getTime() - Date.now();
+      const safeDistance = Math.max(0, distance);
+      countdown.days.textContent = String(Math.floor(safeDistance / 86400000)).padStart(2, '0');
+      countdown.hours.textContent = String(Math.floor((safeDistance % 86400000) / 3600000)).padStart(2, '0');
+      countdown.minutes.textContent = String(Math.floor((safeDistance % 3600000) / 60000)).padStart(2, '0');
+      countdown.seconds.textContent = String(Math.floor((safeDistance % 60000) / 1000)).padStart(2, '0');
+    }
+
+    function createParticles() {
+      const particles = document.getElementById('receiptParticles');
+      const count = window.innerWidth < 520 ? 8 : 15;
+      for (let index = 0; index < count; index += 1) {
+        const particle = document.createElement('i');
+        const size = 3 + Math.random() * 4;
+        particle.className = 'receipt-particle';
+        particle.style.left = `${Math.random() * 100}%`;
+        particle.style.animationDuration = `${6 + Math.random() * 6}s`;
+        particle.style.animationDelay = `${Math.random() * 5}s`;
+        particle.style.height = `${size}px`;
+        particle.style.width = `${size}px`;
+        particles.appendChild(particle);
+      }
+    }
+
+    document.getElementById('replayReceipt').addEventListener('click', runPrintAnimation);
+    document.getElementById('printReceipt').addEventListener('click', () => window.print());
+    document.getElementById('copyBookingId').addEventListener('click', async () => {
+      const bookingId = document.getElementById('receiptBookingId').textContent.trim();
+      try { await navigator.clipboard.writeText(bookingId); showToast('Booking ID copied to clipboard'); }
+      catch { showToast(`Booking ID: ${bookingId}`); }
+    });
+    document.getElementById('shareReceipt').addEventListener('click', async () => {
+      const bookingId = document.getElementById('receiptBookingId').textContent.trim();
+      const shareData = { title: '24 K Barbershop booking confirmed', text: `My appointment is confirmed. Booking ID: ${bookingId}` };
+      try {
+        if (navigator.share) await navigator.share(shareData);
+        else { await navigator.clipboard.writeText(shareData.text); showToast('Booking details copied to clipboard'); }
+      } catch (error) { if (error?.name !== 'AbortError') showToast(`Booking ID: ${bookingId}`); }
+    });
+
+    createParticles();
+    updateCountdown();
+    window.setInterval(updateCountdown, 1000);
+    runPrintAnimation();
+  })();
+</script>
 {% endblock %}

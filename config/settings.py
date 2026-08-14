@@ -21,6 +21,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # REST framework
+    'rest_framework',
+    'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
     # Local apps
     'booking',
     'users',
@@ -60,27 +64,13 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # ──────────────────────────────────────────────
 # Database
 # ──────────────────────────────────────────────
+import dj_database_url
 DATABASE_URL = config('DATABASE_URL', default='')
 
-if DATABASE_URL and DATABASE_URL.startswith('postgres'):
-    import re
-    m = re.match(
-        r'postgres(?:ql)?://(?P<user>[^:]+):(?P<password>[^@]+)@(?P<host>[^:/]+):?(?P<port>\d+)?/(?P<name>.+)',
-        DATABASE_URL
-    )
-    if m:
-        DATABASES = {
-            'default': {
-                'ENGINE': 'django.db.backends.postgresql',
-                'NAME': m.group('name'),
-                'USER': m.group('user'),
-                'PASSWORD': m.group('password'),
-                'HOST': m.group('host'),
-                'PORT': m.group('port') or '5432',
-            }
-        }
-    else:
-        raise ValueError(f"Invalid DATABASE_URL: {DATABASE_URL}")
+if DATABASE_URL:
+    DATABASES = {
+        'default': dj_database_url.config(default=DATABASE_URL, conn_max_age=600)
+    }
 else:
     DATABASES = {
         'default': {
@@ -122,6 +112,35 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# ──────────────────────────────────────────────
+# REST Framework + JWT
+# ──────────────────────────────────────────────
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+}
+
+from datetime import timedelta
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+}
+
+# ──────────────────────────────────────────────
+# SMS — Android SMS Gateway (own SIM)
+# ──────────────────────────────────────────────
+# The app triggers SMS via a free Android gateway app on the barber's phone.
+# Set SMS_GATEWAY_URL to the phone's IP + port, e.g. http://192.168.1.5:8080
+# Leave as 'mock' to print SMS to console (for development)
+SMS_GATEWAY_URL = config('SMS_GATEWAY_URL', default='mock')
+SMS_GATEWAY_TOKEN = config('SMS_GATEWAY_TOKEN', default='')
 
 # ──────────────────────────────────────────────
 # Payment
