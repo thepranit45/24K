@@ -6,6 +6,26 @@
 
 {% block content %}
 
+<style>
+  @keyframes qcShine { 0%, 100% { background-position: 200% center; } 50% { background-position: -200% center; } }
+  @keyframes qcPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.55); } 55% { box-shadow: 0 0 0 16px rgba(212, 175, 55, 0); } }
+  @keyframes qcFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+
+  @supports ((-webkit-background-clip: text) or (background-clip: text)) {
+    .hero-title, .hero-title-gold {
+      background: linear-gradient(110deg, #ffffff 0%, #f3d86a 35%, #ffffff 60%, #d4af37 85%, #ffffff 100%);
+      background-size: 220% auto;
+      -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent; color: transparent;
+      animation: qcShine 6s linear infinite;
+    }
+  }
+  .btn-hero { animation: qcPulse 2.2s ease-in-out infinite; }
+  .hero-trust .trust-item { animation: qcFloat 5s ease-in-out infinite; }
+  .hero-trust .trust-item:nth-child(3) { animation-delay: 1.6s; }
+  .hero-trust .trust-item:nth-child(5) { animation-delay: 3.2s; }
+</style>
+
 <!-- ══════════════════════════════════════════════════════════
      HERO
 ══════════════════════════════════════════════════════════ -->
@@ -164,31 +184,55 @@
   <!-- Step 2: Barber Selection -->
   <div class="wizard-panel" id="wizard-panel-2">
     <div class="wizard-panel-inner">
+      <p class="barber-wizard-kicker"><i class="fa-solid fa-sparkles"></i> Personalize your visit</p>
       <h2 class="wizard-heading">Choose Your Barber</h2>
-      <p class="wizard-sub">Select your preferred master barber or let us assign the fastest available expert.</p>
+      <p class="wizard-sub barber-wizard-sub">Choose your preferred barber, or let us secure the earliest available appointment.</p>
 
-      <div class="barber-selection-grid">
-        <!-- Any Available Option -->
-        <div class="barber-select-card selected" onclick="selectBarber(this, '', 'Any Available Barber')">
-          <div class="barber-card-icon"><i class="fa-solid fa-bolt text-gold"></i></div>
-          <div class="barber-card-info">
-            <h4>Any Available Barber</h4>
-            <p>Fastest slot match for your chosen service</p>
-          </div>
-          <div class="barber-check-badge"><i class="fa-solid fa-check"></i></div>
-        </div>
+      <p class="barber-grid-label">MASTER BARBERS</p>
 
+      <div class="barber-selection-grid" role="radiogroup" aria-label="Choose a barber">
         {% for b in barbers %}
-        <div class="barber-select-card" onclick="selectBarber(this, '{{ b.id }}', '{{ b.name }}')">
-          <div class="barber-card-icon"><i class="fa-solid fa-{{ b.avatar_icon|default:'user-tie' }}"></i></div>
+        <button type="button" class="barber-select-card barber-select-card--featured selected" data-preferred-barber data-barber-id="{{ b.id }}" data-barber-name="{{ b.name }}" onclick="selectBarber(this, '{{ b.id }}', '{{ b.name }}')" role="radio" aria-checked="true">
+          <div class="barber-photo">
+            {% if b.photo %}
+              <img src="{{ b.photo.url }}" alt="{{ b.name }}" />
+            {% else %}
+              <div class="barber-photo-initials">{{ b.initials }}</div>
+            {% endif %}
+          </div>
           <div class="barber-card-info">
-            <h4>{{ b.name }} <span class="b-rating">★ {{ b.rating }}</span></h4>
+            <div class="barber-card-title-row">
+              <h4>{{ b.name }}</h4>
+              <span class="barber-card-tag barber-card-tag--featured"><i class="fa-solid fa-crown"></i> Featured</span>
+            </div>
             <p class="b-role">{{ b.title }}</p>
-            <p class="b-spec">{{ b.specialties }}</p>
+            <div class="barber-spec-chips">
+              {% for spec in b.specialty_list|slice:":3" %}
+              <span class="barber-spec-chip">{{ spec }}</span>
+              {% endfor %}
+            </div>
+            <div class="barber-card-meta">
+              <span class="b-rating"><i class="fa-solid fa-star"></i> {{ b.rating }}</span>
+              <span class="barber-exp-badge"><i class="fa-regular fa-calendar"></i> {{ b.experience_years }} yrs exp</span>
+              <span class="barber-availability"><i class="fa-solid fa-circle-check"></i> Available today</span>
+            </div>
           </div>
           <div class="barber-check-badge"><i class="fa-solid fa-check"></i></div>
-        </div>
+        </button>
         {% endfor %}
+
+        <!-- Fallback option -->
+        <button type="button" class="barber-select-card barber-select-card--any" data-barber-id="" data-barber-name="Any Available Barber" onclick="selectBarber(this, '', 'Any Available Barber')" role="radio" aria-checked="false">
+          <div class="barber-card-icon"><i class="fa-solid fa-bolt"></i></div>
+          <div class="barber-card-info">
+            <div class="barber-card-title-row">
+              <h4>Any Available Barber</h4>
+              <span class="barber-card-tag">Fastest slot</span>
+            </div>
+            <p>We'll match you with the earliest available expert.</p>
+          </div>
+          <div class="barber-check-badge"><i class="fa-solid fa-check"></i></div>
+        </button>
       </div>
 
       <div class="wizard-nav">

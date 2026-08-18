@@ -18,9 +18,15 @@ urlpatterns = [
     # Barber Agenda (Public Timeline)
     path('agenda/', views.barber_agenda, name='barber_agenda'),
 
-    # Admin Management Dashboard
-    path('dashboard/', views.admin_dashboard, name='admin_dashboard'),
+    # Barber management dashboard. Keep the legacy URL working for saved links.
+    path('barber/dashboard/', views.barber_dashboard, name='barber_dashboard'),
+    path('dashboard/', views.barber_dashboard, name='admin_dashboard'),
+    path('dashboard/appointments/', views.admin_appointments, name='admin_appointments'),
+    path('dashboard/services/', views.admin_services, name='admin_services'),
+    path('dashboard/hours/', views.admin_hours, name='admin_hours'),
+    path('dashboard/settings/', views.admin_settings, name='admin_settings'),
     path('dashboard/status/<str:booking_id>/', views.admin_update_status, name='admin_update_status'),
+    path('barber/dashboard/status/<str:booking_id>/', views.barber_update_status, name='barber_update_status'),
     path('dashboard/toggle-barber/<int:barber_id>/', views.admin_toggle_barber, name='admin_toggle_barber'),
     path('dashboard/notify/<str:booking_id>/', views.admin_send_notification, name='admin_send_notification'),
 

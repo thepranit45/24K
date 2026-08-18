@@ -1,0 +1,308 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Appointments | 24 K Barbershop{% endblock %}
+{% block body_class %}barber-dashboard-page{% endblock %}
+
+{% block content %}
+<div class="admin-dashboard-wrapper">
+  <div class="container">
+
+    {% include 'admin_nav.html' %}
+    {% include 'admin_styles.html' %}
+
+    <!-- Page Header -->
+    <div class="dashboard-header" data-animate="fade-up">
+      <div>
+        <div class="dashboard-eyebrow"><i class="fa-solid fa-calendar-check"></i> Shop operations</div>
+        <h1 class="dashboard-title">Appointments</h1>
+        <p class="dashboard-subtitle">Search, filter and manage every booking — confirm, complete, cancel or message clients.</p>
+        <div class="dashboard-header-meta">
+          <span><i class="fa-solid fa-circle"></i> Live operations</span>
+          <span><i class="fa-regular fa-calendar"></i> {{ today|date:"D, d M Y" }}</span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <a href="{% url 'admin_appointments' %}" class="dashboard-header-button dashboard-header-button--primary">
+          <i class="fa-solid fa-rotate"></i> Refresh
+        </a>
+      </div>
+    </div>
+
+    <!-- Appointments Table Section -->
+    <div class="dashboard-section" data-animate="fade-up" data-delay="200">
+      <div class="appointments-header">
+        <div class="section-title-wrap" style="margin-bottom: 0;">
+          <h2><i class="fa-solid fa-list-ol text-gold"></i> Customer Appointments Queue</h2>
+        </div>
+
+        <!-- Filters & Search -->
+        <form method="GET" action="{% url 'admin_appointments' %}" class="admin-filter-form">
+          <div class="filter-controls">
+            <div class="search-input-wrap">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" name="q" value="{{ search_q }}" placeholder="Search ID, Name, Phone..." />
+            </div>
+            <div class="date-input-wrap">
+              <input type="date" name="date" value="{{ date_filter }}" />
+            </div>
+            <select name="status" class="admin-select-filter" onchange="this.form.submit()">
+              <option value="ALL" {% if status_filter == 'ALL' %}selected{% endif %}>All Statuses</option>
+              <option value="TODAY" {% if status_filter == 'TODAY' %}selected{% endif %}>Today's Only</option>
+              <option value="PENDING" {% if status_filter == 'PENDING' %}selected{% endif %}>Pending</option>
+              <option value="CONFIRMED" {% if status_filter == 'CONFIRMED' %}selected{% endif %}>Confirmed</option>
+              <option value="COMPLETED" {% if status_filter == 'COMPLETED' %}selected{% endif %}>Completed</option>
+              <option value="CANCELLED" {% if status_filter == 'CANCELLED' %}selected{% endif %}>Cancelled</option>
+            </select>
+            <button type="submit" class="btn-filter"><i class="fa-solid fa-filter"></i> Filter</button>
+            {% if search_q or date_filter or status_filter != 'ALL' %}
+              <a href="{% url 'admin_appointments' %}" class="btn-clear">Reset</a>
+            {% endif %}
+          </div>
+        </form>
+      </div>
+
+      <!-- Bookings Table -->
+      <div class="table-responsive">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Customer</th>
+              <th>Service</th>
+              <th>Barber</th>
+              <th>Date & Time</th>
+              <th>Amount</th>
+              <th>Status</th>
+              <th>Payment</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for booking in bookings %}
+            <tr>
+              <td><span class="booking-id-tag">{{ booking.booking_id }}</span></td>
+              <td>
+                <div class="customer-info-box">
+                  <span class="cust-name">{{ booking.customer_name }}</span>
+                  <span class="cust-phone"><i class="fa-solid fa-phone"></i> {{ booking.customer_phone }}</span>
+                </div>
+              </td>
+              <td>
+                <span class="service-name-tag">{{ booking.service.name }}</span>
+                <span class="service-dur">({{ booking.service.duration }} min)</span>
+              </td>
+              <td>
+                {% if booking.barber %}
+                  <span class="barber-assigned-tag"><i class="fa-solid fa-user-tie text-gold"></i> {{ booking.barber.name }}</span>
+                {% else %}
+                  <span class="barber-any-tag">Any Available</span>
+                {% endif %}
+              </td>
+              <td>
+                <div class="date-time-box">
+                  <span class="b-date"><i class="fa-regular fa-calendar"></i> {{ booking.booking_date|date:"d M Y" }}</span>
+                  <span class="b-time"><i class="fa-regular fa-clock text-gold"></i> {{ booking.booking_time|time:"g:i A" }}</span>
+                </div>
+              </td>
+              <td><span class="amount-tag">₹ {{ booking.amount|floatformat:0 }}</span></td>
+              <td><span class="status-badge status-{{ booking.status|lower }}">{{ booking.get_status_display }}</span></td>
+              <td>
+                {% if booking.payment %}
+                  <span class="payment-badge pay-{{ booking.payment.status|lower }}">{{ booking.payment.get_status_display }}</span>
+                {% else %}
+                  <span class="payment-badge">—</span>
+                {% endif %}
+              </td>
+              <td>
+                <div class="action-buttons">
+                  <button type="button" class="btn-action btn-notify" title="Send Message or WhatsApp Notification" onclick="openNotifyModal('{{ booking.booking_id }}', '{{ booking.customer_name|escapejs }}', '{{ booking.customer_phone|escapejs }}', '{{ booking.service.name|escapejs }}', '{{ booking.booking_date|date:"d M Y" }}', '{{ booking.booking_time|time:"g:i A" }}')">
+                    <i class="fa-solid fa-paper-plane"></i> Notify
+                  </button>
+                  {% if booking.status != 'CONFIRMED' and booking.status != 'COMPLETED' and booking.status != 'CANCELLED' %}
+                    <form action="{% url 'admin_update_status' booking.booking_id %}" method="POST" style="display:inline;">
+                      {% csrf_token %}
+                      <input type="hidden" name="status" value="CONFIRMED" />
+                      <button type="submit" class="btn-action btn-confirm" title="Confirm Appointment"><i class="fa-solid fa-check"></i> Confirm</button>
+                    </form>
+                  {% endif %}
+                  {% if booking.status != 'COMPLETED' and booking.status != 'CANCELLED' %}
+                    <form action="{% url 'admin_update_status' booking.booking_id %}" method="POST" style="display:inline;">
+                      {% csrf_token %}
+                      <input type="hidden" name="status" value="COMPLETED" />
+                      <button type="submit" class="btn-action btn-complete" title="Mark Completed"><i class="fa-solid fa-star"></i> Complete</button>
+                    </form>
+                  {% endif %}
+                  {% if booking.status != 'CANCELLED' and booking.status != 'COMPLETED' %}
+                    <form action="{% url 'admin_update_status' booking.booking_id %}" method="POST" style="display:inline;">
+                      {% csrf_token %}
+                      <input type="hidden" name="status" value="CANCELLED" />
+                      <button type="submit" class="btn-action btn-cancel" title="Cancel Appointment" onclick="return confirm('Are you sure you want to cancel this booking?')"><i class="fa-solid fa-xmark"></i></button>
+                    </form>
+                  {% endif %}
+                </div>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="9" class="empty-table-msg">
+                <i class="fa-solid fa-inbox"></i>
+                <p>No appointments match the selected filters.</p>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Phone-first appointment cards -->
+      <div class="appointment-mobile-list">
+        {% for booking in bookings %}
+          <article class="appointment-mobile-card">
+            <div class="appointment-mobile-card__topline">
+              <span class="booking-id-tag">{{ booking.booking_id }}</span>
+              <span class="status-badge status-{{ booking.status|lower }}">{{ booking.get_status_display }}</span>
+            </div>
+            <div class="appointment-mobile-card__customer">
+              <div class="appointment-mobile-card__avatar">{{ booking.customer_name|slice:":1" }}</div>
+              <div>
+                <strong>{{ booking.customer_name }}</strong>
+                <a href="tel:{{ booking.customer_phone }}"><i class="fa-solid fa-phone"></i> {{ booking.customer_phone }}</a>
+              </div>
+              <span class="amount-tag">₹ {{ booking.amount|floatformat:0 }}</span>
+            </div>
+            <div class="appointment-mobile-card__details">
+              <span><i class="fa-solid fa-scissors"></i> {{ booking.service.name }}</span>
+              <span><i class="fa-regular fa-calendar"></i> {{ booking.booking_date|date:"d M" }} · {{ booking.booking_time|time:"g:i A" }}</span>
+              <span><i class="fa-solid fa-user-tie"></i> {% if booking.barber %}{{ booking.barber.name }}{% else %}Any Available{% endif %}</span>
+            </div>
+            <div class="appointment-mobile-card__actions">
+              <button type="button" class="btn-action btn-notify" onclick="openNotifyModal('{{ booking.booking_id }}', '{{ booking.customer_name|escapejs }}', '{{ booking.customer_phone|escapejs }}', '{{ booking.service.name|escapejs }}', '{{ booking.booking_date|date:"d M Y" }}', '{{ booking.booking_time|time:"g:i A" }}')"><i class="fa-solid fa-paper-plane"></i> Notify</button>
+              {% if booking.status != 'CONFIRMED' and booking.status != 'COMPLETED' and booking.status != 'CANCELLED' %}
+                <form action="{% url 'admin_update_status' booking.booking_id %}" method="POST">
+                  {% csrf_token %}<input type="hidden" name="status" value="CONFIRMED" />
+                  <button type="submit" class="btn-action btn-confirm"><i class="fa-solid fa-check"></i> Confirm</button>
+                </form>
+              {% endif %}
+              {% if booking.status != 'COMPLETED' and booking.status != 'CANCELLED' %}
+                <form action="{% url 'admin_update_status' booking.booking_id %}" method="POST">
+                  {% csrf_token %}<input type="hidden" name="status" value="COMPLETED" />
+                  <button type="submit" class="btn-action btn-complete"><i class="fa-solid fa-star"></i> Complete</button>
+                </form>
+              {% endif %}
+            </div>
+          </article>
+        {% empty %}
+          <div class="appointment-mobile-empty"><i class="fa-solid fa-inbox"></i><span>No appointments match these filters.</span></div>
+        {% endfor %}
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- CLIENT NOTIFICATION / MESSAGING MODAL -->
+<div class="modal-backdrop" id="notifyModalBackdrop" style="display:none;" onclick="closeNotifyModal()"></div>
+<div class="modal" id="notifyModal" style="display:none; max-width: 520px; background: #12141c; color: #fff; border: 1px solid #232736; border-radius: 16px; padding: 2rem; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10000; box-shadow: 0 15px 50px rgba(0,0,0,0.8);" role="dialog">
+  <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #232736; padding-bottom: 1rem; margin-bottom: 1.5rem;">
+    <h3 style="font-size: 1.2rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 0.6rem; margin: 0;">
+      <i class="fa-solid fa-comment-dots text-gold"></i> Client Messaging Suite
+    </h3>
+    <button onclick="closeNotifyModal()" style="background: none; border: none; color: #9ca3af; font-size: 1.4rem; cursor: pointer;">&times;</button>
+  </div>
+
+  <div class="modal-body" style="text-align: left;">
+    <div style="background: #171a24; padding: 1rem; border-radius: 10px; border: 1px solid #252a3a; margin-bottom: 1.5rem;">
+      <p style="margin: 0 0 0.4rem; font-size: 0.95rem;"><strong>Client:</strong> <span id="notifyCustName" style="color: #fff;"></span> (<span id="notifyCustPhone" style="color: #d4af37;"></span>)</p>
+      <p style="margin: 0; font-size: 0.85rem; color: #9ca3af;"><strong>Appointment:</strong> <span id="notifyServiceInfo"></span></p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin-bottom: 1.5rem;">
+      <div>
+        <label style="display: block; font-size: 0.78rem; font-weight: 700; color: #38bdf8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.4rem;"><i class="fa-solid fa-comment-sms"></i> Native Phone SMS App</label>
+        <a id="btnSMSDirect" href="#" target="_blank" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; background: #14161f; border: 1px solid #252a3a; color: #fff; padding: 0.7rem; border-radius: 8px; text-decoration: none; font-size: 0.85rem; font-weight: 600;">Open SMS App</a>
+      </div>
+      <div>
+        <label style="display: block; font-size: 0.78rem; font-weight: 700; color: #25d366; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.4rem;"><i class="fa-brands fa-whatsapp"></i> WhatsApp Direct</label>
+        <a id="btnWhatsAppDirect" href="#" target="_blank" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; background: #14161f; border: 1px solid #252a3a; color: #fff; padding: 0.7rem; border-radius: 8px; text-decoration: none; font-size: 0.85rem; font-weight: 600;">Open WhatsApp</a>
+      </div>
+    </div>
+
+    <div style="margin-bottom: 1.5rem;">
+      <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.4rem;">Quick Templates</label>
+      <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+        <button type="button" onclick="applyTemplate('REMINDER')" style="background: #1c2030; border: 1px solid #2d3448; color: #d4af37; padding: 0.4rem 0.8rem; border-radius: 8px; font-size: 0.78rem; cursor: pointer;">Reminder</button>
+        <button type="button" onclick="applyTemplate('BARBER_READY')" style="background: #1c2030; border: 1px solid #2d3448; color: #d4af37; padding: 0.4rem 0.8rem; border-radius: 8px; font-size: 0.78rem; cursor: pointer;">Barber Ready</button>
+        <button type="button" onclick="applyTemplate('DELAY')" style="background: #1c2030; border: 1px solid #2d3448; color: #d4af37; padding: 0.4rem 0.8rem; border-radius: 8px; font-size: 0.78rem; cursor: pointer;">Delayed</button>
+        <button type="button" onclick="applyTemplate('CUSTOM')" style="background: #1c2030; border: 1px solid #2d3448; color: #d4af37; padding: 0.4rem 0.8rem; border-radius: 8px; font-size: 0.78rem; cursor: pointer;">Custom</button>
+      </div>
+    </div>
+
+    <form id="notifyForm" method="POST" action="">
+      {% csrf_token %}
+      <div style="margin-bottom: 1rem;">
+        <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.4rem;">Message Body</label>
+        <textarea id="notifyMessageText" name="message" rows="4" style="width: 100%; background: #171a24; border: 1px solid #252a3a; color: #fff; padding: 0.8rem; border-radius: 8px; font-size: 0.9rem; font-family: inherit; resize: vertical;" placeholder="Type message to client..."></textarea>
+      </div>
+
+      <div style="display: flex; gap: 0.8rem;">
+        <button type="submit" class="btn-filter" style="flex: 1; padding: 0.8rem; background: #d4af37; color: #000; font-weight: 700; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+          <i class="fa-solid fa-paper-plane"></i> Log & Send Notification
+        </button>
+        <button type="button" onclick="closeNotifyModal()" style="padding: 0.8rem 1.2rem; background: #252a3a; color: #aaa; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">Close</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+let currentNotifyData = {};
+
+function openNotifyModal(bookingId, custName, custPhone, serviceName, dateStr, timeStr) {
+  currentNotifyData = { bookingId, custName, custPhone, serviceName, dateStr, timeStr };
+
+  document.getElementById('notifyCustName').textContent = custName;
+  document.getElementById('notifyCustPhone').textContent = custPhone;
+  document.getElementById('notifyServiceInfo').textContent = `${serviceName} on ${dateStr} at ${timeStr}`;
+  document.getElementById('notifyForm').action = `/dashboard/notify/${bookingId}/`;
+
+  applyTemplate('REMINDER');
+
+  document.getElementById('notifyModal').style.display = 'block';
+  document.getElementById('notifyModalBackdrop').style.display = 'block';
+  document.body.classList.add('no-scroll');
+}
+
+function applyTemplate(tplKey) {
+  const { custName, serviceName, dateStr, timeStr, custPhone } = currentNotifyData;
+  let text = "";
+
+  if (tplKey === 'REMINDER') {
+    text = `Hello ${custName}, this is a reminder for your upcoming ${serviceName} appointment on ${dateStr} at ${timeStr} at 24 K Barbershop. See you soon!`;
+  } else if (tplKey === 'BARBER_READY') {
+    text = `Hello ${custName}, your master barber is ready for your ${serviceName} appointment at 24 K Barbershop! Please step inside.`;
+  } else if (tplKey === 'DELAY') {
+    text = `Hello ${custName}, your ${serviceName} appointment at 24 K Barbershop is running ~15 minutes behind schedule. Thank you for your patience!`;
+  } else {
+    text = `Hello ${custName}, `;
+  }
+
+  document.getElementById('notifyMessageText').value = text;
+
+  const cleanPhone = (custPhone || '').replace(/\D/g, '');
+  const smsPhone = cleanPhone.length === 10 ? '+91' + cleanPhone : '+' + cleanPhone;
+  const smsUrl = `sms:${smsPhone}?body=${encodeURIComponent(text)}`;
+  document.getElementById('btnSMSDirect').href = smsUrl;
+
+  const waPhone = cleanPhone.length === 10 ? '91' + cleanPhone : cleanPhone;
+  const waUrl = `https://wa.me/${waPhone}?text=${encodeURIComponent(text)}`;
+  document.getElementById('btnWhatsAppDirect').href = waUrl;
+}
+
+function closeNotifyModal() {
+  document.getElementById('notifyModal').style.display = 'none';
+  document.getElementById('notifyModalBackdrop').style.display = 'none';
+  document.body.classList.remove('no-scroll');
+}
+</script>
+{% endblock %}

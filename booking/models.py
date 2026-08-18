@@ -45,6 +45,34 @@ class Service(models.Model):
         return f"₹{int(self.price):,}"
 
 
+class ShopSetting(models.Model):
+    """Simple key/value store for shop-wide configuration (e.g. slot step)."""
+    key = models.CharField(max_length=50, unique=True)
+    value = models.CharField(max_length=200, blank=True, default='')
+
+    class Meta:
+        verbose_name = 'Shop Setting'
+        verbose_name_plural = 'Shop Settings'
+
+    def __str__(self):
+        return f"{self.key} = {self.value}"
+
+
+def get_shop_setting(key, default=''):
+    try:
+        return ShopSetting.objects.get(key=key).value
+    except ShopSetting.DoesNotExist:
+        return default
+
+
+def slot_step_minutes():
+    """How many minutes each time slot lasts (configurable from the dashboard)."""
+    try:
+        return max(5, min(int(get_shop_setting('slot_step', '30')), 120))
+    except (TypeError, ValueError):
+        return 30
+
+
 class BusinessHour(models.Model):
     DAY_CHOICES = [
         (0, 'Monday'),
@@ -76,6 +104,7 @@ class Barber(models.Model):
     name = models.CharField(max_length=100)
     title = models.CharField(max_length=100, default='Master Barber')
     bio = models.TextField(blank=True, default='Expert in precision cuts, fades, and traditional hot towel grooming.')
+    photo = models.ImageField(upload_to='barbers/', null=True, blank=True)
     avatar_icon = models.CharField(
         max_length=50,
         default='user-tie',
@@ -85,6 +114,11 @@ class Barber(models.Model):
     rating = models.DecimalField(max_digits=3, decimal_places=1, default=4.9)
     experience_years = models.PositiveIntegerField(default=5)
     is_active = models.BooleanField(default=True)
+    user = models.OneToOneField(
+        User, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='barber_profile',
+        help_text="Optional shop account that signs this barber into their personal dashboard."
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -94,6 +128,21 @@ class Barber(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.title})"
+
+    @property
+    def specialty_list(self):
+        """Specialties as a list for template chips."""
+        return [s.strip() for s in self.specialties.split(',') if s.strip()]
+
+    @property
+    def initials(self):
+        """Initials for avatar fallback (e.g. 'KM' for Karan Malhotra)."""
+        parts = [p for p in self.name.split() if p]
+        if not parts:
+            return '?'
+        if len(parts) == 1:
+            return parts[0][:2].upper()
+        return (parts[0][0] + parts[1][0]).upper()
 
 
 class Booking(models.Model):

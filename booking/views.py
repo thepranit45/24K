@@ -1,10 +1,13 @@
 import json
 import uuid
 from datetime import date, datetime, timedelta, time as dtime
+from decimal import Decimal
+from functools import wraps
 
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.views import redirect_to_login
+from django.core.exceptions import PermissionDenied
 from django.db.models import Sum, Count, Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -12,20 +15,21 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from .forms import CustomerDetailsForm
-from .models import Barber, Booking, BusinessHour, Payment, Service
+from .models import Barber, Booking, BusinessHour, Payment, Service, ShopSetting, slot_step_minutes
 
 
 # ──────────────────────────────────────────────────────────────
 # Helpers
 # ──────────────────────────────────────────────────────────────
 
-def _generate_slots(open_t: dtime, close_t: dtime, step_minutes: int = 30):
+def _generate_slots(open_t: dtime, close_t: dtime, step_minutes: int = None):
+    step = step_minutes or slot_step_minutes()
     slots = []
     current = datetime.combine(date.today(), open_t)
     end = datetime.combine(date.today(), close_t)
     while current < end:
         slots.append(current.time())
-        current += timedelta(minutes=step_minutes)
+        current += timedelta(minutes=step)
     return slots
 
 
@@ -38,7 +42,8 @@ def _booked_times(booking_date: date, barber_id=None):
         qs = qs.filter(barber_id=barber_id)
         
     bookings = qs.select_related('service')
-    
+
+    step = slot_step_minutes()
     booked_slots = set()
     for b in bookings:
         current_time = datetime.combine(booking_date, b.booking_time)
@@ -46,7 +51,7 @@ def _booked_times(booking_date: date, barber_id=None):
         
         while current_time < end_time:
             booked_slots.add(current_time.time())
-            current_time += timedelta(minutes=30)
+            current_time += timedelta(minutes=step)
             
     return booked_slots
 
@@ -76,6 +81,30 @@ def _add_booking_to_session(request, booking_id):
     request.session.modified = True
 
 
+def barber_staff_required(view_func):
+    """Allow only signed-in staff members to operate shop-management controls."""
+    @wraps(view_func)
+    def _wrapped(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect_to_login(request.get_full_path())
+        if not request.user.is_staff:
+            raise PermissionDenied
+        return view_func(request, *args, **kwargs)
+    return _wrapped
+
+
+def barber_required(view_func):
+    """Allow only signed-in barbers (linked via Barber.user) to use their own dashboard."""
+    @wraps(view_func)
+    def _wrapped(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect_to_login(request.get_full_path())
+        if not hasattr(request.user, 'barber_profile'):
+            raise PermissionDenied
+        return view_func(request, *args, **kwargs)
+    return _wrapped
+
+
 # ──────────────────────────────────────────────────────────────
 # Public pages
 # ──────────────────────────────────────────────────────────────
@@ -83,7 +112,8 @@ def _add_booking_to_session(request, booking_id):
 def home(request):
     male_services = Service.objects.filter(is_active=True, category='MALE')
     female_services = Service.objects.filter(is_active=True, category='FEMALE')
-    barbers = Barber.objects.filter(is_active=True)
+    # Keep the public booking flow focused while the shop has one featured barber.
+    barbers = Barber.objects.filter(is_active=True, name='Prashant Borhade')
     available_dates = _available_dates(30)
     context = {
         'male_services': male_services,
@@ -116,6 +146,18 @@ def get_time_slots(request):
         slot_date = date.fromisoformat(date_str)
     except ValueError:
         return JsonResponse({'error': 'Invalid date format. Use YYYY-MM-DD.'}, status=400)
+
+    # The "Any Available" option is only bookable while the featured barber is
+    # on duty. This makes the dashboard availability toggle affect the public
+    # booking flow immediately.
+    if not barber_id and not Barber.objects.filter(
+        is_active=True,
+        name='Prashant Borhade',
+    ).exists():
+        return JsonResponse({
+            'slots': [],
+            'message': 'No barber is available right now. Please check back soon.',
+        })
         
     duration = 30
     if service_id:
@@ -203,7 +245,9 @@ def create_booking(request):
         try:
             selected_barber = Barber.objects.get(pk=barber_id, is_active=True)
         except Barber.DoesNotExist:
-            pass
+            return JsonResponse({'error': 'Selected barber is no longer available.'}, status=400)
+    elif not Barber.objects.filter(is_active=True, name='Prashant Borhade').exists():
+        return JsonResponse({'error': 'No barber is available right now. Please check back soon.'}, status=400)
 
     # ── Validate date ──────────────────────────────────────────
     try:
@@ -412,11 +456,66 @@ def barber_agenda(request):
 # Admin Dashboard Views
 # ──────────────────────────────────────────────────────────────
 
-def admin_dashboard(request):
+def barber_dashboard(request):
+    """Route each signed-in person to the right dashboard.
+
+    Shop staff get the full management dashboard (even if they also hold a
+    barber profile); everyone with a barber profile gets their personal desk.
+    """
+    if not request.user.is_authenticated:
+        return redirect_to_login(request.get_full_path())
+
+    if request.user.is_staff:
+        return _admin_dashboard(request)
+
+    barber_profile = getattr(request.user, 'barber_profile', None)
+    if barber_profile is not None:
+        return _barber_dashboard(request, barber_profile)
+
+    raise PermissionDenied
+
+
+def _barber_dashboard(request, barber):
     today = timezone.localdate()
-    status_filter = request.GET.get('status', 'ALL')
-    search_q = request.GET.get('q', '').strip()
-    date_filter = request.GET.get('date', '').strip()
+    now_time = timezone.localtime().time()
+
+    bookings = Booking.objects.filter(barber=barber).select_related('service', 'payment')
+    today_qs = bookings.filter(booking_date=today).exclude(status=Booking.STATUS_CANCELLED).order_by('booking_time')
+
+    status_filter = request.GET.get('status', 'TODAY')
+    qs = bookings.order_by('-booking_date', '-booking_time')
+    if status_filter == 'TODAY':
+        qs = qs.filter(booking_date=today)
+    elif status_filter in [Booking.STATUS_PENDING, Booking.STATUS_CONFIRMED, Booking.STATUS_COMPLETED, Booking.STATUS_CANCELLED]:
+        qs = qs.filter(status=status_filter)
+
+    next_appointment = bookings.filter(
+        status__in=[Booking.STATUS_PENDING, Booking.STATUS_CONFIRMED],
+        booking_date__gte=today,
+    ).order_by('booking_date', 'booking_time').first()
+
+    revenue_paid = bookings.filter(payment__status=Payment.STATUS_PAID).aggregate(total=Sum('amount'))['total'] or 0
+
+    context = {
+        'barber': barber,
+        'today': today,
+        'today_bookings': today_qs.count(),
+        'today_schedule': today_qs[:8],
+        'next_appointment': next_appointment,
+        'pending_count': bookings.filter(status=Booking.STATUS_PENDING).count(),
+        'confirmed_count': bookings.filter(status=Booking.STATUS_CONFIRMED).count(),
+        'completed_count': bookings.filter(status=Booking.STATUS_COMPLETED).count(),
+        'cancelled_count': bookings.filter(status=Booking.STATUS_CANCELLED).count(),
+        'revenue_paid': revenue_paid,
+        'bookings': qs[:25],
+        'status_filter': status_filter,
+    }
+    return render(request, 'barber_dashboard_me.html', context)
+
+
+def _admin_dashboard(request):
+    today = timezone.localdate()
+    now_time = timezone.localtime().time()
 
     all_bookings = Booking.objects.select_related('service', 'barber', 'payment')
     all_payments = Payment.objects.all()
@@ -429,15 +528,58 @@ def admin_dashboard(request):
     ).aggregate(total=Sum('amount'))['total'] or 0
 
     total_bookings_count = all_bookings.count()
-    today_bookings_count = all_bookings.filter(booking_date=today).count()
+    today_bookings_qs = all_bookings.filter(booking_date=today)
+    today_bookings_count = today_bookings_qs.count()
 
     pending_count = all_bookings.filter(status=Booking.STATUS_PENDING).count()
     confirmed_count = all_bookings.filter(status=Booking.STATUS_CONFIRMED).count()
     completed_count = all_bookings.filter(status=Booking.STATUS_COMPLETED).count()
     cancelled_count = all_bookings.filter(status=Booking.STATUS_CANCELLED).count()
 
-    # Query table
-    qs = all_bookings.order_by('-booking_date', '-booking_time')
+    # A compact, time-ordered view keeps the most important part of the
+    # dashboard usable between appointments.
+    today_schedule = today_bookings_qs.exclude(
+        status=Booking.STATUS_CANCELLED
+    ).order_by('booking_time')[:6]
+    next_appointment = today_bookings_qs.filter(
+        status__in=[Booking.STATUS_PENDING, Booking.STATUS_CONFIRMED],
+        booking_time__gte=now_time,
+    ).order_by('booking_time').first()
+
+    # Barber Stats
+    barbers = Barber.objects.all()
+    for b in barbers:
+        b.total_appointments = b.bookings.count()
+        b.completed_appointments = b.bookings.filter(status=Booking.STATUS_COMPLETED).count()
+        b.revenue = b.bookings.filter(payment__status=Payment.STATUS_PAID).aggregate(total=Sum('amount'))['total'] or 0
+
+    context = {
+        'active_nav': 'dashboard',
+        'total_revenue': total_revenue,
+        'today_revenue': today_revenue,
+        'total_bookings': total_bookings_count,
+        'today_bookings': today_bookings_count,
+        'pending_count': pending_count,
+        'confirmed_count': confirmed_count,
+        'completed_count': completed_count,
+        'cancelled_count': cancelled_count,
+        'barbers': barbers,
+        'today': today,
+        'today_schedule': today_schedule,
+        'next_appointment': next_appointment,
+        'active_barbers_count': barbers.filter(is_active=True).count(),
+    }
+    return render(request, 'admin_dashboard.html', context)
+
+
+@barber_staff_required
+def admin_appointments(request):
+    today = timezone.localdate()
+    status_filter = request.GET.get('status', 'ALL')
+    search_q = request.GET.get('q', '').strip()
+    date_filter = request.GET.get('date', '').strip()
+
+    qs = Booking.objects.select_related('service', 'barber', 'payment').order_by('-booking_date', '-booking_time')
 
     if status_filter == 'TODAY':
         qs = qs.filter(booking_date=today)
@@ -459,32 +601,160 @@ def admin_dashboard(request):
             Q(customer_email__icontains=search_q)
         )
 
-    # Barber Stats
-    barbers = Barber.objects.all()
-    for b in barbers:
-        b.total_appointments = b.bookings.count()
-        b.completed_appointments = b.bookings.filter(status=Booking.STATUS_COMPLETED).count()
-        b.revenue = b.bookings.filter(payment__status=Payment.STATUS_PAID).aggregate(total=Sum('amount'))['total'] or 0
-
     context = {
-        'total_revenue': total_revenue,
-        'today_revenue': today_revenue,
-        'total_bookings': total_bookings_count,
-        'today_bookings': today_bookings_count,
-        'pending_count': pending_count,
-        'confirmed_count': confirmed_count,
-        'completed_count': completed_count,
-        'cancelled_count': cancelled_count,
-        'bookings': qs[:50],
-        'barbers': barbers,
+        'active_nav': 'appointments',
+        'bookings': qs[:100],
         'status_filter': status_filter,
         'search_q': search_q,
         'date_filter': date_filter,
         'today': today,
     }
-    return render(request, 'admin_dashboard.html', context)
+    return render(request, 'admin_appointments.html', context)
 
 
+@barber_staff_required
+def admin_services(request):
+    """Manage service rates, durations, ordering and availability."""
+    if request.method == 'POST':
+        updated = 0
+        for pk in request.POST.getlist('service_pk'):
+            svc = Service.objects.filter(pk=pk).first()
+            if not svc:
+                continue
+            name = request.POST.get(f'name_{pk}', '').strip()
+            try:
+                price = Decimal(request.POST.get(f'price_{pk}', ''))
+                duration = int(request.POST.get(f'dur_{pk}', ''))
+                sort_order = int(request.POST.get(f'sort_{pk}', '0'))
+            except (TypeError, ValueError):
+                continue
+            if price < 0 or duration < 5 or duration > 720:
+                continue
+            if name:
+                svc.name = name
+            svc.price = price
+            svc.duration = duration
+            svc.sort_order = sort_order
+            svc.is_active = f'active_{pk}' in request.POST
+            svc.save()
+            updated += 1
+
+        if updated:
+            messages.success(request, f"{updated} service(s) updated.")
+        else:
+            messages.error(request, "No valid service rows to update.")
+        return redirect('admin_services')
+
+    services = Service.objects.all().order_by('sort_order', 'category', 'price')
+    context = {
+        'active_nav': 'services',
+        'services': services,
+    }
+    return render(request, 'admin_services.html', context)
+
+
+@barber_staff_required
+def admin_hours(request):
+    """Set opening/closing time and closed days for the whole week."""
+    if request.method == 'POST':
+        updated = 0
+        for day in range(7):
+            bh, _ = BusinessHour.objects.get_or_create(day=day)
+            if f'closed_{day}' in request.POST:
+                bh.is_closed = True
+                bh.save()
+                updated += 1
+                continue
+            try:
+                open_t = datetime.strptime(request.POST.get(f'opening_{day}', ''), '%H:%M').time()
+                close_t = datetime.strptime(request.POST.get(f'closing_{day}', ''), '%H:%M').time()
+            except (ValueError, TypeError):
+                continue
+            if close_t <= open_t:
+                continue
+            bh.opening_time = open_t
+            bh.closing_time = close_t
+            bh.is_closed = False
+            bh.save()
+            updated += 1
+
+        if updated:
+            messages.success(request, f"Business hours updated for {updated} day(s).")
+        else:
+            messages.error(request, "No valid hours rows to update.")
+        return redirect('admin_hours')
+
+    business_hours = [BusinessHour.objects.get_or_create(day=d)[0] for d in range(7)]
+    hour_options = []
+    start_dt = datetime.combine(datetime.today(), datetime.strptime('09:00', '%H:%M').time())
+    end_dt = datetime.combine(datetime.today(), datetime.strptime('23:45', '%H:%M').time())
+    cur = start_dt
+    while cur <= end_dt:
+        hour_options.append(cur.strftime('%H:%M'))
+        cur += timedelta(minutes=15)
+    context = {
+        'active_nav': 'hours',
+        'business_hours': business_hours,
+        'hour_options': hour_options,
+    }
+    return render(request, 'admin_hours.html', context)
+
+
+@barber_staff_required
+def admin_settings(request):
+    """Shop-wide knobs, e.g. how long each time slot lasts."""
+    if request.method == 'POST':
+        try:
+            step = int(request.POST.get('slot_step', '30'))
+        except (TypeError, ValueError):
+            step = 30
+        step = max(5, min(step, 120))
+        ShopSetting.objects.update_or_create(key='slot_step', defaults={'value': str(step)})
+        messages.success(request, f"Each time slot now runs every {step} minutes.")
+        return redirect('admin_settings')
+
+    context = {
+        'active_nav': 'settings',
+        'slot_step': slot_step_minutes(),
+        'slot_choices': [15, 20, 30, 45, 60, 90, 120],
+    }
+    return render(request, 'admin_settings.html', context)
+
+
+@barber_required
+@require_POST
+def barber_update_status(request, booking_id):
+    """A barber can update the status of their own bookings only."""
+    barber = request.user.barber_profile
+    booking = get_object_or_404(Booking, booking_id=booking_id, barber=barber)
+    new_status = request.POST.get('status')
+
+    if new_status in [Booking.STATUS_PENDING, Booking.STATUS_CONFIRMED, Booking.STATUS_COMPLETED, Booking.STATUS_CANCELLED]:
+        booking.status = new_status
+        booking.save()
+
+        try:
+            payment = booking.payment
+            if new_status in [Booking.STATUS_CONFIRMED, Booking.STATUS_COMPLETED] and payment.status == Payment.STATUS_PENDING:
+                payment.status = Payment.STATUS_PAID
+                payment.save()
+            elif new_status == Booking.STATUS_CANCELLED and payment.status == Payment.STATUS_PAID:
+                payment.status = Payment.STATUS_REFUNDED
+                payment.save()
+        except Payment.DoesNotExist:
+            pass
+
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': True, 'status': booking.status, 'status_display': booking.get_status_display()})
+
+        messages.success(request, f"Booking {booking.booking_id} status updated to {booking.get_status_display()}.")
+    else:
+        messages.error(request, "Invalid status choice.")
+
+    return redirect('barber_dashboard')
+
+
+@barber_staff_required
 @require_POST
 def admin_update_status(request, booking_id):
     booking = get_object_or_404(Booking, booking_id=booking_id)
@@ -512,9 +782,10 @@ def admin_update_status(request, booking_id):
     else:
         messages.error(request, "Invalid status choice.")
 
-    return redirect('admin_dashboard')
+    return redirect('barber_dashboard')
 
 
+@barber_staff_required
 @require_POST
 def admin_toggle_barber(request, barber_id):
     barber = get_object_or_404(Barber, pk=barber_id)
@@ -525,9 +796,10 @@ def admin_toggle_barber(request, barber_id):
         return JsonResponse({'success': True, 'is_active': barber.is_active})
 
     messages.success(request, f"Barber {barber.name} status updated.")
-    return redirect('admin_dashboard')
+    return redirect('barber_dashboard')
 
 
+@barber_staff_required
 @require_POST
 def admin_send_notification(request, booking_id):
     booking = get_object_or_404(Booking, booking_id=booking_id)
@@ -546,7 +818,7 @@ def admin_send_notification(request, booking_id):
         })
 
     messages.success(request, f"Notification message logged for {booking.customer_name} ({booking.customer_phone}).")
-    return redirect('admin_dashboard')
+    return redirect('barber_dashboard')
 
 
 # ──────────────────────────────────────────────────────────────

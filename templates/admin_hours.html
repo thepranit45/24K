@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Business Hours | 24 K Barbershop{% endblock %}
+{% block body_class %}barber-dashboard-page{% endblock %}
+
+{% block content %}
+<div class="admin-dashboard-wrapper">
+  <div class="container">
+
+    {% include 'admin_nav.html' %}
+    {% include 'admin_styles.html' %}
+
+    <!-- Page Header -->
+    <div class="dashboard-header" data-animate="fade-up">
+      <div>
+        <div class="dashboard-eyebrow"><i class="fa-regular fa-clock"></i> Shop operations</div>
+        <h1 class="dashboard-title">Business Hours</h1>
+        <p class="dashboard-subtitle">Set opening & closing times per day, or mark a day closed. Closed days show no booking slots.</p>
+        <div class="dashboard-header-meta">
+          <span><i class="fa-solid fa-circle"></i> Live operations</span>
+          <span><i class="fa-regular fa-calendar"></i> {{ today|date:"D, d M Y" }}</span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <a href="{% url 'admin_hours' %}" class="dashboard-header-button dashboard-header-button--primary">
+          <i class="fa-solid fa-rotate"></i> Refresh
+        </a>
+      </div>
+    </div>
+
+    <!-- Business Hours Section -->
+    <div class="dashboard-section" data-animate="fade-up" data-delay="200">
+      <div class="section-title-wrap">
+        <h2><i class="fa-regular fa-calendar-days text-gold"></i> Weekly Opening Hours</h2>
+        <p class="section-sub">Tick <strong>Closed</strong> to shut the shop for that day. Times must have closing after opening.</p>
+      </div>
+
+      <form method="POST" action="{% url 'admin_hours' %}" id="hours-form">
+        {% csrf_token %}
+        <div class="table-responsive">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Day</th>
+                <th>Opens At</th>
+                <th>Closes At</th>
+                <th>Closed All Day</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for bh in business_hours %}
+              <tr id="hour-row-{{ bh.day }}">
+                <td><strong>{{ bh.get_day_display }}</strong></td>
+                <td>
+                  <select name="opening_{{ bh.day }}" class="admin-select-filter admin-inline-input">
+                    {% for opt in hour_options %}
+                      <option value="{{ opt }}" {% if bh.opening_time|time:"H:i" == opt %}selected{% endif %}>{{ opt }}</option>
+                    {% endfor %}
+                  </select>
+                </td>
+                <td>
+                  <select name="closing_{{ bh.day }}" class="admin-select-filter admin-inline-input">
+                    {% for opt in hour_options %}
+                      <option value="{{ opt }}" {% if bh.closing_time|time:"H:i" == opt %}selected{% endif %}>{{ opt }}</option>
+                    {% endfor %}
+                  </select>
+                </td>
+                <td>
+                  <label class="toggle-switch">
+                    <input type="checkbox" name="closed_{{ bh.day }}" value="1" class="closed-day-toggle" {% if bh.is_closed %}checked{% endif %} />
+                    <span class="toggle-slider"></span>
+                  </label>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="dashboard-form-footer">
+          <button type="submit" class="btn-filter"><i class="fa-solid fa-floppy-disk"></i> Save Business Hours</button>
+          <span class="form-hint"><i class="fa-solid fa-circle-info"></i> Slot times are generated from these hours with your chosen slot duration.</span>
+        </div>
+      </form>
+    </div>
+
+  </div>
+</div>
+
+<script>
+document.querySelectorAll('.closed-day-toggle').forEach(function (cb) {
+  function syncDisabled() {
+    const row = document.getElementById('hour-row-' + cb.name.replace(/[^0-9]/g, ''));
+    if (!row) return;
+    const selects = row.querySelectorAll('select');
+    selects.forEach(function (s) { s.disabled = cb.checked; });
+  }
+  cb.addEventListener('change', syncDisabled);
+  syncDisabled();
+});
+</script>
+{% endblock %}

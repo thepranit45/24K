@@ -8,10 +8,17 @@ from .models import Service, BusinessHour, Booking, Payment, Barber
 
 @admin.register(Barber)
 class BarberAdmin(admin.ModelAdmin):
-    list_display = ['name', 'title', 'rating', 'experience_years', 'is_active', 'specialties']
+    list_display = ['photo_preview', 'name', 'title', 'rating', 'experience_years', 'is_active', 'specialties']
     list_editable = ['is_active', 'title', 'rating']
     list_filter = ['is_active']
     search_fields = ['name', 'title', 'specialties']
+    fields = ['name', 'title', 'photo', 'bio', 'avatar_icon', 'specialties', 'rating', 'experience_years', 'is_active']
+
+    def photo_preview(self, obj):
+        if obj.photo:
+            return format_html('<img src="{}" style="height:40px;width:40px;border-radius:50%;object-fit:cover;" />', obj.photo.url)
+        return '—'
+    photo_preview.short_description = 'Photo'
 
 
 

@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Slot Settings | 24 K Barbershop{% endblock %}
+{% block body_class %}barber-dashboard-page{% endblock %}
+
+{% block content %}
+<div class="admin-dashboard-wrapper">
+  <div class="container">
+
+    {% include 'admin_nav.html' %}
+    {% include 'admin_styles.html' %}
+
+    <!-- Page Header -->
+    <div class="dashboard-header" data-animate="fade-up">
+      <div>
+        <div class="dashboard-eyebrow"><i class="fa-solid fa-gears"></i> Shop operations</div>
+        <h1 class="dashboard-title">Slot Settings</h1>
+        <p class="dashboard-subtitle">Control how often customers can pick a booking time — the step between available slots.</p>
+        <div class="dashboard-header-meta">
+          <span><i class="fa-solid fa-circle"></i> Live operations</span>
+          <span><i class="fa-regular fa-calendar"></i> {{ today|date:"D, d M Y" }}</span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <a href="{% url 'admin_settings' %}" class="dashboard-header-button dashboard-header-button--primary">
+          <i class="fa-solid fa-rotate"></i> Refresh
+        </a>
+      </div>
+    </div>
+
+    <!-- Slot Settings Section -->
+    <div class="dashboard-section" data-animate="fade-up" data-delay="200">
+      <div class="section-title-wrap">
+        <h2><i class="fa-solid fa-sliders text-gold"></i> Booking Slot Duration</h2>
+        <p class="section-sub">Applies instantly to the public booking wizard and the customer API. Slots that would start too late for a service are hidden.</p>
+      </div>
+
+      <form method="POST" action="{% url 'admin_settings' %}" id="settings-form" class="settings-form">
+        {% csrf_token %}
+        <div class="settings-grid">
+          <label class="settings-field">
+            <span class="settings-label">Slot step (minutes)</span>
+            <select name="slot_step" class="admin-select-filter admin-inline-input">
+              {% for choice in slot_choices %}
+                <option value="{{ choice }}" {% if slot_step == choice %}selected{% endif %}>{{ choice }} minutes</option>
+              {% endfor %}
+            </select>
+            <span class="settings-hint">e.g. 30 → slots at 10:00, 10:30, 11:00…; 60 → 10:00, 11:00…</span>
+          </label>
+        </div>
+
+        <div class="dashboard-form-footer">
+          <button type="submit" class="btn-filter"><i class="fa-solid fa-floppy-disk"></i> Save Slot Settings</button>
+        </div>
+      </form>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

@@ -48,7 +48,7 @@ def _send_sms(phone: str, message: str) -> bool:
     # ── Mock mode ─────────────────────────────────────────────────────────
     if not gateway_url or gateway_url == 'mock':
         logger.info(f'[MOCK SMS] To: {normalized} | Message: {message}')
-        print(f'\n📱 [MOCK SMS → {normalized}]\n{message}\n')
+        print(f'\n[MOCK SMS → {normalized}]\n{message}\n')
         return True
 
     # ── Real Android SMS Gateway (own SIM) ─────────────────────────────────

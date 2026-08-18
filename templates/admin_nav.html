@@ -1,0 +1,28 @@
+<style>
+  .admin-topnav {
+    align-items: center; background: #0b0d12; border: 1px solid #1f2330; border-radius: 14px;
+    display: flex; flex-wrap: wrap; gap: 0.3rem; margin-bottom: 1.5rem; padding: 0.55rem 0.7rem;
+  }
+  .admin-topnav a {
+    align-items: center; border-radius: 9px; color: #a7afc0; display: inline-flex; font-size: 0.83rem;
+    font-weight: 600; gap: 0.45rem; padding: 0.5rem 0.85rem; text-decoration: none; transition: background 0.2s, color 0.2s;
+  }
+  .admin-topnav a:hover { background: rgba(212, 175, 55, 0.1); color: #fff; }
+  .admin-topnav a.active { background: linear-gradient(135deg, #e8c54f, #b88708); color: #201807; }
+  .admin-topnav .admin-topnav-spacer { flex: 1; }
+  @media (max-width: 768px) {
+    .admin-topnav { gap: 0.15rem; padding: 0.4rem; }
+    .admin-topnav a { font-size: 0.76rem; padding: 0.45rem 0.6rem; }
+  }
+</style>
+<nav class="admin-topnav" aria-label="Management navigation">
+  <a href="{% url 'admin_dashboard' %}" class="{% if active_nav == 'dashboard' %}active{% endif %}"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+  <a href="{% url 'admin_appointments' %}" class="{% if active_nav == 'appointments' %}active{% endif %}"><i class="fa-solid fa-calendar-check"></i> Appointments</a>
+  <a href="{% url 'admin_services' %}" class="{% if active_nav == 'services' %}active{% endif %}"><i class="fa-solid fa-tags"></i> Services &amp; Rates</a>
+  <a href="{% url 'admin_hours' %}" class="{% if active_nav == 'hours' %}active{% endif %}"><i class="fa-regular fa-clock"></i> Business Hours</a>
+  <a href="{% url 'admin_settings' %}" class="{% if active_nav == 'settings' %}active{% endif %}"><i class="fa-solid fa-hourglass-half"></i> Slot Duration</a>
+  <span class="admin-topnav-spacer"></span>
+  <a href="{% url 'barber_agenda' %}" target="_blank"><i class="fa-solid fa-list-check"></i> Agenda</a>
+  <a href="{% url 'home' %}"><i class="fa-solid fa-globe"></i> View Site</a>
+  <a href="{% url 'logout' %}"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</a>
+</nav>

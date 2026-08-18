@@ -31,6 +31,39 @@ document.addEventListener('DOMContentLoaded', () => {
     onScroll();
   }
 
+  // Keep page actions reachable on phones by moving the fixed bottom nav
+  // out of the way while the user is scrolling down. It returns as soon as
+  // the user scrolls up again.
+  const mobileBottomNav = document.querySelector('.mobile-bottom-nav');
+  const mobileViewport = window.matchMedia('(max-width: 768px)');
+  let previousScrollY = window.scrollY;
+  let bottomNavFramePending = false;
+
+  const updateMobileBottomNav = () => {
+    if (!mobileBottomNav) return;
+
+    const currentScrollY = window.scrollY;
+    const scrollDelta = currentScrollY - previousScrollY;
+    const isMobile = mobileViewport.matches;
+
+    if (!isMobile || currentScrollY < 80 || scrollDelta < -8) {
+      mobileBottomNav.classList.remove('is-hidden');
+    } else if (scrollDelta > 8) {
+      mobileBottomNav.classList.add('is-hidden');
+    }
+
+    previousScrollY = currentScrollY;
+    bottomNavFramePending = false;
+  };
+
+  window.addEventListener('scroll', () => {
+    if (!bottomNavFramePending) {
+      bottomNavFramePending = true;
+      window.requestAnimationFrame(updateMobileBottomNav);
+    }
+  }, { passive: true });
+  mobileViewport.addEventListener('change', updateMobileBottomNav);
+
   // Hamburger
   const hamburger = document.getElementById('hamburger');
   const mobileNav = document.getElementById('mobileNav');
@@ -103,6 +136,14 @@ function selectService(btn) {
   wizard.barberId        = '';
   wizard.barberName      = 'Any Available Barber';
 
+  const preferredBarber = document.querySelector('[data-preferred-barber]');
+  const anyAvailableBarber = document.querySelector('.barber-select-card--any');
+  if (preferredBarber) {
+    selectBarber(preferredBarber, preferredBarber.dataset.barberId, preferredBarber.dataset.barberName);
+  } else if (anyAvailableBarber) {
+    selectBarber(anyAvailableBarber, '', 'Any Available Barber');
+  }
+
   // Populate step 1
   document.getElementById('wiz-service-name').textContent     = wizard.serviceName;
   document.getElementById('wiz-service-duration').textContent = wizard.serviceDuration + ' min';
@@ -130,8 +171,12 @@ function selectService(btn) {
 }
 
 function selectBarber(card, id, name) {
-  document.querySelectorAll('.barber-select-card').forEach(c => c.classList.remove('selected'));
+  document.querySelectorAll('.barber-select-card').forEach(c => {
+    c.classList.remove('selected');
+    c.setAttribute('aria-checked', 'false');
+  });
   card.classList.add('selected');
+  card.setAttribute('aria-checked', 'true');
   wizard.barberId   = id || '';
   wizard.barberName = name || 'Any Available Barber';
 
@@ -190,6 +235,7 @@ function wizardGoTo(step) {
         card.style.animation = 'none';
         card.offsetHeight;
         card.style.animation = `barberStaggerIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) ${0.05 * idx}s forwards`;
+        setTimeout(() => { card.style.animation = ''; }, 600 + 100 * idx);
       });
     }
   }

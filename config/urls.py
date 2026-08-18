@@ -5,8 +5,10 @@ from django.views.static import serve
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('auth/', include('users.urls')),
     path('', include('booking.urls')),
     path('api/barber/', include('booking.api_urls')),
+    path('api/customer/', include('booking.customer_urls')),
     re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
     re_path(r'^static/(?P<path>.*)$', serve, {'document_root': settings.STATIC_ROOT}),
 ]
