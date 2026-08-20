@@ -127,8 +127,22 @@ function initScrollAnimations() {
 // BOOKING WIZARD
 // ──────────────────────────────────────────────────────────────
 
+function handleBookAppointmentHero(e) {
+  if (e) e.preventDefault();
+  const servicesSec = document.getElementById('services');
+  if (servicesSec) {
+    servicesSec.scrollIntoView({ behavior: 'smooth' });
+    const firstService = document.querySelector('.mockup-service-card');
+    if (firstService) {
+      firstService.classList.add('pulse-highlight');
+      setTimeout(() => firstService.classList.remove('pulse-highlight'), 1800);
+    }
+  }
+}
+
 /** Open wizard with a selected service */
 function selectService(btn) {
+  if (!btn) return;
   wizard.serviceId       = btn.dataset.serviceId;
   wizard.serviceName     = btn.dataset.serviceName;
   wizard.servicePrice    = btn.dataset.servicePrice;
