@@ -190,49 +190,88 @@
 
       <p class="barber-grid-label">MASTER BARBERS</p>
 
-      <div class="barber-selection-grid" role="radiogroup" aria-label="Choose a barber">
-        {% for b in barbers %}
-        <button type="button" class="barber-select-card barber-select-card--featured selected" data-preferred-barber data-barber-id="{{ b.id }}" data-barber-name="{{ b.name }}" onclick="selectBarber(this, '{{ b.id }}', '{{ b.name }}')" role="radio" aria-checked="true">
-          <div class="barber-photo">
-            {% if b.photo %}
-              <img src="{{ b.photo.url }}" alt="{{ b.name }}" />
-            {% else %}
-              <div class="barber-photo-initials">{{ b.initials }}</div>
-            {% endif %}
-          </div>
-          <div class="barber-card-info">
-            <div class="barber-card-title-row">
-              <h4>{{ b.name }}</h4>
-              <span class="barber-card-tag barber-card-tag--featured"><i class="fa-solid fa-crown"></i> Featured</span>
+      <div class="barber-wheel" id="barberWheel" data-count="{{ barbers|length|add:1 }}">
+        <div class="barber-wheel__stage" id="barberWheelStage" role="radiogroup" aria-label="Choose a barber" aria-orientation="horizontal" tabindex="0">
+          <div class="barber-wheel__track" id="barberWheelTrack">
+            {% for b in barbers %}
+            <div class="barber-wheel__card{% if b.is_featured %} barber-wheel__card--featured{% endif %}{% if b.is_featured %} selected{% endif %}"
+                 data-barber-id="{{ b.id }}" data-barber-name="{{ b.name }}" role="radio"
+                 aria-checked="{% if b.is_featured %}true{% else %}false{% endif %}" tabindex="-1"
+                 {% if b.is_featured %}data-preferred-barber{% endif %}>
+              <div class="barber-wheel__avatar">
+                <span class="wheel-ring wheel-ring--outer" aria-hidden="true"></span>
+                <span class="wheel-ring wheel-ring--inner" aria-hidden="true"></span>
+                <div class="barber-photo">
+                  {% if b.photo %}
+                    <img src="{{ b.photo.url }}" alt="{{ b.name }}" loading="lazy" />
+                  {% else %}
+                    <div class="barber-photo-initials">{{ b.initials }}</div>
+                  {% endif %}
+                </div>
+              </div>
+              <div class="barber-wheel__body">
+                <div class="barber-card-title-row">
+                  <h4>{{ b.name }}</h4>
+                  {% if b.is_featured %}
+                    <span class="barber-card-tag barber-card-tag--featured"><i class="fa-solid fa-crown"></i> Featured</span>
+                  {% endif %}
+                </div>
+                <p class="b-role">{{ b.title }}</p>
+                <div class="barber-spec-chips">
+                  {% for spec in b.specialty_list|slice:":3" %}
+                  <span class="barber-spec-chip">{{ spec }}</span>
+                  {% endfor %}
+                </div>
+                <div class="barber-card-meta">
+                  <span class="b-rating"><i class="fa-solid fa-star"></i> {{ b.rating }}</span>
+                  <span class="barber-exp-badge"><i class="fa-regular fa-calendar"></i> {{ b.experience_years }} yrs exp</span>
+                  {% if b.is_active %}
+                    <span class="barber-availability"><i class="fa-solid fa-circle-check"></i> Available today</span>
+                  {% else %}
+                    <span class="barber-availability barber-availability--off"><i class="fa-solid fa-circle-pause"></i> Paused</span>
+                  {% endif %}
+                </div>
+                {% if b.next_slot_label %}
+                  <p class="barber-next-slot"><i class="fa-regular fa-clock"></i> Next: {{ b.next_slot_label }}</p>
+                {% endif %}
+              </div>
+              <div class="barber-wheel__footer">
+                <button type="button" class="barber-wheel__select-btn">Select Barber</button>
+              </div>
+              <div class="wheel-sheen" aria-hidden="true"></div>
             </div>
-            <p class="b-role">{{ b.title }}</p>
-            <div class="barber-spec-chips">
-              {% for spec in b.specialty_list|slice:":3" %}
-              <span class="barber-spec-chip">{{ spec }}</span>
-              {% endfor %}
-            </div>
-            <div class="barber-card-meta">
-              <span class="b-rating"><i class="fa-solid fa-star"></i> {{ b.rating }}</span>
-              <span class="barber-exp-badge"><i class="fa-regular fa-calendar"></i> {{ b.experience_years }} yrs exp</span>
-              <span class="barber-availability"><i class="fa-solid fa-circle-check"></i> Available today</span>
-            </div>
-          </div>
-          <div class="barber-check-badge"><i class="fa-solid fa-check"></i></div>
-        </button>
-        {% endfor %}
+            {% endfor %}
 
-        <!-- Fallback option -->
-        <button type="button" class="barber-select-card barber-select-card--any" data-barber-id="" data-barber-name="Any Available Barber" onclick="selectBarber(this, '', 'Any Available Barber')" role="radio" aria-checked="false">
-          <div class="barber-card-icon"><i class="fa-solid fa-bolt"></i></div>
-          <div class="barber-card-info">
-            <div class="barber-card-title-row">
-              <h4>Any Available Barber</h4>
-              <span class="barber-card-tag">Fastest slot</span>
+            <div class="barber-wheel__card barber-wheel__card--any barber-select-card--any"
+                 data-barber-id="" data-barber-name="Any Available Barber" role="radio"
+                 aria-checked="false" tabindex="-1">
+              <div class="barber-wheel__avatar">
+                <span class="wheel-ring wheel-ring--outer" aria-hidden="true"></span>
+                <span class="wheel-ring wheel-ring--inner" aria-hidden="true"></span>
+                <div class="barber-card-icon"><i class="fa-solid fa-bolt"></i></div>
+              </div>
+              <div class="barber-wheel__body">
+                <div class="barber-card-title-row">
+                  <h4>Any Available Barber</h4>
+                  <span class="barber-card-tag">Fastest slot</span>
+                </div>
+                <p class="b-role">Smart Match</p>
+                <p class="barber-wheel__any-desc">We'll match you with the earliest available expert.</p>
+              </div>
+              <div class="barber-wheel__footer">
+                <button type="button" class="barber-wheel__select-btn">Select Barber</button>
+              </div>
+              <div class="wheel-sheen" aria-hidden="true"></div>
             </div>
-            <p>We'll match you with the earliest available expert.</p>
           </div>
-          <div class="barber-check-badge"><i class="fa-solid fa-check"></i></div>
-        </button>
+        </div>
+
+        <div class="barber-wheel__controls">
+          <button type="button" class="barber-wheel__nav" id="wheelPrev" aria-label="Previous barber"><i class="fa-solid fa-chevron-left"></i></button>
+          <div class="barber-wheel__dots" id="wheelDots"></div>
+          <span class="barber-wheel__counter" id="wheelCounter" role="status" aria-live="polite"></span>
+          <button type="button" class="barber-wheel__nav" id="wheelNext" aria-label="Next barber"><i class="fa-solid fa-chevron-right"></i></button>
+        </div>
       </div>
 
       <div class="wizard-nav">

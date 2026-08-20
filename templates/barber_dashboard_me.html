@@ -26,9 +26,12 @@
         <a href="{% url 'barber_agenda' %}" target="_blank" class="dashboard-header-button dashboard-header-button--secondary">
           <i class="fa-solid fa-list-check"></i> Live Agenda
         </a>
-        <a href="{% url 'logout' %}" class="dashboard-header-button dashboard-header-button--primary">
-          <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
-        </a>
+        <form action="{% url 'logout' %}" method="POST" style="display: inline-flex; margin: 0;">
+          {% csrf_token %}
+          <button type="submit" class="dashboard-header-button dashboard-header-button--primary" style="border: none; cursor: pointer; font: inherit;">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
+          </button>
+        </form>
       </div>
     </div>
 

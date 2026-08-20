@@ -171,7 +171,8 @@ function selectService(btn) {
 }
 
 function selectBarber(card, id, name) {
-  document.querySelectorAll('.barber-select-card').forEach(c => {
+  if (initBarberWheel) initBarberWheel();
+  document.querySelectorAll('.barber-select-card, .barber-wheel__card').forEach(c => {
     c.classList.remove('selected');
     c.setAttribute('aria-checked', 'false');
   });
@@ -229,13 +230,15 @@ function wizardGoTo(step) {
       });
     }
 
-    // Trigger stagger animation for barber cards on step 2
+    // Stagger the barber wheel entrance and settle wheel positions on step 2
     if (step === 2) {
-      document.querySelectorAll('.barber-select-card').forEach((card, idx) => {
-        card.style.animation = 'none';
-        card.offsetHeight;
-        card.style.animation = `barberStaggerIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) ${0.05 * idx}s forwards`;
-        setTimeout(() => { card.style.animation = ''; }, 600 + 100 * idx);
+      if (window.__barberWheel) {
+        requestAnimationFrame(() => window.__barberWheel.render(true));
+      }
+      document.querySelectorAll('.barber-wheel__dots .wheel-dot, .barber-wheel__nav, .barber-wheel__counter, .barber-wheel__controls').forEach((el) => {
+        el.style.animation = 'none';
+        el.offsetHeight;
+        el.style.animation = '';
       });
     }
   }
@@ -462,3 +465,348 @@ function showToast(message, type = 'info') {
   container.appendChild(toast);
   setTimeout(() => toast.remove(), 5000);
 }
+
+// ──────────────────────────────────────────────────────────────
+// BARBER WHEEL — swipeable circular selector for "Choose Your Barber"
+// ──────────────────────────────────────────────────────────────
+let __barberWheel = null;
+let __barberWheelInit = false;
+window.__barberWheel = null;
+
+function initBarberWheel() {
+  const stage = document.getElementById('barberWheelStage');
+  if (!stage || __barberWheelInit && __barberWheel?.stage === stage) return;
+  __barberWheelInit = true;
+
+  const cards = Array.from(stage.querySelectorAll('.barber-wheel__card'));
+  if (!cards.length) return;
+
+  const dotsWrap = document.getElementById('wheelDots');
+  const counter = document.getElementById('wheelCounter');
+  const prevBtn = document.getElementById('wheelPrev');
+  const nextBtn = document.getElementById('wheelNext');
+
+  const initial = Math.max(0, cards.findIndex(c => c.classList.contains('selected') || c.getAttribute('aria-checked') === 'true'));
+
+  const w = {
+    stage, cards, dotsWrap, counter, prevBtn, nextBtn,
+    count: cards.length,
+    active: initial >= 0 ? initial : 0,
+    raw: 0,                 // accumulated drag offset (cards)
+    velocity: 0,
+    dragging: false,
+    animating: false,
+    pointerActive: false,
+    pointerId: null,
+    lastX: 0, lastY: 0, lastT: 0,
+    startX: 0, startY: 0, startT: 0,
+    consumedTouch: false,
+    reduced: window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+    raf: 0,
+
+    spacing() {
+      const w = this.cards[0].getBoundingClientRect().width || 280;
+      return w + 14;
+    },
+
+    norm(i) {
+      const n = ((i % this.count) + this.count) % this.count;
+      return n;
+    },
+
+    /** Fractional distance of card i from the visual center (wrapped). */
+    dist(i) {
+      let d = i - (this.active + this.raw);
+      d = ((d + this.count) % this.count + this.count / 2) % this.count - this.count / 2;
+      return d;
+    },
+
+    positionCards(animate) {
+      const away = this.count > 1 ? this.spacing() : 0;
+      this.cards.forEach((card, i) => {
+        const d = this.dist(i);
+        const ad = Math.abs(d);
+        const y = 18 * Math.sin(Math.min(ad, 4) * Math.PI / 4) * Math.min(1, ad * 2);
+        const scale = ad < 1 ? 1 - 0.16 * ad : (ad < 2 ? 0.84 - 0.14 * (ad - 1) : 0.7);
+        const opacity = ad < 1 ? 1 - 0.35 * ad : (ad < 2 ? 0.65 - 0.3 * (ad - 1) : 0.32);
+        const blur = ad < 1 ? 0 : (ad < 2 ? (ad - 1) * 6 : 7);
+        const ry = -Math.min(ad, 1.5) * 18;
+        card.style.transform =
+          `translateX(calc(-50% + ${(away * d).toFixed(1)}px)) translateY(${y.toFixed(1)}px) ` +
+          `scale(${scale.toFixed(3)}) rotateY(${ry.toFixed(1)}deg)`;
+        card.style.zIndex = String(20 - Math.min(ad, 9));
+        card.style.opacity = opacity.toFixed(3);
+        card.style.filter = blur > 0 ? `blur(${blur.toFixed(1)}px)` : 'none';
+        card.classList.toggle('wheel-active', Math.abs(d) < 0.5);
+        card.classList.toggle('wheel-side', Math.abs(d) >= 0.5 && Math.abs(d) < 1.5);
+        card.setAttribute('aria-hidden', Math.abs(d) >= 1.5 ? 'true' : 'false');
+      });
+      if (this.counter) {
+        const shown = this.norm(this.active + Math.round(this.raw));
+        this.counter.textContent = `${shown + 1} of ${this.count}`;
+      }
+      this.updateDots(animate);
+    },
+
+    updateDots(animate) {
+      if (!this.dotsWrap) return;
+      const shown = this.norm(this.active + Math.round(this.raw));
+      this.dotsWrap.querySelectorAll('.wheel-dot').forEach((dot, i) => {
+        const on = i === shown;
+        dot.classList.toggle('active', on);
+        dot.setAttribute('aria-current', on ? 'true' : 'false');
+        if (animate && on) {
+          dot.style.animation = 'none';
+          dot.offsetHeight;
+          dot.style.animation = 'wheelDotPulse 0.45s cubic-bezier(0.34, 1.56, 0.64, 1)';
+        }
+      });
+    },
+
+    snap(target, withSpring) {
+      if (this.animating) return;
+      this.animating = true;
+      this.raw = 0;
+      this.active = this.norm(target);
+      const changed = this.changed !== this.active;
+      this.changed = this.active;
+
+      this.stage.classList.toggle('wheel-snapping', withSpring && !this.reduced);
+      this.positionCards(withSpring && !this.reduced);
+
+      const finish = () => {
+        this.stage.classList.remove('wheel-snapping');
+        this.animating = false;
+        this.applySelection();
+        if (changed && !this.reduced) {
+          try { navigator.vibrate && navigator.vibrate(10); } catch (e) { /* not supported */ }
+        }
+      };
+      if (withSpring && !this.reduced) {
+        setTimeout(finish, 600);
+      } else {
+        finish();
+      }
+    },
+
+    applySelection() {
+      const card = this.cards[this.active];
+      const id = card.dataset.barberId || '';
+      const name = card.dataset.barberName || 'Any Available Barber';
+      const wasSelected = wizard.barberId === id;
+      this.cards.forEach(c => {
+        c.classList.remove('selected');
+        c.setAttribute('aria-checked', 'false');
+        c.querySelectorAll('.barber-wheel__select-btn').forEach(b => { b.textContent = 'Select Barber'; });
+      });
+      card.classList.add('selected');
+      card.setAttribute('aria-checked', 'true');
+      card.querySelectorAll('.barber-wheel__select-btn').forEach(b => { b.textContent = 'Selected ✓'; });
+      if (!wasSelected) {
+        card.classList.remove('wheel-just-selected');
+        card.offsetHeight;
+        card.classList.add('wheel-just-selected');
+      }
+      if (stage) stage.focus({ preventScroll: true });
+      if (wizard.barberId !== id || wizard.barberName !== name) {
+        selectBarber(card, id, name);
+      }
+    },
+
+    render(entering) {
+      this.positionCards(false);
+    },
+
+    destroy() {
+      this.stage.removeEventListener('pointerdown', this._onDown);
+      this.stage.removeEventListener('pointermove', this._onMove);
+      this.stage.removeEventListener('pointerup', this._onUp);
+      this.stage.removeEventListener('pointercancel', this._onUp);
+      this.stage.removeEventListener('keydown', this._onKey);
+      this.stage.removeEventListener('touchmove', this._onTouch);
+      this.stage.removeEventListener('click', this._onClick);
+      window.removeEventListener('resize', this._onResize);
+    },
+  };
+
+  // Dots
+  if (dotsWrap) {
+    dotsWrap.innerHTML = cards.map((c, i) =>
+      `<button type="button" class="wheel-dot" data-i="${i}" aria-label="Show ${c.dataset.barberName || 'barber'} ${i + 1} of ${cards.length}"></button>`
+    ).join('');
+  }
+
+  // Single card: centered without carousel controls
+  if (w.count <= 1) {
+    if (dotsWrap) dotsWrap.style.display = 'none';
+    if (counter) counter.style.display = 'none';
+    if (prevBtn) prevBtn.style.display = 'none';
+    if (nextBtn) nextBtn.style.display = 'none';
+    w.stage.classList.add('wheel-single');
+  }
+
+  // Pointer gestures (mouse + touch unified)
+  w._onDown = (e) => {
+    if (w.animating) return;
+    if (w.dragging || w.pointerActive) return;
+    w.pointerActive = true;
+    w.pointerId = e.pointerId;
+    w.dragging = true;
+    w.startX = w.lastX = e.clientX;
+    w.startY = w.lastY = e.clientY;
+    w.startT = w.lastT = performance.now();
+    w.velocity = 0;
+    w.raw = 0;
+    w.consumedTouch = false;
+    w.stage.classList.add('wheel-dragging');
+    w.stage.setPointerCapture && w.stage.setPointerCapture(e.pointerId);
+  };
+
+  w._onMove = (e) => {
+    if (!w.dragging || e.pointerId !== w.pointerId) return;
+    const dx = e.clientX - w.lastX;
+    const dy = e.clientY - w.lastY;
+    const now = performance.now();
+    const dt = Math.max(1, now - w.lastT);
+    if (Math.abs(e.clientX - w.startX) > 10 && Math.abs(e.clientX - w.startX) > Math.abs(e.clientY - w.startY)) {
+      w.consumedTouch = true;
+      if (e.cancelable) e.preventDefault();
+    }
+    // Track follows the pointer: dragging left (dx<0) moves the next card
+    // toward the center, so the raw offset grows positive.
+    const dCards = -dx / w.spacing();
+    w.raw += dCards;
+    if (dt > 0) w.velocity = 0.75 * w.velocity + 0.25 * (dCards / dt); // cards per ms
+    w.lastX = e.clientX; w.lastY = e.clientY; w.lastT = now;
+    if (!w.raf) {
+      w.raf = requestAnimationFrame(() => { w.raf = 0; w.positionCards(false); });
+    }
+  };
+
+  w._onUp = (e) => {
+    if (!w.dragging || e.pointerId !== w.pointerId) return;
+    w.dragging = false;
+    w.pointerActive = false;
+    w.stage.classList.remove('wheel-dragging');
+    w.stage.releasePointerCapture && w.stage.releasePointerCapture(e.pointerId);
+
+    const moved = Math.abs(e.clientX - w.startX);
+    let targetRaw = w.raw;
+    if (!w.reduced) {
+      targetRaw += w.velocity * 240; // momentum: cards per ms * 240ms
+    }
+
+    if (!w.consumedTouch && moved < 8 && Math.abs(w.raw) < 0.25) {
+      // Tap: rotate the tapped side card into the center
+      const card = document.elementFromPoint(e.clientX, e.clientY);
+      const hit = card && card.closest ? card.closest('.barber-wheel__card') : null;
+      if (hit) {
+        const idx = w.cards.indexOf(hit);
+        if (idx !== -1 && idx !== w.active) {
+          w.snap(idx, true);
+          return;
+        }
+      }
+    }
+
+    const drift = Math.round(targetRaw);
+    const maxDrift = Math.max(1, Math.floor(w.count / 2));
+    w.snap(w.active + Math.max(-maxDrift, Math.min(maxDrift, drift)), true);
+    w.velocity = 0;
+  };
+
+  // Block vertical page scroll only while a horizontal swipe is happening
+  w._onTouch = (e) => {
+    if (!w.dragging) return;
+    const dx = e.touches[0].clientX - w.startX;
+    const dy = e.touches[0].clientY - w.startY;
+    if (Math.abs(dx) > 12 && Math.abs(dx) > Math.abs(dy)) {
+      if (e.cancelable) e.preventDefault();
+    }
+  };
+
+  w._onKey = (e) => {
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+      e.preventDefault();
+      if (w.animating) return;
+      w.snap(w.active + (e.key === 'ArrowRight' ? 1 : -1), true);
+    } else if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      w.applySelection();
+    }
+  };
+
+  w._onClick = (e) => {
+    const btn = e.target.closest('.barber-wheel__select-btn');
+    if (btn) {
+      const card = btn.closest('.barber-wheel__card');
+      if (card && w.cards.indexOf(card) === w.active) {
+        e.preventDefault();
+        w.applySelection();
+      }
+    }
+  };
+
+  w._onResize = () => { w.positionCards(false); };
+
+  w._onTouch = w._onTouch.bind(w);
+  w._onDown = w._onDown.bind(w);
+  w._onMove = w._onMove.bind(w);
+  w._onUp = w._onUp.bind(w);
+  w._onKey = w._onKey.bind(w);
+  w._onClick = w._onClick.bind(w);
+  w._onResize = w._onResize.bind(w);
+
+  stage.addEventListener('pointerdown', w._onDown);
+  stage.addEventListener('pointermove', w._onMove);
+  stage.addEventListener('pointerup', w._onUp);
+  stage.addEventListener('pointercancel', w._onUp);
+  stage.addEventListener('keydown', w._onKey);
+  if (w.prevBtn) w.prevBtn.addEventListener('click', () => { if (!w.animating) w.snap(w.active - 1, true); });
+  if (w.nextBtn) w.nextBtn.addEventListener('click', () => { if (!w.animating) w.snap(w.active + 1, true); });
+  if (dotsWrap) dotsWrap.addEventListener('click', (e) => {
+    const dot = e.target.closest('.wheel-dot');
+    if (dot && !w.animating) w.snap(parseInt(dot.dataset.i, 10), true);
+  });
+
+  // Native touchmove must stay non-passive for scroll prevention
+  stage.addEventListener('touchmove', (e) => w._onTouch(e), { passive: false });
+  window.addEventListener('resize', w._onResize);
+
+  w.positionCards(false);
+  w.applySelection(true);
+
+  window.__barberWheel = w;
+
+  return w;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  initBarberWheel();
+
+  const isIOS = /iPad|iPhone|iPod/.test(window.navigator.userAgent)
+    || (window.navigator.platform === 'MacIntel' && window.navigator.maxTouchPoints > 1);
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  const installPrompt = document.getElementById('iosInstallPrompt');
+  const closeInstallPrompt = document.getElementById('iosInstallPromptClose');
+  const installLink = document.getElementById('iosInstallLink');
+
+  if (isIOS && !isStandalone && installPrompt && localStorage.getItem('24k-ios-install-dismissed') !== 'true') {
+    installPrompt.hidden = false;
+  }
+
+  closeInstallPrompt?.addEventListener('click', () => {
+    installPrompt.hidden = true;
+    localStorage.setItem('24k-ios-install-dismissed', 'true');
+  });
+
+  installLink?.addEventListener('click', () => {
+    if (!installPrompt) return;
+    installPrompt.hidden = false;
+    localStorage.removeItem('24k-ios-install-dismissed');
+  });
+
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => navigator.serviceWorker.register('/service-worker.js').catch(() => {}));
+  }
+});

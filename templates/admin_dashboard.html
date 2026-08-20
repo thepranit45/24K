@@ -17,7 +17,7 @@
           <i class="fa-solid fa-scissors"></i> Shop operations
         </div>
         <h1 class="dashboard-title">Barber Dashboard</h1>
-        <p class="dashboard-subtitle">Run todayâ€™s appointments, keep Prashant available, and manage every booking from one place.</p>
+        <p class="dashboard-subtitle">Run today's appointments, keep Prashant available, and manage every booking from one place.</p>
         <div class="dashboard-header-meta">
           <span><i class="fa-solid fa-circle"></i> Live operations</span>
           <span><i class="fa-regular fa-calendar"></i> {{ today|date:"D, d M Y" }}</span>
@@ -43,7 +43,7 @@
         </div>
         <div class="stat-info">
           <span class="stat-label">Total Revenue</span>
-          <span class="stat-value text-gold">â‚¹ {{ total_revenue|floatformat:0 }}</span>
+          <span class="stat-value text-gold">₹ {{ total_revenue|floatformat:0 }}</span>
           <span class="stat-sub">Lifetime collected sales</span>
         </div>
       </div>
@@ -55,7 +55,7 @@
         </div>
         <div class="stat-info">
           <span class="stat-label">Today's Revenue</span>
-          <span class="stat-value">â‚¹ {{ today_revenue|floatformat:0 }}</span>
+          <span class="stat-value">₹ {{ today_revenue|floatformat:0 }}</span>
           <span class="stat-sub">Collected {{ today|date:"d M Y" }}</span>
         </div>
       </div>
@@ -91,7 +91,7 @@
         <div class="section-title-wrap">
           <div>
             <span class="section-overline"><i class="fa-regular fa-calendar"></i> {{ today|date:"l, d M" }}</span>
-            <h2><i class="fa-solid fa-bolt text-gold"></i> Todayâ€™s chair</h2>
+            <h2><i class="fa-solid fa-bolt text-gold"></i> Today's chair</h2>
           </div>
           <span class="section-badge">{{ today_bookings }} booked</span>
         </div>
@@ -101,7 +101,7 @@
             <div class="next-queue-icon"><i class="fa-solid fa-clock"></i></div>
             <div>
               <span class="next-queue-label">Next appointment</span>
-              <strong>{{ next_appointment.booking_time|time:"g:i A" }} Â· {{ next_appointment.customer_name }}</strong>
+              <strong>{{ next_appointment.booking_time|time:"g:i A" }} · {{ next_appointment.customer_name }}</strong>
               <span>{{ next_appointment.service.name }}{% if next_appointment.barber %} with {{ next_appointment.barber.name }}{% endif %}</span>
             </div>
             <span class="status-badge status-{{ next_appointment.status|lower }}">{{ next_appointment.get_status_display }}</span>
@@ -136,12 +136,12 @@
             <h2><i class="fa-solid fa-sliders text-gold"></i> Manage the shop</h2>
           </div>
         </div>
-        <p>Use the dashboard for appointments; open the management area when you need to edit services, photos, business hours, or staff details.</p>
+        <p>Use the dashboard for appointments; use the management pages to edit services, rates, business hours or slot settings.</p>
         <div class="dashboard-tools-actions">
-          <a href="{% url 'admin:booking_booking_changelist' %}" class="dashboard-tool-link primary"><i class="fa-solid fa-calendar-pen"></i> Edit all bookings</a>
-          <a href="{% url 'admin:booking_barber_changelist' %}" class="dashboard-tool-link"><i class="fa-solid fa-user-gear"></i> Manage Prashant</a>
-          <a href="{% url 'admin:booking_service_changelist' %}" class="dashboard-tool-link"><i class="fa-solid fa-scissors"></i> Services & pricing</a>
-          <a href="{% url 'admin:booking_businesshour_changelist' %}" class="dashboard-tool-link"><i class="fa-solid fa-clock"></i> Business hours</a>
+          <a href="{% url 'admin_appointments' %}" class="dashboard-tool-link primary"><i class="fa-solid fa-calendar-pen"></i> Manage appointments</a>
+          <a href="{% url 'admin_services' %}" class="dashboard-tool-link"><i class="fa-solid fa-scissors"></i> Services &amp; rates</a>
+          <a href="{% url 'admin_hours' %}" class="dashboard-tool-link"><i class="fa-solid fa-clock"></i> Business hours</a>
+          <a href="{% url 'admin_settings' %}" class="dashboard-tool-link"><i class="fa-solid fa-hourglass-half"></i> Slot duration</a>
         </div>
         <div class="dashboard-live-note"><span></span>{{ active_barbers_count }} barber{% if active_barbers_count != 1 %}s{% endif %} currently available for new bookings.</div>
       </section>
@@ -185,7 +185,7 @@
           <div class="barber-details">
             <div class="barber-name-row">
               <h3>{{ b.name }}</h3>
-              <span class="barber-rating">â˜… {{ b.rating }}</span>
+              <span class="barber-rating">★ {{ b.rating }}</span>
             </div>
             <p class="barber-title">{{ b.title }}</p>
             <p class="barber-specs">{{ b.specialties }}</p>
@@ -197,7 +197,7 @@
               </div>
               <div>
                 <span>Revenue</span>
-                <strong>â‚¹ {{ b.revenue|floatformat:0 }}</strong>
+                <strong>₹ {{ b.revenue|floatformat:0 }}</strong>
               </div>
             </div>
 

@@ -45,6 +45,7 @@ def customer_home(request):
             'price': str(s.price),
             'price_display': s.price_display,
             'duration': s.duration,
+            'image_url': request.build_absolute_uri(s.image.url) if s.image else None,
             'icon': s.icon,
         }
 
@@ -63,13 +64,52 @@ def customer_home(request):
 
     male = Service.objects.filter(is_active=True, category='MALE')
     female = Service.objects.filter(is_active=True, category='FEMALE')
-    barbers = Barber.objects.filter(is_active=True, name='Prashant Borhade')
+    barbers = Barber.objects.filter(is_active=True)
 
     return _ok({
         'male_services': [ser(s) for s in male],
         'female_services': [ser(s) for s in female],
         'barbers': [br(b) for b in barbers],
         'available_dates': [d.isoformat() for d in _available_dates(30)],
+    })
+
+
+# ──────────────────────────────────────────────────────────────
+# Shop Meta (contact + hours for the app shell)
+# ──────────────────────────────────────────────────────────────
+
+@csrf_exempt
+@require_http_methods(["GET"])
+def customer_meta(request):
+    """
+    GET /api/customer/meta/
+    Returns shop contact details and today's/next open day hours.
+    """
+    from .models import get_shop_setting
+
+    phone = get_shop_setting('phone', '+919209597436')
+    address = get_shop_setting('address', 'Sangamner, Ahmednagar')
+
+    hours_text = 'Open daily 10:00 AM – 9:00 PM'
+    today = timezone.localdate()
+    for offset in range(7):
+        d = today + timedelta(days=offset)
+        try:
+            bh = BusinessHour.objects.get(day=d.weekday())
+        except BusinessHour.DoesNotExist:
+            continue
+        if bh.is_closed:
+            continue
+        opening = bh.opening_time.strftime('%I:%M %p').lstrip('0')
+        closing = bh.closing_time.strftime('%I:%M %p').lstrip('0')
+        label = 'today' if offset == 0 else bh.get_day_display()
+        hours_text = f'Open {label}, {opening} – {closing}'
+        break
+
+    return _ok({
+        'phone': phone,
+        'address': address,
+        'hours_text': hours_text,
     })
 
 

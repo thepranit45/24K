@@ -109,11 +109,45 @@ def barber_required(view_func):
 # Public pages
 # ──────────────────────────────────────────────────────────────
 
+def _barber_next_slot(barber, business_hours, now, days_ahead=14):
+    """Earliest free slot for one barber across the upcoming business days."""
+    step = slot_step_minutes()
+    for i in range(0, days_ahead):
+        d = now.date() + timedelta(days=i)
+        bh = business_hours.get(d.weekday())
+        if not bh or bh.is_closed:
+            continue
+        booked = _booked_times(d, barber_id=barber.id)
+        for s in _generate_slots(bh.opening_time, bh.closing_time, step):
+            slot_dt = datetime.combine(d, s)
+            if d == now.date() and slot_dt <= now.replace(tzinfo=None):
+                continue
+            if s in booked:
+                continue
+            return slot_dt
+    return None
+
+
 def home(request):
     male_services = Service.objects.filter(is_active=True, category='MALE')
     female_services = Service.objects.filter(is_active=True, category='FEMALE')
-    # Keep the public booking flow focused while the shop has one featured barber.
-    barbers = Barber.objects.filter(is_active=True, name='Prashant Borhade')
+    barbers = list(Barber.objects.filter(is_active=True))
+    featured = next((b for b in barbers if b.name == 'Prashant Borhade'), None)
+    barbers.sort(key=lambda b: (b is not featured, -float(b.rating)))
+    business_hours = {bh.day: bh for bh in BusinessHour.objects.all()}
+    now = timezone.localtime()
+    for b in barbers:
+        b.is_featured = b is featured
+        next_slot = _barber_next_slot(b, business_hours, now)
+        if next_slot:
+            if next_slot.date() == now.date():
+                b.next_slot_label = f"{next_slot.strftime('%I:%M %p')} today"
+            elif next_slot.date() == now.date() + timedelta(days=1):
+                b.next_slot_label = f"{next_slot.strftime('%I:%M %p')} tomorrow"
+            else:
+                b.next_slot_label = f"{next_slot.strftime('%a, %I:%M %p')}"
+        else:
+            b.next_slot_label = None
     available_dates = _available_dates(30)
     context = {
         'male_services': male_services,

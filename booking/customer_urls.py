@@ -7,6 +7,7 @@ urlpatterns = [
     # Catalog + Slots
     path('home/',                customer_views.customer_home,     name='api_customer_home'),
     path('slots/',               customer_views.customer_slots,    name='api_customer_slots'),
+    path('meta/',                customer_views.customer_meta,     name='api_customer_meta'),
 
     # Bookings
     path('bookings/',            customer_views.customer_create_booking, name='api_customer_create_booking'),
