@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Secure Payment | The Gentleman's Cut{% endblock %}
+{% block title %}Scan & Pay UPI | 24 K Barbershop{% endblock %}
 
 {% block content %}
 <section class="section payment-section">
@@ -19,6 +19,12 @@
             <span>Service</span>
             <strong>{{ booking.service.name }}</strong>
           </div>
+          {% if booking.barber %}
+          <div class="psum-row">
+            <span>Barber</span>
+            <strong>{{ booking.barber.name }}</strong>
+          </div>
+          {% endif %}
           <div class="psum-row">
             <span>Date</span>
             <strong>{{ booking.booking_date|date:"d F Y" }}</strong>
@@ -37,7 +43,7 @@
           </div>
           <div class="psum-divider"></div>
           <div class="psum-row psum-total">
-            <span>Total Amount</span>
+            <span>Total Payable</span>
             <strong class="gold">₹{{ booking.amount|floatformat:0 }}</strong>
           </div>
         </div>
@@ -46,46 +52,59 @@
         </div>
       </div>
 
-      <!-- Payment Panel -->
-      <div class="payment-panel">
+      <!-- Payment Panel: UPI QR & Copy ID -->
+      <div class="payment-panel upi-payment-panel">
         <div class="payment-panel-header">
           <div class="payment-secure-badge">
-            <i class="fa-solid fa-lock"></i> Secure Payment
+            <i class="fa-solid fa-qrcode"></i> Scan & Pay UPI
           </div>
           <h2 class="payment-amount">₹{{ booking.amount|floatformat:0 }}</h2>
-          <p class="payment-desc">{{ booking.service.name }}</p>
+          <p class="payment-desc">{{ booking.service.name }} at 24 K Hair Studio</p>
         </div>
 
-        {% if payment_mode == 'MOCK' %}
-        <!-- Mock Payment -->
-        <div class="mock-payment-info">
-          <div class="mock-badge"><i class="fa-solid fa-flask"></i> Demo Payment Mode</div>
-          <p>This is a demo environment. No real money will be charged.</p>
+        <!-- QR Code Display Card -->
+        <div class="upi-qr-card">
+          <div class="upi-qr-frame">
+            <img src="{% static 'images/upi_qr.jpg' %}" alt="Google Pay QR Code 24K Hair Studio" class="upi-qr-image" id="upiQrImg" />
+          </div>
+          
+          <div class="upi-actions-row">
+            <a href="{% static 'images/upi_qr.jpg' %}" download="24K_Studio_UPI_QR.jpg" class="btn-qr-action btn-download-qr">
+              <i class="fa-solid fa-download"></i> Download QR
+            </a>
+            <a href="upi://pay?pa=9921028084@okbizaxis&pn=24%20K%20HAIR%20STUDIO&am={{ booking.amount|floatformat:0 }}&cu=INR" class="btn-qr-action btn-open-upi mobile-only-inline">
+              <i class="fa-solid fa-mobile-screen-button"></i> Open UPI App
+            </a>
+          </div>
         </div>
 
-        <div id="payBtn">
-          <form method="post" action="{% url 'process_mock_payment' booking.booking_id %}">
-            {% csrf_token %}
-            <button type="submit" class="btn-pay" id="paySubmitBtn" onclick="handlePayClick(this)">
-              <span id="payBtnText"><i class="fa-solid fa-lock"></i> Pay ₹{{ booking.amount|floatformat:0 }}</span>
-              <span id="payBtnSpinner" style="display:none;">
-                <span class="spinner-inline"></span> Processing…
-              </span>
-            </button>
-          </form>
+        <!-- Copy UPI Section -->
+        <div class="upi-copy-box">
+          <div class="upi-copy-info">
+            <span class="upi-label">UPI ID</span>
+            <span class="upi-value" id="upiIdValue">9921028084@okbizaxis</span>
+          </div>
+          <button type="button" class="btn-copy-upi" id="copyUpiBtn" onclick="copyUpiId()">
+            <i class="fa-regular fa-copy" id="copyIcon"></i>
+            <span id="copyText">Copy</span>
+          </button>
         </div>
+
+        <!-- Confirm / Done Form -->
+        <form method="post" action="{% url 'process_mock_payment' booking.booking_id %}" class="upi-confirm-form">
+          {% csrf_token %}
+          <button type="submit" class="btn-pay btn-confirm-paid" id="paySubmitBtn" onclick="handlePayClick(this)">
+            <span id="payBtnText"><i class="fa-solid fa-circle-check"></i> I Have Paid ₹{{ booking.amount|floatformat:0 }}</span>
+            <span id="payBtnSpinner" style="display:none;">
+              <span class="spinner-inline"></span> Confirming Booking…
+            </span>
+          </button>
+        </form>
 
         <p class="payment-note">
           <i class="fa-solid fa-shield-halved"></i>
-          Demo mode — click Pay to simulate a successful payment.
+          Scan using Google Pay, PhonePe, Paytm or any UPI app.
         </p>
-
-        {% else %}
-        <!-- Real payment gateway placeholder -->
-        <div id="razorpay-container">
-          <p class="muted-text">Payment gateway loading…</p>
-        </div>
-        {% endif %}
 
         <a href="{% url 'booking_list' %}" class="payment-cancel-link">
           <i class="fa-solid fa-xmark"></i> Cancel & go back
@@ -97,16 +116,33 @@
 </section>
 
 <script>
+function copyUpiId() {
+  const upiId = "9921028084@okbizaxis";
+  navigator.clipboard.writeText(upiId).then(() => {
+    const copyText = document.getElementById('copyText');
+    const copyIcon = document.getElementById('copyIcon');
+    const btn = document.getElementById('copyUpiBtn');
+    
+    copyText.innerText = "Copied!";
+    copyIcon.className = "fa-solid fa-check";
+    btn.classList.add('copied');
+    
+    setTimeout(() => {
+      copyText.innerText = "Copy";
+      copyIcon.className = "fa-regular fa-copy";
+      btn.classList.remove('copied');
+    }, 2500);
+  }).catch(err => {
+    console.error('Failed to copy UPI: ', err);
+  });
+}
+
 function handlePayClick(btn) {
   const textEl = document.getElementById('payBtnText');
   const spinnerEl = document.getElementById('payBtnSpinner');
   textEl.style.display = 'none';
   spinnerEl.style.display = 'inline-flex';
-  
-  // Submit the form programmatically before disabling the button
   btn.closest('form').submit();
-  
-  // Disable the button to prevent double clicks
   btn.disabled = true;
 }
 </script>
