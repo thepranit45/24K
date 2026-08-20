@@ -400,6 +400,23 @@ function showError(id, msg) {
   if (el) el.textContent = msg;
 }
 
+function getCsrfToken() {
+  if (window.CSRF_TOKEN && window.CSRF_TOKEN.length > 5) return window.CSRF_TOKEN;
+  const name = 'csrftoken';
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue || '';
+}
+
 // ── Submit booking ────────────────────────────────────────────
 async function submitBooking() {
   const btn = document.getElementById('btnConfirm');
@@ -420,11 +437,12 @@ async function submitBooking() {
   };
 
   try {
-    const res = await fetch(window.BOOK_URL, {
+    const csrfToken = getCsrfToken();
+    const res = await fetch(window.BOOK_URL || '/book/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-CSRFToken': window.CSRF_TOKEN,
+        'X-CSRFToken': csrfToken,
       },
       body: JSON.stringify(payload),
     });
@@ -440,6 +458,7 @@ async function submitBooking() {
       if (btn)   { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-lock"></i> Proceed to Payment'; }
     }
   } catch (err) {
+    console.error("Booking error:", err);
     if (errEl) { errEl.textContent = 'Network error. Please check your connection and try again.'; errEl.style.display = 'block'; }
     if (btn)   { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-lock"></i> Proceed to Payment'; }
   }

@@ -167,11 +167,6 @@
   <a href="{% url 'about' %}" class="bottom-nav-item {% if request.resolver_match.url_name == 'about' %}active{% endif %}">
     <i class="fa-solid fa-store"></i><span>About</span>
   </a>
-  {% if request.user.is_staff %}
-  <a href="{% url 'barber_dashboard' %}" class="bottom-nav-item {% if request.resolver_match.url_name == 'barber_dashboard' or request.resolver_match.url_name|slice:':6' == 'admin_' %}active{% endif %}">
-    <i class="fa-solid fa-sliders"></i><span>Manage</span>
-  </a>
-  {% endif %}
 </nav>
 
 <!-- iPhone Safari cannot trigger installation programmatically, so this gives
