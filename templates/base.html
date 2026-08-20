@@ -21,6 +21,7 @@
   {% load static %}
   <link rel="manifest" href="{% url 'pwa_manifest' %}" />
   <meta name="theme-color" content="#D4AF37" />
+  <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="24K Salon" />
@@ -112,7 +113,7 @@
       </div>
       <button class="footer-ios-install" id="iosInstallLink" type="button">
         <i class="fa-brands fa-apple" aria-hidden="true"></i>
-        Install on iPhone
+        Install on iPhone / iPad
       </button>
     </div>
 
@@ -175,7 +176,7 @@
   <span class="ios-install-prompt__icon"><i class="fa-solid fa-scissors"></i></span>
   <div class="ios-install-prompt__content">
     <strong>Install 24K Salon</strong>
-    <span>Tap <i class="fa-solid fa-arrow-up-from-bracket" aria-hidden="true"></i> Share, then <b>Add to Home Screen</b>.</span>
+    <span id="iosInstallPromptText">In Safari, tap <i class="fa-solid fa-arrow-up-from-bracket" aria-hidden="true"></i> Share, then <b>Add to Home Screen</b>.</span>
   </div>
   <button class="ios-install-prompt__close" id="iosInstallPromptClose" type="button" aria-label="Close install instructions">&times;</button>
 </aside>

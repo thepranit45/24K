@@ -822,6 +822,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const installPrompt = document.getElementById('iosInstallPrompt');
   const closeInstallPrompt = document.getElementById('iosInstallPromptClose');
   const installLink = document.getElementById('iosInstallLink');
+  const installPromptText = document.getElementById('iosInstallPromptText');
 
   if (isIOS && !isStandalone && installPrompt && localStorage.getItem('24k-ios-install-dismissed') !== 'true') {
     installPrompt.hidden = false;
@@ -834,6 +835,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   installLink?.addEventListener('click', () => {
     if (!installPrompt) return;
+    if (!isIOS && installPromptText) {
+      installPromptText.innerHTML = 'Open this website in <b>Safari on your iPhone or iPad</b>, then tap Share <i class="fa-solid fa-arrow-up-from-bracket" aria-hidden="true"></i> and <b>Add to Home Screen</b>.';
+    }
     installPrompt.hidden = false;
     localStorage.removeItem('24k-ios-install-dismissed');
   });
