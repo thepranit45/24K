@@ -129,13 +129,13 @@ function initScrollAnimations() {
 
 function handleBookAppointmentHero(e) {
   if (e) e.preventDefault();
-  const servicesSec = document.getElementById('services');
-  if (servicesSec) {
-    servicesSec.scrollIntoView({ behavior: 'smooth' });
-    const firstService = document.querySelector('.mockup-service-card');
-    if (firstService) {
-      firstService.classList.add('pulse-highlight');
-      setTimeout(() => firstService.classList.remove('pulse-highlight'), 1800);
+  const firstService = document.querySelector('.mockup-service-card');
+  if (firstService) {
+    selectService(firstService);
+  } else {
+    const servicesSec = document.getElementById('services');
+    if (servicesSec) {
+      servicesSec.scrollIntoView({ behavior: 'smooth' });
     }
   }
 }
