@@ -185,7 +185,6 @@ function selectService(btn) {
 }
 
 function selectBarber(card, id, name) {
-  if (initBarberWheel) initBarberWheel();
   document.querySelectorAll('.barber-select-card, .barber-wheel__card').forEach(c => {
     c.classList.remove('selected');
     c.setAttribute('aria-checked', 'false');
