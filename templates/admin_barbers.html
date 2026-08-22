@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Barber Dashboard | 24 K Barbershop{% endblock %}
+{% block title %}Barbers Management | 24 K Barbershop{% endblock %}
 {% block body_class %}barber-dashboard-page{% endblock %}
 
 {% block content %}
@@ -9,174 +9,69 @@
   <div class="container">
 
     {% include 'admin_nav.html' %}
+    {% include 'admin_styles.html' %}
 
-    <!-- Dashboard Header -->
+    <!-- Page Header -->
     <div class="dashboard-header" data-animate="fade-up">
       <div>
-        <div class="dashboard-eyebrow">
-          <i class="fa-solid fa-scissors"></i> Shop operations
-        </div>
-        <h1 class="dashboard-title">Barber Dashboard</h1>
-        <p class="dashboard-subtitle">Run today's appointments, keep Prashant available, and manage every booking from one place.</p>
+        <div class="dashboard-eyebrow"><i class="fa-solid fa-user-tie"></i> Team &amp; Operations</div>
+        <h1 class="dashboard-title">Master Barbers</h1>
+        <p class="dashboard-subtitle">Manage barber roster, duty availability, profile details, and login accounts.</p>
         <div class="dashboard-header-meta">
-          <span><i class="fa-solid fa-circle"></i> Live operations</span>
+          <span><i class="fa-solid fa-circle"></i> Live roster</span>
           <span><i class="fa-regular fa-calendar"></i> {{ today|date:"D, d M Y" }}</span>
         </div>
       </div>
-
       <div class="header-actions">
-        <a href="{% url 'admin_settings' %}" class="dashboard-header-button dashboard-header-button--secondary">
-          <i class="fa-solid fa-gear"></i> Settings &amp; UPI
-        </a>
-        <a href="{% url 'barber_agenda' %}" target="_blank" class="dashboard-header-button dashboard-header-button--secondary">
-          <i class="fa-solid fa-list-check"></i> Live Agenda
-        </a>
-        <a href="{% url 'barber_dashboard' %}" class="dashboard-header-button dashboard-header-button--primary">
-          <i class="fa-solid fa-rotate"></i> Refresh
-        </a>
+        <button type="button" class="dashboard-header-button dashboard-header-button--primary" onclick="openAddBarberModal()">
+          <i class="fa-solid fa-user-plus"></i> Add New Barber
+        </button>
       </div>
     </div>
 
     <!-- Executive Stats Grid -->
     <div class="stats-grid" data-animate="fade-up" data-delay="50">
-      <!-- Total Lifetime Revenue -->
       <div class="stat-card gold-border">
         <div class="stat-icon-wrap gold-bg">
-          <i class="fa-solid fa-indian-rupee-sign"></i>
+          <i class="fa-solid fa-users-viewfinder"></i>
         </div>
         <div class="stat-info">
-          <span class="stat-label">Total Revenue</span>
-          <span class="stat-value text-gold">₹ {{ total_revenue|floatformat:0 }}</span>
-          <span class="stat-sub">Lifetime collected sales</span>
+          <span class="stat-label">Total Barbers</span>
+          <span class="stat-value text-gold">{{ total_barbers }}</span>
+          <span class="stat-sub">Roster strength</span>
         </div>
       </div>
 
-      <!-- Today's Revenue -->
-      <div class="stat-card">
-        <div class="stat-icon-wrap cyan-bg">
-          <i class="fa-solid fa-money-bill-trend-up"></i>
-        </div>
-        <div class="stat-info">
-          <span class="stat-label">Today's Revenue</span>
-          <span class="stat-value">₹ {{ today_revenue|floatformat:0 }}</span>
-          <span class="stat-sub">Collected {{ today|date:"d M Y" }}</span>
-        </div>
-      </div>
-
-      <!-- Total Bookings -->
-      <div class="stat-card">
-        <div class="stat-icon-wrap blue-bg">
-          <i class="fa-solid fa-calendar-check"></i>
-        </div>
-        <div class="stat-info">
-          <span class="stat-label">Total Bookings</span>
-          <span class="stat-value">{{ total_bookings }}</span>
-          <span class="stat-sub">All-time reservations</span>
-        </div>
-      </div>
-
-      <!-- Today's Appointments -->
       <div class="stat-card">
         <div class="stat-icon-wrap green-bg">
-          <i class="fa-solid fa-clock-rotate-left"></i>
+          <i class="fa-solid fa-circle-check"></i>
         </div>
         <div class="stat-info">
-          <span class="stat-label">Today's Appointments</span>
-          <span class="stat-value">{{ today_bookings }}</span>
-          <span class="stat-sub">Scheduled for today</span>
+          <span class="stat-label">On Duty</span>
+          <span class="stat-value text-green">{{ active_barbers_count }}</span>
+          <span class="stat-sub">Available for online booking</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon-wrap cyan-bg">
+          <i class="fa-solid fa-circle-pause"></i>
+        </div>
+        <div class="stat-info">
+          <span class="stat-label">Off Duty</span>
+          <span class="stat-value">{{ inactive_barbers_count }}</span>
+          <span class="stat-sub">Paused or on leave</span>
         </div>
       </div>
     </div>
 
-    <!-- Day-at-a-glance keeps active appointments visible before the full queue. -->
-    <div class="dashboard-operations-grid" data-animate="fade-up" data-delay="75">
-      <section class="dashboard-section dashboard-today-card">
-        <div class="section-title-wrap">
-          <div>
-            <span class="section-overline"><i class="fa-regular fa-calendar"></i> {{ today|date:"l, d M" }}</span>
-            <h2><i class="fa-solid fa-bolt text-gold"></i> Today's chair</h2>
-          </div>
-          <span class="section-badge">{{ today_bookings }} booked</span>
-        </div>
-
-        {% if next_appointment %}
-          <div class="next-queue-item">
-            <div class="next-queue-icon"><i class="fa-solid fa-clock"></i></div>
-            <div>
-              <span class="next-queue-label">Next appointment</span>
-              <strong>{{ next_appointment.booking_time|time:"g:i A" }} · {{ next_appointment.customer_name }}</strong>
-              <span>{{ next_appointment.service.name }}{% if next_appointment.barber %} with {{ next_appointment.barber.name }}{% endif %}</span>
-            </div>
-            <span class="status-badge status-{{ next_appointment.status|lower }}">{{ next_appointment.get_status_display }}</span>
-          </div>
-        {% else %}
-          <div class="today-empty-state">
-            <i class="fa-solid fa-mug-hot"></i>
-            <span>No upcoming appointments remain today.</span>
-          </div>
-        {% endif %}
-
-        <div class="today-queue-list">
-          {% for booking in today_schedule %}
-            <div class="today-queue-row">
-              <time>{{ booking.booking_time|time:"g:i A" }}</time>
-              <div>
-                <strong>{{ booking.customer_name }}</strong>
-                <span>{{ booking.service.name }}</span>
-              </div>
-              <span class="status-badge status-{{ booking.status|lower }}">{{ booking.get_status_display }}</span>
-            </div>
-          {% empty %}
-            <p class="today-queue-empty">New appointments will appear here as soon as customers book.</p>
-          {% endfor %}
-        </div>
-      </section>
-
-      <section class="dashboard-section dashboard-tools-card">
-        <div class="section-title-wrap">
-          <div>
-            <span class="section-overline"><i class="fa-solid fa-wand-magic-sparkles"></i> Quick tools</span>
-            <h2><i class="fa-solid fa-sliders text-gold"></i> Manage the shop</h2>
-          </div>
-        </div>
-        <p>Use the dashboard for appointments; use the management pages to edit services, rates, business hours or slot settings.</p>
-        <div class="dashboard-tools-actions">
-          <a href="{% url 'admin_appointments' %}" class="dashboard-tool-link primary"><i class="fa-solid fa-calendar-pen"></i> Manage appointments</a>
-          <a href="{% url 'admin_barbers' %}" class="dashboard-tool-link"><i class="fa-solid fa-user-tie"></i> Barbers &amp; Team</a>
-          <a href="{% url 'admin_services' %}" class="dashboard-tool-link"><i class="fa-solid fa-scissors"></i> Services &amp; rates</a>
-          <a href="{% url 'admin_hours' %}" class="dashboard-tool-link"><i class="fa-solid fa-clock"></i> Business hours</a>
-          <a href="{% url 'admin_settings' %}" class="dashboard-tool-link"><i class="fa-solid fa-gear"></i> Settings &amp; UPI</a>
-        </div>
-        <div class="dashboard-live-note"><span></span>{{ active_barbers_count }} barber{% if active_barbers_count != 1 %}s{% endif %} currently available for new bookings.</div>
-      </section>
-    </div>
-
-    <!-- Status Counter Summary Bar -->
-    <div class="status-summary-bar" data-animate="fade-up" data-delay="100">
-      <div class="summary-pill pending">
-        <span class="pill-dot"></span> Pending: <strong>{{ pending_count }}</strong>
-      </div>
-      <div class="summary-pill confirmed">
-        <span class="pill-dot"></span> Confirmed: <strong>{{ confirmed_count }}</strong>
-      </div>
-      <div class="summary-pill completed">
-        <span class="pill-dot"></span> Completed: <strong>{{ completed_count }}</strong>
-      </div>
-      <div class="summary-pill cancelled">
-        <span class="pill-dot"></span> Cancelled: <strong>{{ cancelled_count }}</strong>
-      </div>
-    </div>
-
-    <!-- Barber Roster Management -->
-    <div class="dashboard-section" data-animate="fade-up" data-delay="150">
+    <!-- Barber Roster Section -->
+    <div class="dashboard-section" data-animate="fade-up" data-delay="100">
       <div class="section-title-wrap">
-        <h2><i class="fa-solid fa-user-tie text-gold"></i> Master Barber Roster &amp; Duty Toggle</h2>
-        <div style="display:flex; align-items:center; gap:0.6rem;">
-          <span class="section-badge">{{ active_barbers_count }} on duty</span>
-          <button type="button" class="btn-filter" style="font-size:0.82rem; padding:0.4rem 0.85rem;" onclick="openAddBarberModal()">
-            <i class="fa-solid fa-user-plus"></i> Add Barber
-          </button>
-        </div>
+        <h2><i class="fa-solid fa-user-tie text-gold"></i> Master Barber Roster ({{ barbers|length }})</h2>
+        <button type="button" class="btn-filter" style="font-size:0.82rem; padding:0.4rem 0.85rem;" onclick="openAddBarberModal()">
+          <i class="fa-solid fa-plus"></i> Add Barber
+        </button>
       </div>
 
       <div class="barbers-roster-grid">
@@ -203,7 +98,7 @@
               <span class="barber-rating">★ {{ b.rating }}</span>
             </div>
             <p class="barber-title">{{ b.title }} · {{ b.experience_years }} yrs exp</p>
-
+            
             {% if b.user %}
               <div class="barber-account-badge">
                 <i class="fa-solid fa-key"></i> Login: <strong>{{ b.user.username }}</strong>
@@ -222,27 +117,33 @@
                 <strong>{{ b.total_appointments }}</strong>
               </div>
               <div>
+                <span>Today's</span>
+                <strong>{{ b.today_appointments }}</strong>
+              </div>
+              <div>
                 <span>Revenue</span>
                 <strong>₹ {{ b.revenue|floatformat:0 }}</strong>
               </div>
             </div>
 
-            <form action="{% url 'admin_toggle_barber' b.id %}" method="POST">
-              {% csrf_token %}
-              <button type="submit" class="btn-toggle {% if b.is_active %}active{% else %}inactive{% endif %}">
-                {% if b.is_active %}
-                  <i class="fa-solid fa-circle-check"></i> Available / On Duty
-                {% else %}
-                  <i class="fa-solid fa-circle-pause"></i> Off Duty / Paused
-                {% endif %}
-              </button>
-            </form>
+            <div class="barber-actions-row">
+              <form action="{% url 'admin_toggle_barber' b.id %}" method="POST" style="flex:1;">
+                {% csrf_token %}
+                <button type="submit" class="btn-toggle {% if b.is_active %}active{% else %}inactive{% endif %}">
+                  {% if b.is_active %}
+                    <i class="fa-solid fa-circle-check"></i> On Duty
+                  {% else %}
+                    <i class="fa-solid fa-circle-pause"></i> Paused
+                  {% endif %}
+                </button>
+              </form>
+            </div>
           </div>
         </div>
         {% empty %}
         <div class="empty-table-msg" style="grid-column: 1 / -1; padding: 3rem; text-align: center;">
           <i class="fa-solid fa-user-slash" style="font-size: 2rem; color: #d4af37; margin-bottom: 1rem;"></i>
-          <p>No barbers registered yet. Click "Add Barber" to add your first barber.</p>
+          <p>No barbers registered yet. Click "Add New Barber" to add your first barber.</p>
         </div>
         {% endfor %}
       </div>
@@ -262,7 +163,7 @@
   </div>
   <form method="POST" action="{% url 'admin_add_barber' %}" enctype="multipart/form-data">
     {% csrf_token %}
-    <input type="hidden" name="next" value="{% url 'admin_dashboard' %}" />
+    <input type="hidden" name="next" value="{% url 'admin_barbers' %}" />
     <div class="admin-modal-body">
       <div class="form-group">
         <label class="form-label">Full Name <span class="required" style="color:#ef4444;">*</span></label>
@@ -338,7 +239,7 @@
   </div>
   <form method="POST" id="deleteBarberForm" action="">
     {% csrf_token %}
-    <input type="hidden" name="next" value="{% url 'admin_dashboard' %}" />
+    <input type="hidden" name="next" value="{% url 'admin_barbers' %}" />
     <div class="admin-modal-body">
       <p style="color:#e5e7eb; font-size:0.95rem; margin-bottom:0.75rem;">
         Are you sure you want to delete <strong id="deleteBarberName" style="color:#ffd700;">this barber</strong>?

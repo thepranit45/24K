@@ -13,6 +13,7 @@ urlpatterns = [
     path('book/', views.create_booking, name='create_booking'),
     path('payment/<str:booking_id>/', views.payment_page, name='payment_page'),
     path('payment/<str:booking_id>/process/', views.process_mock_payment, name='process_mock_payment'),
+    path('payment/<str:booking_id>/razorpay-verify/', views.verify_razorpay_payment, name='verify_razorpay_payment'),
     path('booking/<str:booking_id>/confirm/', views.booking_confirm, name='booking_confirm'),
 
     # Barber Agenda (Public Timeline)
@@ -22,6 +23,9 @@ urlpatterns = [
     path('barber/dashboard/', views.barber_dashboard, name='barber_dashboard'),
     path('dashboard/', views.barber_dashboard, name='admin_dashboard'),
     path('dashboard/appointments/', views.admin_appointments, name='admin_appointments'),
+    path('dashboard/barbers/', views.admin_barbers, name='admin_barbers'),
+    path('dashboard/barbers/add/', views.admin_add_barber, name='admin_add_barber'),
+    path('dashboard/barbers/<int:barber_id>/delete/', views.admin_delete_barber, name='admin_delete_barber'),
     path('dashboard/services/', views.admin_services, name='admin_services'),
     path('dashboard/hours/', views.admin_hours, name='admin_hours'),
     path('dashboard/settings/', views.admin_settings, name='admin_settings'),

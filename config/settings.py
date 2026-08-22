@@ -160,11 +160,13 @@ SMS_GATEWAY_URL = config('SMS_GATEWAY_URL', default='mock')
 SMS_GATEWAY_TOKEN = config('SMS_GATEWAY_TOKEN', default='')
 
 # ──────────────────────────────────────────────
-# Payment
+# Payment & UPI
 # ──────────────────────────────────────────────
 PAYMENT_MODE = config('PAYMENT_MODE', default='MOCK')  # MOCK | RAZORPAY
 RAZORPAY_KEY_ID = config('RAZORPAY_KEY_ID', default='')
 RAZORPAY_KEY_SECRET = config('RAZORPAY_KEY_SECRET', default='')
+SHOP_UPI_ID = config('SHOP_UPI_ID', default='9921028084@okbizaxis')
+SHOP_UPI_NAME = config('SHOP_UPI_NAME', default='24 K Hair Studio')
 
 # ──────────────────────────────────────────────
 # Messages

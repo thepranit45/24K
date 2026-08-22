@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Slot Settings | 24 K Barbershop{% endblock %}
+{% block title %}Shop &amp; Payment Settings | 24 K Barbershop{% endblock %}
 {% block body_class %}barber-dashboard-page{% endblock %}
 
 {% block content %}
@@ -15,8 +15,8 @@
     <div class="dashboard-header" data-animate="fade-up">
       <div>
         <div class="dashboard-eyebrow"><i class="fa-solid fa-gears"></i> Shop operations</div>
-        <h1 class="dashboard-title">Slot Settings</h1>
-        <p class="dashboard-subtitle">Control how often customers can pick a booking time — the step between available slots.</p>
+        <h1 class="dashboard-title">Shop &amp; Payment Settings</h1>
+        <p class="dashboard-subtitle">Control booking slot durations and salon Direct UPI payment configurations.</p>
         <div class="dashboard-header-meta">
           <span><i class="fa-solid fa-circle"></i> Live operations</span>
           <span><i class="fa-regular fa-calendar"></i> {{ today|date:"D, d M Y" }}</span>
@@ -29,15 +29,65 @@
       </div>
     </div>
 
-    <!-- Slot Settings Section -->
-    <div class="dashboard-section" data-animate="fade-up" data-delay="200">
-      <div class="section-title-wrap">
-        <h2><i class="fa-solid fa-sliders text-gold"></i> Booking Slot Duration</h2>
-        <p class="section-sub">Applies instantly to the public booking wizard and the customer API. Slots that would start too late for a service are hidden.</p>
+    <!-- Form Section -->
+    <form method="POST" action="{% url 'admin_settings' %}" id="settings-form" class="settings-form">
+      {% csrf_token %}
+
+      <!-- Direct UPI Payment Configuration Section -->
+      <div class="dashboard-section" data-animate="fade-up" data-delay="100">
+        <div class="section-title-wrap">
+          <h2><i class="fa-solid fa-qrcode text-gold"></i> Direct UPI Payment Gateway (0% Fee)</h2>
+          <span class="section-badge"><i class="fa-solid fa-bolt"></i> Instant Bank Transfer</span>
+        </div>
+        <p class="section-sub" style="color:#9ca3af; font-size:0.88rem; margin-top:-0.5rem; margin-bottom:1.5rem; line-height:1.5;">
+          Payments made on the website go <strong>100% directly into this UPI / Bank account</strong> with zero gateway deductions. Enter your Google Pay / PhonePe / Paytm UPI ID.
+        </p>
+
+        <div class="settings-grid" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:1.5rem;">
+          <label class="settings-field">
+            <span class="settings-label">Shop UPI ID (VPA) <span style="color:#ef4444;">*</span></span>
+            <input type="text" name="shop_upi_id" value="{{ shop_upi_id }}" class="admin-inline-input" placeholder="e.g. 9921028084@okbizaxis" required />
+            <span class="settings-hint">Google Pay, PhonePe, Paytm, or Bank UPI handle (e.g. yourphone@okaxis, salon@okhdfcbank).</span>
+          </label>
+
+          <label class="settings-field">
+            <span class="settings-label">Payee / Salon Business Name <span style="color:#ef4444;">*</span></span>
+            <input type="text" name="shop_upi_name" value="{{ shop_upi_name }}" class="admin-inline-input" placeholder="e.g. 24 K Hair Studio" required />
+            <span class="settings-hint">Displayed to the customer inside Google Pay / PhonePe when scanning.</span>
+          </label>
+        </div>
+      <!-- Razorpay Payment Gateway Configuration -->
+      <div class="dashboard-section" data-animate="fade-up" data-delay="120">
+        <div class="section-title-wrap">
+          <h2><i class="fa-solid fa-credit-card text-gold"></i> Razorpay Payment Gateway (Cards, NetBanking, UPI)</h2>
+          <span class="section-badge"><i class="fa-solid fa-lock"></i> Automated Bank Verification</span>
+        </div>
+        <p class="section-sub" style="color:#9ca3af; font-size:0.88rem; margin-top:-0.5rem; margin-bottom:1.5rem; line-height:1.5;">
+          Enables Razorpay's Standard Checkout popup for Credit/Debit Cards, NetBanking, and automated cryptographic payment verification.
+        </p>
+
+        <div class="settings-grid" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:1.5rem;">
+          <label class="settings-field">
+            <span class="settings-label">Razorpay Key ID</span>
+            <input type="text" name="razorpay_key_id" value="{{ razorpay_key_id }}" class="admin-inline-input" placeholder="e.g. rzp_live_xxxxxxxx or rzp_test_xxxxxxxx" />
+            <span class="settings-hint">Found in Razorpay Dashboard → Settings → API Keys.</span>
+          </label>
+
+          <label class="settings-field">
+            <span class="settings-label">Razorpay Key Secret</span>
+            <input type="password" name="razorpay_key_secret" value="{{ razorpay_key_secret }}" class="admin-inline-input" placeholder="Leave blank to keep current secret" />
+            <span class="settings-hint">Used securely on server to verify HMAC SHA256 payment signatures.</span>
+          </label>
+        </div>
       </div>
 
-      <form method="POST" action="{% url 'admin_settings' %}" id="settings-form" class="settings-form">
-        {% csrf_token %}
+      <!-- Slot Settings Section -->
+      <div class="dashboard-section" data-animate="fade-up" data-delay="150">
+        <div class="section-title-wrap">
+          <h2><i class="fa-solid fa-sliders text-gold"></i> Booking Slot Duration</h2>
+          <p class="section-sub">Applies instantly to the public booking wizard and the customer API. Slots that would start too late for a service are hidden.</p>
+        </div>
+
         <div class="settings-grid">
           <label class="settings-field">
             <span class="settings-label">Slot step (minutes)</span>
@@ -51,10 +101,11 @@
         </div>
 
         <div class="dashboard-form-footer">
-          <button type="submit" class="btn-filter"><i class="fa-solid fa-floppy-disk"></i> Save Slot Settings</button>
+          <button type="submit" class="btn-filter"><i class="fa-solid fa-floppy-disk"></i> Save All Settings</button>
         </div>
-      </form>
-    </div>
+      </div>
+
+    </form>
 
   </div>
 </div>

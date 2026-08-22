@@ -65,6 +65,24 @@ def get_shop_setting(key, default=''):
         return default
 
 
+def get_shop_upi_id():
+    """Get the active Shop UPI ID from database settings with fallback to config."""
+    from django.conf import settings
+    val = get_shop_setting('shop_upi_id', '')
+    if val and val.strip():
+        return val.strip()
+    return getattr(settings, 'SHOP_UPI_ID', '9921028084@okbizaxis')
+
+
+def get_shop_upi_name():
+    """Get the active Shop Payee Name from database settings with fallback to config."""
+    from django.conf import settings
+    val = get_shop_setting('shop_upi_name', '')
+    if val and val.strip():
+        return val.strip()
+    return getattr(settings, 'SHOP_UPI_NAME', '24 K Hair Studio')
+
+
 def slot_step_minutes():
     """How many minutes each time slot lasts (configurable from the dashboard)."""
     try:
@@ -240,6 +258,12 @@ class Payment(models.Model):
     transaction_id = models.CharField(max_length=100, unique=True, null=True, blank=True)
     payment_method = models.CharField(max_length=50, default='MOCK')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)
+    
+    # Razorpay Specific Tracking
+    razorpay_order_id = models.CharField(max_length=100, null=True, blank=True)
+    razorpay_payment_id = models.CharField(max_length=100, null=True, blank=True)
+    razorpay_signature = models.CharField(max_length=255, null=True, blank=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -249,3 +273,15 @@ class Payment(models.Model):
 
     def __str__(self):
         return f"Payment [{self.status}] for {self.booking.booking_id} — ₹{self.amount}"
+
+
+def get_razorpay_keys():
+    """Retrieve active Razorpay Key ID and Secret from database settings with fallback to config."""
+    from django.conf import settings
+    key_id = get_shop_setting('razorpay_key_id', '')
+    if not key_id:
+        key_id = getattr(settings, 'RAZORPAY_KEY_ID', '')
+    key_secret = get_shop_setting('razorpay_key_secret', '')
+    if not key_secret:
+        key_secret = getattr(settings, 'RAZORPAY_KEY_SECRET', '')
+    return key_id.strip(), key_secret.strip()

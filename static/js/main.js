@@ -158,20 +158,23 @@ function selectService(btn) {
     selectBarber(anyAvailableBarber, '', 'Any Available Barber');
   }
 
-  // Populate step 1
-  document.getElementById('wiz-service-name').textContent     = wizard.serviceName;
-  document.getElementById('wiz-service-duration').textContent = wizard.serviceDuration + ' min';
-  document.getElementById('wiz-service-price').textContent    = '₹' + wizard.servicePrice;
+  // Populate step 1 if elements exist
+  const nameEl  = document.getElementById('wiz-service-name');
+  const durEl   = document.getElementById('wiz-service-duration');
+  const priceEl = document.getElementById('wiz-service-price');
+  if (nameEl)  nameEl.textContent = wizard.serviceName;
+  if (durEl)   durEl.textContent = wizard.serviceDuration + ' min';
+  if (priceEl) priceEl.textContent = '₹' + wizard.servicePrice;
 
   // Prefill user details if available
   if (window._userData) {
     const u = window._userData;
-    const nameEl    = document.getElementById('inp-name');
-    const emailEl   = document.getElementById('inp-email');
-    const phoneEl   = document.getElementById('inp-phone');
-    if (nameEl  && !nameEl.value  && u.name)  nameEl.value  = u.name;
-    if (emailEl && !emailEl.value && u.email) emailEl.value = u.email;
-    if (phoneEl && !phoneEl.value && u.phone) phoneEl.value = u.phone;
+    const inpName  = document.getElementById('inp-name');
+    const inpEmail = document.getElementById('inp-email');
+    const inpPhone = document.getElementById('inp-phone');
+    if (inpName  && !inpName.value  && u.name)  inpName.value  = u.name;
+    if (inpEmail && !inpEmail.value && u.email) inpEmail.value = u.email;
+    if (inpPhone && !inpPhone.value && u.phone) inpPhone.value = u.phone;
   }
 
   // Pre-select first date chip if date is not selected yet
@@ -180,8 +183,136 @@ function selectService(btn) {
     selectDate(dateChip);
   }
 
+  // Update selection highlight in options list
+  highlightSelectedWizardService();
+
   wizardGoTo(1);
   openBookingWizard();
+}
+
+let currentWizardCategory = 'all';
+
+/** Toggle full service list in wizard Step 1 */
+function toggleWizardServices() {
+  const container = document.getElementById('wizardAllServicesList');
+  const arrow = document.getElementById('viewAllServicesArrow');
+  const btnText = document.getElementById('viewAllBtnText');
+  if (!container) return;
+
+  const isOpen = container.style.display !== 'none';
+  if (isOpen) {
+    container.style.display = 'none';
+    if (arrow) arrow.style.transform = 'rotate(0deg)';
+    if (btnText) btnText.textContent = 'Browse All Services';
+  } else {
+    container.style.display = 'block';
+    if (arrow) arrow.style.transform = 'rotate(180deg)';
+    if (btnText) btnText.textContent = 'Close Service Menu';
+    highlightSelectedWizardService();
+    // Focus search or scroll list smoothly into view
+    const searchInp = document.getElementById('wizardServiceSearchInput');
+    if (searchInp) {
+      setTimeout(() => searchInp.focus(), 150);
+    }
+  }
+}
+
+/** Highlight selected service option in wizard Step 1 */
+function highlightSelectedWizardService() {
+  document.querySelectorAll('.wizard-service-option').forEach(opt => {
+    if (String(opt.dataset.serviceId) === String(wizard.serviceId)) {
+      opt.classList.add('selected');
+    } else {
+      opt.classList.remove('selected');
+    }
+  });
+}
+
+/** Select a service from the wizard Step 1 options list */
+function pickWizardService(card) {
+  if (!card) return;
+  wizard.serviceId       = card.dataset.serviceId;
+  wizard.serviceName     = card.dataset.serviceName;
+  wizard.servicePrice    = card.dataset.servicePrice;
+  wizard.serviceDuration = card.dataset.serviceDuration;
+
+  // Update selected service preview card
+  const nameEl = document.getElementById('wiz-service-name');
+  const durEl  = document.getElementById('wiz-service-duration');
+  const priceEl = document.getElementById('wiz-service-price');
+  if (nameEl) nameEl.textContent = wizard.serviceName;
+  if (durEl) durEl.innerHTML = `<i class="fa-regular fa-clock"></i> ${wizard.serviceDuration} min`;
+  if (priceEl) priceEl.textContent = '₹' + wizard.servicePrice;
+
+  // Pulse animation on the selected service card
+  const ssc = document.querySelector('.selected-service-card');
+  if (ssc) {
+    ssc.style.transform = 'scale(1.02)';
+    setTimeout(() => { ssc.style.transform = ''; }, 200);
+  }
+
+  // Update highlight in list
+  highlightSelectedWizardService();
+
+  // Update summary fields if needed
+  const sumService = document.getElementById('sum-service');
+  const sumDuration = document.getElementById('sum-duration');
+  const sumTotal = document.getElementById('sum-total');
+  if (sumService) sumService.textContent = wizard.serviceName;
+  if (sumDuration) sumDuration.textContent = wizard.serviceDuration + ' min';
+  if (sumTotal) sumTotal.textContent = '₹' + wizard.servicePrice;
+}
+
+/** Filter wizard services by category (All, MALE, FEMALE) */
+function filterWizardServices(cat, tabBtn) {
+  currentWizardCategory = cat;
+  document.querySelectorAll('.wiz-cat-tab').forEach(t => t.classList.remove('active'));
+  if (tabBtn) tabBtn.classList.add('active');
+
+  const query = (document.getElementById('wizardServiceSearchInput')?.value || '').toLowerCase().trim();
+  applyWizardServiceFilters(query, cat);
+}
+
+/** Live search in wizard services */
+function searchWizardServices(val) {
+  const clearBtn = document.getElementById('searchClearBtn');
+  if (clearBtn) {
+    clearBtn.style.display = val.length > 0 ? 'flex' : 'none';
+  }
+  applyWizardServiceFilters(val.toLowerCase().trim(), currentWizardCategory);
+}
+
+function clearServiceSearch() {
+  const searchInp = document.getElementById('wizardServiceSearchInput');
+  const clearBtn = document.getElementById('searchClearBtn');
+  if (searchInp) {
+    searchInp.value = '';
+    searchInp.focus();
+  }
+  if (clearBtn) clearBtn.style.display = 'none';
+  applyWizardServiceFilters('', currentWizardCategory);
+}
+
+function applyWizardServiceFilters(query, cat) {
+  let matchCount = 0;
+  document.querySelectorAll('.wizard-service-option').forEach(opt => {
+    const sName = (opt.dataset.serviceName || '').toLowerCase();
+    const sCat  = opt.dataset.category || '';
+    const matchesCat = (cat === 'all' || sCat === cat);
+    const matchesQuery = !query || sName.includes(query);
+
+    if (matchesCat && matchesQuery) {
+      opt.style.display = 'flex';
+      matchCount++;
+    } else {
+      opt.style.display = 'none';
+    }
+  });
+
+  const noMsg = document.getElementById('wizardNoServices');
+  if (noMsg) {
+    noMsg.style.display = matchCount === 0 ? 'block' : 'none';
+  }
 }
 
 function selectBarber(card, id, name) {

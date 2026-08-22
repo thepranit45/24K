@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ barber.name }}'s Dashboard | 24 K Barbershop{% endblock %}
+{% block title %}{{ barber.name }}'s Desk | 24 K Barbershop{% endblock %}
 {% block body_class %}barber-dashboard-page{% endblock %}
 
 {% block content %}
@@ -10,19 +10,39 @@
 
     <!-- Dashboard Header -->
     <div class="dashboard-header" data-animate="fade-up">
-      <div>
-        <div class="dashboard-eyebrow">
-          <i class="fa-solid fa-scissors"></i> My barber desk
+      <div class="dashboard-header-barber-main">
+        <div class="barber-desk-avatar">
+          {% if barber.photo %}
+            <img src="{{ barber.photo.url }}" alt="{{ barber.name }}" />
+          {% elif barber.name == 'Prashant Borhade' %}
+            <img src="{% static 'images/barbers/prashant-borhade-placeholder.png' %}" alt="{{ barber.name }}" />
+          {% else %}
+            <i class="fa-solid fa-{{ barber.avatar_icon|default:'user-tie' }}"></i>
+          {% endif %}
+          <span class="desk-duty-indicator {% if barber.is_active %}on-duty{% else %}off-duty{% endif %}" title="{% if barber.is_active %}On Duty{% else %}Paused{% endif %}"></span>
         </div>
-        <h1 class="dashboard-title">{{ barber.name }}</h1>
-        <p class="dashboard-subtitle">{{ barber.title }} — stay on top of your appointments, today and beyond.</p>
-        <div class="dashboard-header-meta">
-          <span><i class="fa-solid fa-circle"></i> Live operations</span>
-          <span><i class="fa-regular fa-calendar"></i> {{ today|date:"D, d M Y" }}</span>
+        <div>
+          <div class="dashboard-eyebrow">
+            <i class="fa-solid fa-scissors text-gold"></i> Personal Barber Desk
+          </div>
+          <h1 class="dashboard-title">{{ barber.name }}</h1>
+          <p class="dashboard-subtitle">{{ barber.title }} · {{ barber.experience_years }} yrs exp · ★ {{ barber.rating }}</p>
+          <div class="dashboard-header-meta">
+            <span><i class="fa-solid fa-circle text-green"></i> Live Operations</span>
+            <span><i class="fa-regular fa-calendar"></i> {{ today|date:"D, d M Y" }}</span>
+          </div>
         </div>
       </div>
 
       <div class="header-actions">
+        {% if request.user.is_staff %}
+        <a href="{% url 'admin_settings' %}" class="dashboard-header-button dashboard-header-button--secondary">
+          <i class="fa-solid fa-gear"></i> Settings &amp; UPI
+        </a>
+        <a href="{% url 'admin_dashboard' %}" class="dashboard-header-button dashboard-header-button--secondary">
+          <i class="fa-solid fa-gauge-high"></i> Full Shop Manager
+        </a>
+        {% endif %}
         <a href="{% url 'barber_agenda' %}" target="_blank" class="dashboard-header-button dashboard-header-button--secondary">
           <i class="fa-solid fa-list-check"></i> Live Agenda
         </a>
@@ -35,13 +55,13 @@
       </div>
     </div>
 
-    <!-- Stats -->
+    <!-- Executive Stats Grid -->
     <div class="stats-grid" data-animate="fade-up" data-delay="50">
       <div class="stat-card gold-border">
-        <div class="stat-icon-wrap gold-bg"><i class="fa-solid fa-clock-rotate-left"></i></div>
+        <div class="stat-icon-wrap gold-bg"><i class="fa-solid fa-calendar-check"></i></div>
         <div class="stat-info">
           <span class="stat-label">Today's Appointments</span>
-          <span class="stat-value">{{ today_bookings }}</span>
+          <span class="stat-value text-gold">{{ today_bookings }}</span>
           <span class="stat-sub">{{ today|date:"D, d M" }}</span>
         </div>
       </div>
@@ -60,53 +80,63 @@
         <div class="stat-info">
           <span class="stat-label">Confirmed</span>
           <span class="stat-value">{{ confirmed_count }}</span>
-          <span class="stat-sub">Locked-in bookings</span>
+          <span class="stat-sub">Ready for chair</span>
         </div>
       </div>
 
       <div class="stat-card">
-        <div class="stat-icon-wrap blue-bg"><i class="fa-solid fa-star"></i></div>
+        <div class="stat-icon-wrap blue-bg"><i class="fa-solid fa-indian-rupee-sign"></i></div>
         <div class="stat-info">
-          <span class="stat-label">Completed</span>
-          <span class="stat-value">{{ completed_count }}</span>
-          <span class="stat-sub">Fully serviced</span>
+          <span class="stat-label">Revenue Collected</span>
+          <span class="stat-value text-gold">₹ {{ revenue_paid|floatformat:0 }}</span>
+          <span class="stat-sub">{{ completed_count }} completed services</span>
         </div>
       </div>
     </div>
 
-    <!-- Next appointment highlight + Today's schedule -->
-    <div class="dashboard-section">
+    <!-- Operations Overview: Next Up & Today's Schedule -->
+    <div class="dashboard-section" data-animate="fade-up" data-delay="100">
       <div class="section-title-wrap">
-        <h2><i class="fa-solid fa-bolt"></i> Today's Schedule</h2>
-        <span class="section-badge">₹ {{ revenue_paid|floatformat:0 }} collected</span>
+        <h2><i class="fa-solid fa-bolt text-gold"></i> Today's Schedule &amp; Queue</h2>
+        <span class="section-badge">{{ today_schedule|length }} appointments today</span>
       </div>
 
       {% if next_appointment %}
-      <div class="next-queue-item" style="align-items:center; background:linear-gradient(135deg, rgba(212,175,55,0.14), transparent 55%); border:1px solid rgba(212,175,55,0.35); border-radius:12px; display:flex; gap:1rem; justify-content:space-between; margin-bottom:1.1rem; padding:0.9rem 1.1rem;">
-        <div>
-          <div style="color:#f3d86a; font-size:0.7rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase;">Next up</div>
-          <div style="color:#fff; font-size:1.05rem; font-weight:700;">
+      <div class="next-queue-item" style="background: linear-gradient(135deg, rgba(212,175,55,0.18), rgba(18,20,28,0.95)); border: 1.5px solid rgba(212,175,55,0.4); border-radius: 14px; padding: 1.1rem 1.3rem; margin-bottom: 1.25rem;">
+        <div class="next-queue-icon" style="background: linear-gradient(135deg, #ffd700, #b8860b); color: #000; font-size: 1.2rem;">
+          <i class="fa-solid fa-user-clock"></i>
+        </div>
+        <div style="flex: 1; min-width: 0;">
+          <div class="next-queue-label"><i class="fa-solid fa-bolt"></i> Up Next On Chair</div>
+          <strong style="font-size: 1.1rem; color: #fff;">
             {% if next_appointment.booking_date == today %}{{ next_appointment.booking_time|time:"g:i A" }} · {% else %}{{ next_appointment.booking_date|date:"D, d M" }} · {% endif %}
             {{ next_appointment.customer_name }}
+          </strong>
+          <div style="color: #cbd5e1; font-size: 0.85rem; display: flex; align-items: center; gap: 0.8rem; margin-top: 0.2rem;">
+            <span><i class="fa-solid fa-scissors text-gold"></i> {{ next_appointment.service.name }}</span>
+            <span><i class="fa-regular fa-clock"></i> {{ next_appointment.service.duration }} min</span>
+            <a href="tel:{{ next_appointment.customer_phone }}" style="color: #93c5fd; text-decoration: none;"><i class="fa-solid fa-phone"></i> {{ next_appointment.customer_phone }}</a>
           </div>
-          <div style="color:#a7afc0; font-size:0.83rem;">{{ next_appointment.service.name }} · {{ next_appointment.service.duration }} min</div>
         </div>
         <span class="status-badge status-{{ next_appointment.status|lower }}">{{ next_appointment.get_status_display }}</span>
       </div>
       {% endif %}
 
-      <div class="today-queue-list" style="display:flex; flex-direction:column; gap:0.5rem;">
+      <div class="today-queue-list">
         {% for b in today_schedule %}
-        <div class="today-queue-row" style="align-items:center; background:#11141c; border:1px solid #232836; border-radius:10px; display:flex; gap:0.8rem; padding:0.65rem 0.9rem;">
-          <strong style="color:#f3d86a; font-size:0.95rem; flex:0 0 70px;">{{ b.booking_time|time:"g:i A" }}</strong>
-          <div style="flex:1; min-width:0;">
-            <div style="color:#fff; font-weight:600; font-size:0.92rem;">{{ b.customer_name }}</div>
-            <div style="color:#8a93a6; font-size:0.78rem;">{{ b.service.name }} · {{ b.booking_id }}</div>
+        <div class="today-queue-row">
+          <time>{{ b.booking_time|time:"g:i A" }}</time>
+          <div>
+            <strong>{{ b.customer_name }}</strong>
+            <span>{{ b.service.name }} · ₹{{ b.amount|floatformat:0 }} · <a href="tel:{{ b.customer_phone }}" style="color:#93c5fd; text-decoration:none;">{{ b.customer_phone }}</a></span>
           </div>
           <span class="status-badge status-{{ b.status|lower }}">{{ b.get_status_display }}</span>
         </div>
         {% empty %}
-        <p style="color:#8a93a6; font-size:0.9rem;">No appointments scheduled for today. Enjoy the calm!</p>
+        <div class="today-empty-state">
+          <i class="fa-solid fa-mug-hot"></i>
+          <span>No appointments scheduled for today. You are all set!</span>
+        </div>
         {% endfor %}
       </div>
     </div>

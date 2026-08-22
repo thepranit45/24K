@@ -25,9 +25,10 @@
 <nav class="admin-topnav" aria-label="Management navigation">
   <a href="{% url 'admin_dashboard' %}" class="{% if active_nav == 'dashboard' %}active{% endif %}"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
   <a href="{% url 'admin_appointments' %}" class="{% if active_nav == 'appointments' %}active{% endif %}"><i class="fa-solid fa-calendar-check"></i> Appointments</a>
+  <a href="{% url 'admin_barbers' %}" class="{% if active_nav == 'barbers' %}active{% endif %}"><i class="fa-solid fa-user-tie"></i> Barbers</a>
   <a href="{% url 'admin_services' %}" class="{% if active_nav == 'services' %}active{% endif %}"><i class="fa-solid fa-tags"></i> Services &amp; Rates</a>
   <a href="{% url 'admin_hours' %}" class="{% if active_nav == 'hours' %}active{% endif %}"><i class="fa-regular fa-clock"></i> Business Hours</a>
-  <a href="{% url 'admin_settings' %}" class="{% if active_nav == 'settings' %}active{% endif %}"><i class="fa-solid fa-hourglass-half"></i> Slot Duration</a>
+  <a href="{% url 'admin_settings' %}" class="{% if active_nav == 'settings' %}active{% endif %}"><i class="fa-solid fa-gear"></i> Settings &amp; UPI</a>
   <span class="admin-topnav-spacer"></span>
   <a href="{% url 'barber_agenda' %}" target="_blank"><i class="fa-solid fa-list-check"></i> Agenda</a>
   <a href="{% url 'home' %}"><i class="fa-solid fa-globe"></i> View Site</a>

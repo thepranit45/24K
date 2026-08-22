@@ -161,23 +161,97 @@
     </div>
   </div>
 
-  <!-- Step 1: Selected service preview -->
+  <!-- Step 1: Select Service -->
   <div class="wizard-panel active" id="wizard-panel-1">
     <div class="wizard-panel-inner">
-      <h2 class="wizard-heading">Selected Service</h2>
-      <div class="selected-service-card">
-        <div class="ssc-icon"><i class="fa-solid fa-scissors"></i></div>
-        <div class="ssc-info">
-          <h3 id="wiz-service-name">—</h3>
-          <div class="ssc-meta">
-            <span id="wiz-service-duration"></span>
-            <span id="wiz-service-price" class="ssc-price"></span>
+      <p class="barber-wizard-kicker"><i class="fa-solid fa-sparkles"></i> Step 1 • Service Selection</p>
+      <h2 class="wizard-heading">Select Service</h2>
+      <p class="wizard-step-desc">Choose your preferred grooming service to proceed.</p>
+
+      <!-- Search Bar -->
+      <div class="wizard-service-search-box">
+        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+        <input type="text" id="wizardServiceSearchInput" class="wizard-service-search-inp" 
+               placeholder="Search haircut, beard, facial, spa..." oninput="searchWizardServices(this.value)" autocomplete="off" />
+        <button type="button" class="search-clear-btn" id="searchClearBtn" onclick="clearServiceSearch()" style="display:none;">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Category Filter Tabs -->
+      <div class="wizard-service-category-tabs">
+        <button type="button" class="wiz-cat-tab active" onclick="filterWizardServices('all', this)">
+          <span>✨ All</span> <span class="tab-count">{{ male_services|length|add:female_services|length }}</span>
+        </button>
+        <button type="button" class="wiz-cat-tab" onclick="filterWizardServices('MALE', this)">
+          <span>✂️ Men</span> <span class="tab-count">{{ male_services|length }}</span>
+        </button>
+        <button type="button" class="wiz-cat-tab" onclick="filterWizardServices('FEMALE', this)">
+          <span>💇‍♀️ Women</span> <span class="tab-count">{{ female_services|length }}</span>
+        </button>
+      </div>
+
+      <!-- Services Grid Directly Displayed -->
+      <div class="wizard-services-grid" id="wizardServicesGrid">
+        {% for s in male_services %}
+        <div class="wizard-service-option{% if forloop.first %} selected{% endif %}" data-category="MALE"
+             data-service-id="{{ s.pk }}"
+             data-service-name="{{ s.name }}"
+             data-service-price="{{ s.price|floatformat:0 }}"
+             data-service-duration="{{ s.duration }}"
+             onclick="pickWizardService(this)">
+          <div class="wso-icon-wrap">
+            <i class="fa-solid fa-scissors"></i>
+          </div>
+          <div class="wso-body">
+            <div class="wso-name">{{ s.name }}</div>
+            <div class="wso-meta">
+              <span class="wso-duration"><i class="fa-regular fa-clock"></i> {{ s.duration }} min</span>
+              <span class="wso-category wso-cat-male">Men</span>
+            </div>
+          </div>
+          <div class="wso-right">
+            <div class="wso-price">₹{{ s.price|floatformat:0 }}</div>
+            <div class="wso-check"><i class="fa-solid fa-check"></i></div>
           </div>
         </div>
+        {% endfor %}
+
+        {% for s in female_services %}
+        <div class="wizard-service-option" data-category="FEMALE"
+             data-service-id="{{ s.pk }}"
+             data-service-name="{{ s.name }}"
+             data-service-price="{{ s.price|floatformat:0 }}"
+             data-service-duration="{{ s.duration }}"
+             onclick="pickWizardService(this)">
+          <div class="wso-icon-wrap wso-icon-female">
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+          </div>
+          <div class="wso-body">
+            <div class="wso-name">{{ s.name }}</div>
+            <div class="wso-meta">
+              <span class="wso-duration"><i class="fa-regular fa-clock"></i> {{ s.duration }} min</span>
+              <span class="wso-category wso-cat-female">Women</span>
+            </div>
+          </div>
+          <div class="wso-right">
+            <div class="wso-price">₹{{ s.price|floatformat:0 }}</div>
+            <div class="wso-check"><i class="fa-solid fa-check"></i></div>
+          </div>
+        </div>
+        {% endfor %}
+
+        <div class="wizard-no-services-found" id="wizardNoServices" style="display:none;">
+          <i class="fa-regular fa-face-meh"></i>
+          <p>No services match your search.</p>
+        </div>
       </div>
-      <button class="btn-wizard-next" onclick="wizardGoTo(2)">
-        Choose Barber <i class="fa-solid fa-arrow-right"></i>
-      </button>
+
+      <div class="wizard-nav" style="margin-top: 1.5rem;">
+        <button class="btn-wizard-next" id="btnServiceNext" onclick="wizardGoTo(2)">
+          Choose Barber <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </div>
     </div>
   </div>
 

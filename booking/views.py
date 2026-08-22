@@ -1,11 +1,13 @@
 import json
 import uuid
+import urllib.parse
 from datetime import date, datetime, timedelta, time as dtime
 from decimal import Decimal
 from functools import wraps
 
 from django.conf import settings
 from django.contrib import messages
+from django.contrib.auth.models import User
 from django.contrib.auth.views import redirect_to_login
 from django.core.exceptions import PermissionDenied
 from django.db.models import Sum, Count, Q
@@ -15,7 +17,10 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from .forms import CustomerDetailsForm
-from .models import Barber, Booking, BusinessHour, Payment, Service, ShopSetting, slot_step_minutes
+from .models import (
+    Barber, Booking, BusinessHour, Payment, Service, ShopSetting,
+    slot_step_minutes, get_shop_upi_id, get_shop_upi_name, get_razorpay_keys
+)
 
 
 # ──────────────────────────────────────────────────────────────
@@ -385,12 +390,145 @@ def payment_page(request, booking_id):
         messages.error(request, "This booking has been cancelled.")
         return redirect('home')
 
+    payment, _ = Payment.objects.get_or_create(
+        booking=booking,
+        defaults={'amount': booking.amount, 'status': Payment.STATUS_PENDING}
+    )
+
+    shop_upi_id = get_shop_upi_id()
+    shop_upi_name = get_shop_upi_name()
+    amount_str = f"{booking.amount:.2f}"
+    amount_paise = int(booking.amount * 100)
+
+    # Razorpay Order Initialization
+    razorpay_key_id, razorpay_key_secret = get_razorpay_keys()
+    razorpay_order_id = ''
+    razorpay_enabled = bool(razorpay_key_id)
+
+    if razorpay_enabled and razorpay_key_secret and not razorpay_key_id.startswith('rzp_test_placeholder'):
+        try:
+            import razorpay
+            client = razorpay.Client(auth=(razorpay_key_id, razorpay_key_secret))
+            order_data = {
+                'amount': amount_paise,
+                'currency': 'INR',
+                'receipt': booking.booking_id,
+                'notes': {
+                    'booking_id': booking.booking_id,
+                    'customer_name': booking.customer_name,
+                    'service': booking.service.name,
+                }
+            }
+            rzp_order = client.order.create(data=order_data)
+            razorpay_order_id = rzp_order.get('id', '')
+            payment.razorpay_order_id = razorpay_order_id
+            payment.save()
+        except Exception as exc:
+            import logging
+            logging.getLogger(__name__).warning(f"Razorpay order creation fallback: {exc}")
+            razorpay_order_id = f"order_demo_{booking.booking_id}"
+    elif razorpay_enabled:
+        razorpay_order_id = f"order_demo_{booking.booking_id}"
+
+    # Build standard UPI URI
+    # upi://pay?pa=VPA&pn=NAME&am=AMOUNT&tr=REF&cu=INR
+    encoded_name = urllib.parse.quote_plus(shop_upi_name)
+    upi_link = f"upi://pay?pa={shop_upi_id}&pn={encoded_name}&am={amount_str}&tr={booking.booking_id}&cu=INR"
+    
+    # Specific mobile intent links
+    gpay_link = f"gpay://upi/pay?pa={shop_upi_id}&pn={encoded_name}&am={amount_str}&tr={booking.booking_id}&cu=INR"
+    phonepe_link = f"phonepe://pay?pa={shop_upi_id}&pn={encoded_name}&am={amount_str}&tr={booking.booking_id}&cu=INR"
+    paytm_link = f"paytmmp://pay?pa={shop_upi_id}&pn={encoded_name}&am={amount_str}&tr={booking.booking_id}&cu=INR"
+
+    # Generate dynamic QR Code URL
+    encoded_upi_link = urllib.parse.quote_plus(upi_link)
+    qr_code_url = f"https://api.qrserver.com/v1/create-qr-code/?data={encoded_upi_link}&size=320x320&margin=12&color=000000&bgcolor=ffffff"
+
     context = {
         'booking': booking,
         'payment_mode': settings.PAYMENT_MODE,
-        'razorpay_key_id': settings.RAZORPAY_KEY_ID,
+        'razorpay_enabled': razorpay_enabled,
+        'razorpay_key_id': razorpay_key_id,
+        'razorpay_order_id': razorpay_order_id,
+        'amount_paise': amount_paise,
+        'shop_upi_id': shop_upi_id,
+        'shop_upi_name': shop_upi_name,
+        'upi_link': upi_link,
+        'gpay_link': gpay_link,
+        'phonepe_link': phonepe_link,
+        'paytm_link': paytm_link,
+        'qr_code_url': qr_code_url,
     }
     return render(request, 'payment/pay.html', context)
+
+
+@require_POST
+def verify_razorpay_payment(request, booking_id):
+    """Cryptographically verify Razorpay payment and confirm booking."""
+    booking = get_object_or_404(Booking, booking_id=booking_id)
+
+    if not _can_access_booking(request, booking):
+        messages.error(request, "You don't have access to this booking.")
+        return redirect('home')
+
+    if booking.status == Booking.STATUS_CONFIRMED:
+        return redirect('booking_confirm', booking_id=booking.booking_id)
+
+    payment = get_object_or_404(Payment, booking=booking)
+
+    razorpay_order_id = request.POST.get('razorpay_order_id', '').strip()
+    razorpay_payment_id = request.POST.get('razorpay_payment_id', '').strip()
+    razorpay_signature = request.POST.get('razorpay_signature', '').strip()
+
+    key_id, key_secret = get_razorpay_keys()
+    verified = False
+
+    if key_id and key_secret and not key_id.startswith('rzp_test_placeholder'):
+        try:
+            import razorpay
+            client = razorpay.Client(auth=(key_id, key_secret))
+            params_dict = {
+                'razorpay_order_id': razorpay_order_id,
+                'razorpay_payment_id': razorpay_payment_id,
+                'razorpay_signature': razorpay_signature
+            }
+            client.utility.verify_payment_signature(params_dict)
+            verified = True
+        except Exception as exc:
+            import logging
+            logging.getLogger(__name__).error(f"Razorpay signature verification failed for {booking_id}: {exc}")
+            messages.error(request, "Payment signature verification failed. Please try again.")
+            return redirect('payment_page', booking_id=booking.booking_id)
+    else:
+        # Development / Sandbox fallback verification
+        verified = bool(razorpay_payment_id)
+
+    if verified:
+        payment.razorpay_order_id = razorpay_order_id
+        payment.razorpay_payment_id = razorpay_payment_id
+        payment.razorpay_signature = razorpay_signature
+        payment.transaction_id = razorpay_payment_id or f"RZP-{uuid.uuid4().hex[:10].upper()}"
+        payment.payment_method = 'RAZORPAY'
+        payment.status = Payment.STATUS_PAID
+        payment.save()
+
+        booking.status = Booking.STATUS_CONFIRMED
+        booking.save()
+
+        # Send confirmation SMS
+        try:
+            from .sms import send_booking_confirmation, schedule_reminders
+            send_booking_confirmation(booking)
+            schedule_reminders(booking)
+        except Exception as exc:
+            import logging
+            logging.getLogger(__name__).exception(f'SMS error for {booking_id}: {exc}')
+
+        messages.success(request, f"Payment verified via Razorpay! Booking {booking.booking_id} is confirmed.")
+        return redirect('booking_confirm', booking_id=booking.booking_id)
+
+    messages.error(request, "Payment could not be verified.")
+    return redirect('payment_page', booking_id=booking.booking_id)
 
 
 @require_POST
@@ -410,10 +548,15 @@ def process_mock_payment(request, booking_id):
     if payment.status == Payment.STATUS_PAID:
         return redirect('booking_confirm', booking_id=booking.booking_id)
 
-    txn_id = f"MOCK-TXN-{uuid.uuid4().hex[:12].upper()}"
+    utr_number = request.POST.get('utr_number', '').strip()
+    if utr_number:
+        txn_id = f"UPI-{utr_number}"
+    else:
+        txn_id = f"UPI-{booking.booking_id}-{uuid.uuid4().hex[:6].upper()}"
+
     payment.transaction_id = txn_id
     payment.status = Payment.STATUS_PAID
-    payment.payment_method = 'MOCK'
+    payment.payment_method = 'UPI'
     payment.save()
 
     booking.status = Booking.STATUS_CONFIRMED
@@ -647,6 +790,116 @@ def admin_appointments(request):
 
 
 @barber_staff_required
+def admin_barbers(request):
+    """View and manage all barbers, duty status, and metrics."""
+    barbers = list(Barber.objects.all().order_by('-is_active', 'name'))
+    today = timezone.localdate()
+
+    for b in barbers:
+        b_bookings = Booking.objects.filter(barber=b)
+        b.total_appointments = b_bookings.count()
+        b.today_appointments = b_bookings.filter(booking_date=today).exclude(status=Booking.STATUS_CANCELLED).count()
+        b.revenue = b_bookings.filter(payment__status=Payment.STATUS_PAID).aggregate(total=Sum('amount'))['total'] or 0
+
+    active_count = sum(1 for b in barbers if b.is_active)
+    context = {
+        'active_nav': 'barbers',
+        'barbers': barbers,
+        'today': today,
+        'total_barbers': len(barbers),
+        'active_barbers_count': active_count,
+        'inactive_barbers_count': len(barbers) - active_count,
+    }
+    return render(request, 'admin_barbers.html', context)
+
+
+@barber_staff_required
+@require_POST
+def admin_add_barber(request):
+    """Create a new barber profile, with optional staff login account."""
+    name = request.POST.get('name', '').strip()
+    title = request.POST.get('title', '').strip() or 'Master Barber'
+    email = request.POST.get('email', '').strip()
+    specialties = request.POST.get('specialties', '').strip() or 'Skin Fade, Beard Styling, Hair Design'
+    avatar_icon = request.POST.get('avatar_icon', '').strip() or 'user-tie'
+
+    try:
+        experience_years = int(request.POST.get('experience_years', '5'))
+    except (ValueError, TypeError):
+        experience_years = 5
+
+    try:
+        rating = Decimal(request.POST.get('rating', '4.9'))
+    except Exception:
+        rating = Decimal('4.9')
+
+    is_active = request.POST.get('is_active') == '1' or 'is_active' in request.POST
+    photo = request.FILES.get('photo')
+
+    next_url = request.POST.get('next') or request.META.get('HTTP_REFERER') or 'admin_dashboard'
+
+    if not name:
+        messages.error(request, "Barber name is required.")
+        return redirect(next_url)
+
+    linked_user = None
+    if email:
+        username = email
+        user = User.objects.filter(username=username).first() or User.objects.filter(email=email).first()
+        if not user:
+            user = User.objects.create_user(
+                username=username,
+                email=email,
+                password='admin',
+                first_name=name.split()[0] if name else '',
+                last_name=' '.join(name.split()[1:]) if len(name.split()) > 1 else ''
+            )
+        user.is_staff = True
+        user.set_password('admin')
+        user.save()
+        linked_user = user
+
+    barber = Barber.objects.create(
+        name=name,
+        title=title,
+        specialties=specialties,
+        avatar_icon=avatar_icon,
+        experience_years=experience_years,
+        rating=rating,
+        is_active=is_active,
+        user=linked_user,
+        photo=photo if photo else None
+    )
+
+    login_msg = f" Login email: '{email}', password: 'admin'." if email else ""
+    messages.success(request, f"Barber {barber.name} added successfully!{login_msg}")
+    return redirect(next_url)
+
+
+@barber_staff_required
+@require_POST
+def admin_delete_barber(request, barber_id):
+    """Safely delete a barber and their linked staff login account."""
+    barber = get_object_or_404(Barber, pk=barber_id)
+    name = barber.name
+    linked_user = barber.user
+
+    # Delete the barber record (associated Bookings will have barber set to NULL)
+    barber.delete()
+
+    # If linked user is not superuser and not main admin, remove login account
+    if linked_user and not linked_user.is_superuser and linked_user.username != 'admin':
+        try:
+            linked_user.delete()
+        except Exception:
+            pass
+
+    next_url = request.POST.get('next') or request.META.get('HTTP_REFERER') or 'admin_dashboard'
+    messages.success(request, f"Barber {name} has been deleted.")
+    return redirect(next_url)
+
+
+@barber_staff_required
 def admin_services(request):
     """Manage service rates, durations, ordering and availability."""
     if request.method == 'POST':
@@ -736,21 +989,44 @@ def admin_hours(request):
 
 @barber_staff_required
 def admin_settings(request):
-    """Shop-wide knobs, e.g. how long each time slot lasts."""
+    """Shop-wide knobs: slot duration, Razorpay Gateway keys, and Shop UPI Payment settings."""
     if request.method == 'POST':
+        # Slot duration step
         try:
             step = int(request.POST.get('slot_step', '30'))
         except (TypeError, ValueError):
             step = 30
         step = max(5, min(step, 120))
         ShopSetting.objects.update_or_create(key='slot_step', defaults={'value': str(step)})
-        messages.success(request, f"Each time slot now runs every {step} minutes.")
+
+        # Razorpay API Keys
+        razorpay_key_id = request.POST.get('razorpay_key_id', '').strip()
+        razorpay_key_secret = request.POST.get('razorpay_key_secret', '').strip()
+        ShopSetting.objects.update_or_create(key='razorpay_key_id', defaults={'value': razorpay_key_id})
+        if razorpay_key_secret:
+            ShopSetting.objects.update_or_create(key='razorpay_key_secret', defaults={'value': razorpay_key_secret})
+
+        # Shop UPI ID & Name
+        shop_upi_id = request.POST.get('shop_upi_id', '').strip()
+        shop_upi_name = request.POST.get('shop_upi_name', '').strip()
+
+        if shop_upi_id:
+            ShopSetting.objects.update_or_create(key='shop_upi_id', defaults={'value': shop_upi_id})
+        if shop_upi_name:
+            ShopSetting.objects.update_or_create(key='shop_upi_name', defaults={'value': shop_upi_name})
+
+        messages.success(request, "Shop settings, Razorpay keys, and UPI details updated successfully.")
         return redirect('admin_settings')
 
+    rzp_key_id, rzp_key_secret = get_razorpay_keys()
     context = {
         'active_nav': 'settings',
         'slot_step': slot_step_minutes(),
         'slot_choices': [15, 20, 30, 45, 60, 90, 120],
+        'shop_upi_id': get_shop_upi_id(),
+        'shop_upi_name': get_shop_upi_name(),
+        'razorpay_key_id': rzp_key_id,
+        'razorpay_key_secret': rzp_key_secret,
     }
     return render(request, 'admin_settings.html', context)
 
