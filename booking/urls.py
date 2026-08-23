@@ -13,7 +13,7 @@ urlpatterns = [
     path('book/', views.create_booking, name='create_booking'),
     path('payment/<str:booking_id>/', views.payment_page, name='payment_page'),
     path('payment/<str:booking_id>/process/', views.process_mock_payment, name='process_mock_payment'),
-    path('payment/<str:booking_id>/razorpay-verify/', views.verify_razorpay_payment, name='verify_razorpay_payment'),
+    path('dashboard/verify-payment/<str:booking_id>/', views.barber_verify_payment, name='barber_verify_payment'),
     path('booking/<str:booking_id>/confirm/', views.booking_confirm, name='booking_confirm'),
 
     # Barber Agenda (Public Timeline)

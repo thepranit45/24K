@@ -1438,6 +1438,33 @@ textarea.form-control { resize:vertical; min-height:100px; }
   border-color: #10b981;
 }
 
+/* In-Salon Verification Notice Box */
+.salon-verify-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  padding: 0.85rem 1rem;
+  background: rgba(212, 175, 55, 0.08);
+  border: 1px dashed rgba(212, 175, 55, 0.35);
+  border-radius: 12px;
+  font-size: 0.82rem;
+  color: #e5e7eb;
+  text-align: left;
+  line-height: 1.45;
+  margin-bottom: 1.25rem;
+}
+.salon-verify-notice i {
+  font-size: 1.15rem;
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+.salon-verify-notice strong {
+  color: #ffd700;
+  display: block;
+  font-size: 0.85rem;
+  margin-bottom: 0.15rem;
+}
+
 /* Mobile UPI Apps Container */
 .upi-mobile-apps-container {
   margin-bottom: 1.5rem;
@@ -2269,10 +2296,50 @@ textarea.form-control { resize:vertical; min-height:100px; }
 .pay-paid { color: #10b981; }
 .pay-pending { color: #f59e0b; }
 .pay-refunded { color: #a855f7; }
+.pay-verified {
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: #34d399;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+.pay-unverified-box {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.pay-unverified {
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  color: #fbbf24;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+.utr-mini-tag {
+  font-size: 0.7rem;
+  color: #9ca3af;
+  font-family: monospace;
+  background: #151822;
+  padding: 1px 5px;
+  border-radius: 4px;
+  border: 1px solid #282e40;
+}
 
 /* Table Action Buttons */
 .action-buttons { display: flex; gap: 0.4rem; align-items: center; }
 .btn-action { padding: 0.4rem 0.8rem; border-radius: 6px; border: none; font-size: 0.78rem; font-weight: 600; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 0.3rem; }
+.btn-verify-pay {
+  background: linear-gradient(135deg, rgba(212,175,55,0.25), rgba(212,175,55,0.1));
+  border: 1px solid #d4af37;
+  color: #ffd700;
+}
+.btn-verify-pay:hover {
+  background: #d4af37;
+  color: #000;
+  box-shadow: 0 4px 12px rgba(212,175,55,0.3);
+}
 .btn-notify { background: rgba(212,175,55,0.15); border: 1px solid rgba(212,175,55,0.32); color: #dfbc44; }
 .btn-notify:hover { background: #d4af37; color: #15110a; }
 .btn-confirm { background: rgba(16,185,129,0.2); color: #10b981; border: 1px solid rgba(16,185,129,0.4); }

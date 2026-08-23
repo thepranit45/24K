@@ -56,29 +56,6 @@
             <span class="settings-hint">Displayed to the customer inside Google Pay / PhonePe when scanning.</span>
           </label>
         </div>
-      <!-- Razorpay Payment Gateway Configuration -->
-      <div class="dashboard-section" data-animate="fade-up" data-delay="120">
-        <div class="section-title-wrap">
-          <h2><i class="fa-solid fa-credit-card text-gold"></i> Razorpay Payment Gateway (Cards, NetBanking, UPI)</h2>
-          <span class="section-badge"><i class="fa-solid fa-lock"></i> Automated Bank Verification</span>
-        </div>
-        <p class="section-sub" style="color:#9ca3af; font-size:0.88rem; margin-top:-0.5rem; margin-bottom:1.5rem; line-height:1.5;">
-          Enables Razorpay's Standard Checkout popup for Credit/Debit Cards, NetBanking, and automated cryptographic payment verification.
-        </p>
-
-        <div class="settings-grid" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:1.5rem;">
-          <label class="settings-field">
-            <span class="settings-label">Razorpay Key ID</span>
-            <input type="text" name="razorpay_key_id" value="{{ razorpay_key_id }}" class="admin-inline-input" placeholder="e.g. rzp_live_xxxxxxxx or rzp_test_xxxxxxxx" />
-            <span class="settings-hint">Found in Razorpay Dashboard → Settings → API Keys.</span>
-          </label>
-
-          <label class="settings-field">
-            <span class="settings-label">Razorpay Key Secret</span>
-            <input type="password" name="razorpay_key_secret" value="{{ razorpay_key_secret }}" class="admin-inline-input" placeholder="Leave blank to keep current secret" />
-            <span class="settings-hint">Used securely on server to verify HMAC SHA256 payment signatures.</span>
-          </label>
-        </div>
       </div>
 
       <!-- Slot Settings Section -->

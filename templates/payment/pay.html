@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Checkout &amp; Payment | 24 K Barbershop{% endblock %}
+{% block title %}Scan &amp; Pay UPI | 24 K Barbershop{% endblock %}
 
 {% block content %}
 <section class="section payment-section">
@@ -56,113 +56,95 @@
         </div>
       </div>
 
-      <!-- Payment Panel -->
-      <div class="payment-panel">
+      <!-- Payment Panel: Smart Salon UPI QR Gateway -->
+      <div class="payment-panel upi-payment-panel">
         <div class="payment-panel-header">
           <div class="payment-secure-badge">
-            <i class="fa-solid fa-shield-halved"></i> 100% Encrypted &amp; Secure Payment
+            <i class="fa-solid fa-qrcode"></i> Scan &amp; Pay Salon UPI
           </div>
           <h2 class="payment-amount">₹{{ booking.amount|floatformat:0 }}</h2>
-          <p class="payment-desc">{{ booking.service.name }} · 24 K Hair Studio</p>
+          <p class="payment-desc">{{ booking.service.name }} · {{ shop_upi_name }}</p>
         </div>
 
-        <!-- Payment Mode Tabs -->
-        <div class="payment-tabs-nav">
-          <button type="button" class="pay-tab-btn active" id="tabBtnRazorpay" onclick="switchPayTab('razorpay')">
-            <i class="fa-solid fa-credit-card"></i> Razorpay (Cards, UPI, NetBanking)
+        <!-- 1-Tap Mobile UPI App Buttons -->
+        <div class="upi-mobile-apps-container">
+          <span class="upi-apps-label"><i class="fa-solid fa-bolt text-gold"></i> Pay with any UPI app on phone:</span>
+          <div class="upi-apps-grid">
+            <a href="{{ gpay_link }}" class="btn-upi-app btn-gpay">
+              <i class="fa-brands fa-google-pay"></i> Google Pay
+            </a>
+            <a href="{{ phonepe_link }}" class="btn-upi-app btn-phonepe">
+              <i class="fa-solid fa-mobile-screen-button"></i> PhonePe
+            </a>
+            <a href="{{ paytm_link }}" class="btn-upi-app btn-paytm">
+              <i class="fa-solid fa-wallet"></i> Paytm
+            </a>
+            <a href="{{ upi_link }}" class="btn-upi-app btn-any-upi">
+              <i class="fa-solid fa-qrcode"></i> Any UPI App
+            </a>
+          </div>
+        </div>
+
+        <!-- Salon QR Code Card -->
+        <div class="upi-qr-card">
+          <div class="upi-qr-frame">
+            <img src="{{ qr_code_url }}" alt="Scan UPI QR Code for {{ shop_upi_name }}" class="upi-qr-image" id="upiQrImg" onerror="this.src='{% static 'images/upi_qr.jpg' %}';" />
+          </div>
+          
+          <div class="upi-actions-row">
+            <a href="{{ qr_code_url }}" target="_blank" download="24K_Studio_QR_{{ booking.booking_id }}.png" class="btn-qr-action btn-download-qr">
+              <i class="fa-solid fa-download"></i> Save QR Code
+            </a>
+            <a href="{{ upi_link }}" class="btn-qr-action btn-open-upi mobile-only-inline">
+              <i class="fa-solid fa-mobile-screen-button"></i> Open UPI App
+            </a>
+          </div>
+        </div>
+
+        <!-- Copy UPI ID Box -->
+        <div class="upi-copy-box">
+          <div class="upi-copy-info">
+            <span class="upi-label">Salon Payee UPI ID</span>
+            <span class="upi-value" id="upiIdValue">{{ shop_upi_id }}</span>
+          </div>
+          <button type="button" class="btn-copy-upi" id="copyUpiBtn" onclick="copyUpiId()">
+            <i class="fa-regular fa-copy" id="copyIcon"></i>
+            <span id="copyText">Copy ID</span>
           </button>
-          <button type="button" class="pay-tab-btn" id="tabBtnUpi" onclick="switchPayTab('upi')">
-            <i class="fa-solid fa-qrcode"></i> Direct UPI QR
+        </div>
+
+        <!-- In-Salon Verification Notice -->
+        <div class="salon-verify-notice">
+          <i class="fa-solid fa-user-check text-gold"></i>
+          <div>
+            <strong>In-Salon Verification:</strong>
+            <span>Your barber will verify this UPI payment in the salon when your service is completed.</span>
+          </div>
+        </div>
+
+        <!-- Confirmation Form -->
+        <form method="post" action="{% url 'process_mock_payment' booking.booking_id %}" class="upi-confirm-form" id="upiConfirmForm">
+          {% csrf_token %}
+          
+          <div class="utr-input-wrap">
+            <label for="utrInput" class="utr-label">
+              <span>UPI Ref / UTR No.</span>
+              <span class="muted">(Optional 12-digit number from payment receipt)</span>
+            </label>
+            <input type="text" name="utr_number" id="utrInput" class="utr-input" placeholder="e.g. 423819283741" maxlength="18" pattern="[0-9A-Za-z-]+" />
+          </div>
+
+          <button type="submit" class="btn-pay btn-confirm-paid" id="paySubmitBtn" onclick="handleUpiPayClick(this)">
+            <span id="payBtnText"><i class="fa-solid fa-circle-check"></i> I Have Paid ₹{{ booking.amount|floatformat:0 }} · Confirm Booking</span>
+            <span id="payBtnSpinner" style="display:none;">
+              <span class="spinner-inline"></span> Confirming Booking…
+            </span>
           </button>
-        </div>
-
-        <!-- TAB 1: RAZORPAY GATEWAY CHECKOUT -->
-        <div class="pay-tab-content active" id="payContentRazorpay">
-          <div class="razorpay-checkout-box">
-            <div class="rzp-features-grid">
-              <div class="rzp-feat-item"><i class="fa-solid fa-credit-card text-gold"></i> <span>Cards (Visa, MC, RuPay)</span></div>
-              <div class="rzp-feat-item"><i class="fa-brands fa-google-pay text-gold"></i> <span>UPI &amp; QR Apps</span></div>
-              <div class="rzp-feat-item"><i class="fa-solid fa-building-columns text-gold"></i> <span>NetBanking (50+ Banks)</span></div>
-              <div class="rzp-feat-item"><i class="fa-solid fa-wallet text-gold"></i> <span>Wallets &amp; PayLater</span></div>
-            </div>
-
-            <button type="button" class="btn-pay btn-razorpay-trigger" id="rzpPayBtn" onclick="launchRazorpay()">
-              <i class="fa-solid fa-lock"></i> Pay ₹{{ booking.amount|floatformat:0 }} via Razorpay
-            </button>
-
-            <!-- Verification form submitted on Razorpay success callback -->
-            <form method="POST" action="{% url 'verify_razorpay_payment' booking.booking_id %}" id="razorpayVerifyForm" style="display:none;">
-              {% csrf_token %}
-              <input type="hidden" name="razorpay_order_id" id="rzpOrderIdInput" value="{{ razorpay_order_id }}" />
-              <input type="hidden" name="razorpay_payment_id" id="rzpPaymentIdInput" value="" />
-              <input type="hidden" name="razorpay_signature" id="rzpSignatureInput" value="" />
-            </form>
-          </div>
-        </div>
-
-        <!-- TAB 2: DIRECT UPI QR SCAN -->
-        <div class="pay-tab-content" id="payContentUpi" style="display:none;">
-          <!-- 1-Tap Mobile UPI App Buttons -->
-          <div class="upi-mobile-apps-container">
-            <span class="upi-apps-label"><i class="fa-solid fa-bolt text-gold"></i> Fast Pay on Mobile:</span>
-            <div class="upi-apps-grid">
-              <a href="{{ gpay_link }}" class="btn-upi-app btn-gpay"><i class="fa-brands fa-google-pay"></i> Google Pay</a>
-              <a href="{{ phonepe_link }}" class="btn-upi-app btn-phonepe"><i class="fa-solid fa-mobile-screen-button"></i> PhonePe</a>
-              <a href="{{ paytm_link }}" class="btn-upi-app btn-paytm"><i class="fa-solid fa-wallet"></i> Paytm</a>
-              <a href="{{ upi_link }}" class="btn-upi-app btn-any-upi"><i class="fa-solid fa-qrcode"></i> Any UPI</a>
-            </div>
-          </div>
-
-          <!-- QR Code Frame -->
-          <div class="upi-qr-card">
-            <div class="upi-qr-frame">
-              <img src="{{ qr_code_url }}" alt="Scan UPI QR Code for {{ shop_upi_name }}" class="upi-qr-image" id="upiQrImg" onerror="this.src='{% static 'images/upi_qr.jpg' %}';" />
-            </div>
-            <div class="upi-actions-row">
-              <a href="{{ qr_code_url }}" target="_blank" download="24K_Studio_QR_{{ booking.booking_id }}.png" class="btn-qr-action btn-download-qr">
-                <i class="fa-solid fa-download"></i> Save QR Code
-              </a>
-              <a href="{{ upi_link }}" class="btn-qr-action btn-open-upi mobile-only-inline">
-                <i class="fa-solid fa-mobile-screen-button"></i> Open UPI App
-              </a>
-            </div>
-          </div>
-
-          <!-- Copy UPI Section -->
-          <div class="upi-copy-box">
-            <div class="upi-copy-info">
-              <span class="upi-label">Payee UPI ID</span>
-              <span class="upi-value" id="upiIdValue">{{ shop_upi_id }}</span>
-            </div>
-            <button type="button" class="btn-copy-upi" id="copyUpiBtn" onclick="copyUpiId()">
-              <i class="fa-regular fa-copy" id="copyIcon"></i>
-              <span id="copyText">Copy ID</span>
-            </button>
-          </div>
-
-          <!-- Direct UPI Verification Form -->
-          <form method="post" action="{% url 'process_mock_payment' booking.booking_id %}" class="upi-confirm-form" id="upiConfirmForm">
-            {% csrf_token %}
-            <div class="utr-input-wrap">
-              <label for="utrInput" class="utr-label">
-                <span>UPI Ref / UTR No.</span>
-                <span class="muted">(Optional: 12-digit number from payment receipt)</span>
-              </label>
-              <input type="text" name="utr_number" id="utrInput" class="utr-input" placeholder="e.g. 423819283741" maxlength="18" pattern="[0-9A-Za-z-]+" />
-            </div>
-
-            <button type="submit" class="btn-pay btn-confirm-paid" id="paySubmitBtn" onclick="handleUpiPayClick(this)">
-              <span id="payBtnText"><i class="fa-solid fa-circle-check"></i> I Have Paid ₹{{ booking.amount|floatformat:0 }}</span>
-              <span id="payBtnSpinner" style="display:none;">
-                <span class="spinner-inline"></span> Confirming Booking…
-              </span>
-            </button>
-          </form>
-        </div>
+        </form>
 
         <p class="payment-note">
           <i class="fa-solid fa-shield-halved"></i>
-          Automated bank verification &amp; instant appointment confirmation receipt.
+          Direct instant UPI transfer. 0% gateway fee.
         </p>
 
         <a href="{% url 'booking_list' %}" class="payment-cancel-link">
@@ -174,94 +156,7 @@
   </div>
 </section>
 
-<!-- Razorpay Standard Checkout SDK -->
-<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-
 <script>
-function switchPayTab(tab) {
-  const rzpBtn = document.getElementById('tabBtnRazorpay');
-  const upiBtn = document.getElementById('tabBtnUpi');
-  const rzpContent = document.getElementById('payContentRazorpay');
-  const upiContent = document.getElementById('payContentUpi');
-
-  if (tab === 'razorpay') {
-    rzpBtn.classList.add('active');
-    upiBtn.classList.remove('active');
-    rzpContent.style.display = 'block';
-    upiContent.style.display = 'none';
-  } else {
-    upiBtn.classList.add('active');
-    rzpBtn.classList.remove('active');
-    upiContent.style.display = 'block';
-    rzpContent.style.display = 'none';
-  }
-}
-
-function launchRazorpay() {
-  const keyId = "{{ razorpay_key_id|default:'rzp_test_placeholder' }}";
-  const orderId = "{{ razorpay_order_id }}";
-  const amountPaise = {{ amount_paise }};
-  const customerName = "{{ booking.customer_name|escapejs }}";
-  const customerEmail = "{{ booking.customer_email|escapejs }}";
-  const customerPhone = "{{ booking.customer_phone|escapejs }}";
-  const bookingId = "{{ booking.booking_id|escapejs }}";
-  const serviceName = "{{ booking.service.name|escapejs }}";
-
-  // If Razorpay keys are in place, initialize the official checkout modal
-  if (keyId && keyId !== 'rzp_test_placeholder' && typeof Razorpay !== 'undefined') {
-    const options = {
-      key: keyId,
-      amount: amountPaise,
-      currency: "INR",
-      name: "24 K Hair Studio",
-      description: serviceName + " (Ref: " + bookingId + ")",
-      image: "https://cdn-icons-png.flaticon.com/512/1046/1046857.png",
-      order_id: orderId || undefined,
-      prefill: {
-        name: customerName,
-        email: customerEmail,
-        contact: customerPhone
-      },
-      theme: {
-        color: "#d4af37",
-        backdrop_color: "rgba(0,0,0,0.85)"
-      },
-      modal: {
-        ondismiss: function() {
-          console.log('Razorpay modal dismissed');
-        }
-      },
-      handler: function(response) {
-        document.getElementById('rzpOrderIdInput').value = response.razorpay_order_id || orderId;
-        document.getElementById('rzpPaymentIdInput').value = response.razorpay_payment_id;
-        document.getElementById('rzpSignatureInput').value = response.razorpay_signature || '';
-        
-        const btn = document.getElementById('rzpPayBtn');
-        btn.disabled = true;
-        btn.innerHTML = '<span class="spinner-inline"></span> Verifying with Bank…';
-        document.getElementById('razorpayVerifyForm').submit();
-      }
-    };
-
-    const rzpInstance = new Razorpay(options);
-    rzpInstance.on('payment.failed', function(response) {
-      alert('Payment failed: ' + (response.error.description || 'Please try again.'));
-    });
-    rzpInstance.open();
-  } else {
-    // Sandbox / Test Simulator when test keys are being initialized
-    const testPaymentId = "pay_test_" + Math.random().toString(36).substring(2, 12).toUpperCase();
-    const btn = document.getElementById('rzpPayBtn');
-    btn.disabled = true;
-    btn.innerHTML = '<span class="spinner-inline"></span> Confirming Test Payment…';
-
-    document.getElementById('rzpOrderIdInput').value = orderId || "order_test_demo";
-    document.getElementById('rzpPaymentIdInput').value = testPaymentId;
-    document.getElementById('rzpSignatureInput').value = "sig_test_demo";
-    document.getElementById('razorpayVerifyForm').submit();
-  }
-}
-
 function copyUpiId() {
   const upiId = document.getElementById('upiIdValue').textContent.trim();
   navigator.clipboard.writeText(upiId).then(() => {

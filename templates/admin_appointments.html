@@ -108,14 +108,28 @@
               <td><span class="amount-tag">₹ {{ booking.amount|floatformat:0 }}</span></td>
               <td><span class="status-badge status-{{ booking.status|lower }}">{{ booking.get_status_display }}</span></td>
               <td>
-                {% if booking.payment %}
-                  <span class="payment-badge pay-{{ booking.payment.status|lower }}">{{ booking.payment.get_status_display }}</span>
+                {% if booking.payment.is_verified_by_barber %}
+                  <span class="payment-badge pay-verified"><i class="fa-solid fa-circle-check"></i> Verified in Salon</span>
+                {% elif booking.payment %}
+                  <div class="pay-unverified-box">
+                    <span class="payment-badge pay-unverified"><i class="fa-solid fa-clock-rotate-left"></i> Unverified UPI</span>
+                    {% if booking.payment.transaction_id %}
+                    <span class="utr-mini-tag">{{ booking.payment.transaction_id }}</span>
+                    {% endif %}
+                  </div>
                 {% else %}
                   <span class="payment-badge">—</span>
                 {% endif %}
               </td>
               <td>
                 <div class="action-buttons">
+                  {% if not booking.payment.is_verified_by_barber and booking.status != 'CANCELLED' %}
+                    <form action="{% url 'barber_verify_payment' booking.booking_id %}" method="POST" style="display:inline;">
+                      {% csrf_token %}
+                      <input type="hidden" name="complete_service" value="1" />
+                      <button type="submit" class="btn-action btn-verify-pay" title="Verify Salon UPI Payment and Mark Complete"><i class="fa-solid fa-shield-check"></i> Verify &amp; Complete</button>
+                    </form>
+                  {% endif %}
                   <button type="button" class="btn-action btn-notify" title="Send Message or WhatsApp Notification" onclick="openNotifyModal('{{ booking.booking_id }}', '{{ booking.customer_name|escapejs }}', '{{ booking.customer_phone|escapejs }}', '{{ booking.service.name|escapejs }}', '{{ booking.booking_date|date:"d M Y" }}', '{{ booking.booking_time|time:"g:i A" }}')">
                     <i class="fa-solid fa-paper-plane"></i> Notify
                   </button>
@@ -126,7 +140,7 @@
                       <button type="submit" class="btn-action btn-confirm" title="Confirm Appointment"><i class="fa-solid fa-check"></i> Confirm</button>
                     </form>
                   {% endif %}
-                  {% if booking.status != 'COMPLETED' and booking.status != 'CANCELLED' %}
+                  {% if booking.status != 'COMPLETED' and booking.status != 'CANCELLED' and booking.payment.is_verified_by_barber %}
                     <form action="{% url 'admin_update_status' booking.booking_id %}" method="POST" style="display:inline;">
                       {% csrf_token %}
                       <input type="hidden" name="status" value="COMPLETED" />

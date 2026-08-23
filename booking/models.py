@@ -256,13 +256,13 @@ class Payment(models.Model):
     booking = models.OneToOneField(Booking, on_delete=models.CASCADE, related_name='payment')
     amount = models.DecimalField(max_digits=8, decimal_places=2)
     transaction_id = models.CharField(max_length=100, unique=True, null=True, blank=True)
-    payment_method = models.CharField(max_length=50, default='MOCK')
+    payment_method = models.CharField(max_length=50, default='UPI')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)
     
-    # Razorpay Specific Tracking
-    razorpay_order_id = models.CharField(max_length=100, null=True, blank=True)
-    razorpay_payment_id = models.CharField(max_length=100, null=True, blank=True)
-    razorpay_signature = models.CharField(max_length=255, null=True, blank=True)
+    # In-salon verification by barber
+    is_verified_by_barber = models.BooleanField(default=False)
+    verified_at = models.DateTimeField(null=True, blank=True)
+    verified_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='verified_payments')
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -272,7 +272,8 @@ class Payment(models.Model):
         verbose_name_plural = 'Payments'
 
     def __str__(self):
-        return f"Payment [{self.status}] for {self.booking.booking_id} — ₹{self.amount}"
+        ver_str = "Verified" if self.is_verified_by_barber else "Unverified"
+        return f"Payment [{self.status} - {ver_str}] for {self.booking.booking_id} — ₹{self.amount}"
 
 
 def get_razorpay_keys():

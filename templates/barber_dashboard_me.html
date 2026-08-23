@@ -173,6 +173,7 @@
               <th>Date &amp; Time</th>
               <th>Amount</th>
               <th>Status</th>
+              <th>Payment &amp; Salon Verification</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -183,7 +184,7 @@
               <td>
                 <div class="customer-info-box">
                   <span class="cust-name">{{ b.customer_name }}</span>
-                  <span class="cust-phone">{{ b.customer_phone }}</span>
+                  <a href="tel:{{ b.customer_phone }}" class="cust-phone"><i class="fa-solid fa-phone"></i> {{ b.customer_phone }}</a>
                 </div>
               </td>
               <td>
@@ -196,29 +197,52 @@
                   <span class="b-time">{{ b.booking_time|time:"g:i A" }}</span>
                 </div>
               </td>
-              <td><span class="amount-tag">₹{{ b.service.price|floatformat:0 }}</span></td>
+              <td><span class="amount-tag">₹{{ b.amount|floatformat:0 }}</span></td>
               <td><span class="status-badge status-{{ b.status|lower }}">{{ b.get_status_display }}</span></td>
               <td>
+                {% if b.payment.is_verified_by_barber %}
+                  <span class="payment-badge pay-verified"><i class="fa-solid fa-circle-check"></i> Verified in Salon</span>
+                {% elif b.payment %}
+                  <div class="pay-unverified-box">
+                    <span class="payment-badge pay-unverified"><i class="fa-solid fa-clock-rotate-left"></i> Unverified UPI</span>
+                    {% if b.payment.transaction_id %}
+                    <span class="utr-mini-tag">{{ b.payment.transaction_id }}</span>
+                    {% endif %}
+                  </div>
+                {% else %}
+                  <span class="payment-badge pay-pending">Pending</span>
+                {% endif %}
+              </td>
+              <td>
                 <div class="action-buttons">
-                  {% if b.status != 'CONFIRMED' and b.status != 'COMPLETED' %}
+                  {% if not b.payment.is_verified_by_barber and b.status != 'CANCELLED' %}
+                  <form method="POST" action="{% url 'barber_verify_payment' b.booking_id %}" class="inline-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="complete_service" value="1" />
+                    <button type="submit" class="btn-action btn-verify-pay" title="Verify Salon UPI Payment and Mark Complete">
+                      <i class="fa-solid fa-shield-check"></i> Verify &amp; Complete
+                    </button>
+                  </form>
+                  {% endif %}
+                  {% if b.status != 'CONFIRMED' and b.status != 'COMPLETED' and b.status != 'CANCELLED' %}
                   <form method="POST" action="{% url 'barber_update_status' b.booking_id %}" class="inline-form">
                     {% csrf_token %}
                     <input type="hidden" name="status" value="CONFIRMED" />
                     <button type="submit" class="btn-action btn-confirm"><i class="fa-solid fa-check"></i> Confirm</button>
                   </form>
                   {% endif %}
-                  {% if b.status != 'COMPLETED' and b.status != 'CANCELLED' %}
+                  {% if b.status != 'COMPLETED' and b.status != 'CANCELLED' and b.payment.is_verified_by_barber %}
                   <form method="POST" action="{% url 'barber_update_status' b.booking_id %}" class="inline-form">
                     {% csrf_token %}
                     <input type="hidden" name="status" value="COMPLETED" />
                     <button type="submit" class="btn-action btn-complete"><i class="fa-solid fa-flag-checkered"></i> Complete</button>
                   </form>
                   {% endif %}
-                  {% if b.status != 'CANCELLED' %}
+                  {% if b.status != 'CANCELLED' and b.status != 'COMPLETED' %}
                   <form method="POST" action="{% url 'barber_update_status' b.booking_id %}" class="inline-form">
                     {% csrf_token %}
                     <input type="hidden" name="status" value="CANCELLED" />
-                    <button type="submit" class="btn-action btn-cancel" onclick="return confirm('Cancel this booking?')"><i class="fa-solid fa-ban"></i> Cancel</button>
+                    <button type="submit" class="btn-action btn-cancel" onclick="return confirm('Cancel this appointment?');"><i class="fa-solid fa-xmark"></i></button>
                   </form>
                   {% endif %}
                 </div>

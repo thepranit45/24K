@@ -398,37 +398,6 @@ def payment_page(request, booking_id):
     shop_upi_id = get_shop_upi_id()
     shop_upi_name = get_shop_upi_name()
     amount_str = f"{booking.amount:.2f}"
-    amount_paise = int(booking.amount * 100)
-
-    # Razorpay Order Initialization
-    razorpay_key_id, razorpay_key_secret = get_razorpay_keys()
-    razorpay_order_id = ''
-    razorpay_enabled = bool(razorpay_key_id)
-
-    if razorpay_enabled and razorpay_key_secret and not razorpay_key_id.startswith('rzp_test_placeholder'):
-        try:
-            import razorpay
-            client = razorpay.Client(auth=(razorpay_key_id, razorpay_key_secret))
-            order_data = {
-                'amount': amount_paise,
-                'currency': 'INR',
-                'receipt': booking.booking_id,
-                'notes': {
-                    'booking_id': booking.booking_id,
-                    'customer_name': booking.customer_name,
-                    'service': booking.service.name,
-                }
-            }
-            rzp_order = client.order.create(data=order_data)
-            razorpay_order_id = rzp_order.get('id', '')
-            payment.razorpay_order_id = razorpay_order_id
-            payment.save()
-        except Exception as exc:
-            import logging
-            logging.getLogger(__name__).warning(f"Razorpay order creation fallback: {exc}")
-            razorpay_order_id = f"order_demo_{booking.booking_id}"
-    elif razorpay_enabled:
-        razorpay_order_id = f"order_demo_{booking.booking_id}"
 
     # Build standard UPI URI
     # upi://pay?pa=VPA&pn=NAME&am=AMOUNT&tr=REF&cu=INR
@@ -442,15 +411,11 @@ def payment_page(request, booking_id):
 
     # Generate dynamic QR Code URL
     encoded_upi_link = urllib.parse.quote_plus(upi_link)
-    qr_code_url = f"https://api.qrserver.com/v1/create-qr-code/?data={encoded_upi_link}&size=320x320&margin=12&color=000000&bgcolor=ffffff"
+    qr_code_url = f"https://api.qrserver.com/v1/create-qr-code/?data={encoded_upi_link}&size=340x340&margin=12&color=000000&bgcolor=ffffff"
 
     context = {
         'booking': booking,
-        'payment_mode': settings.PAYMENT_MODE,
-        'razorpay_enabled': razorpay_enabled,
-        'razorpay_key_id': razorpay_key_id,
-        'razorpay_order_id': razorpay_order_id,
-        'amount_paise': amount_paise,
+        'payment': payment,
         'shop_upi_id': shop_upi_id,
         'shop_upi_name': shop_upi_name,
         'upi_link': upi_link,
@@ -462,73 +427,46 @@ def payment_page(request, booking_id):
     return render(request, 'payment/pay.html', context)
 
 
+@barber_required
 @require_POST
-def verify_razorpay_payment(request, booking_id):
-    """Cryptographically verify Razorpay payment and confirm booking."""
+def barber_verify_payment(request, booking_id):
+    """Barber or Admin verifies the customer's UPI payment in salon when service is done."""
     booking = get_object_or_404(Booking, booking_id=booking_id)
 
-    if not _can_access_booking(request, booking):
-        messages.error(request, "You don't have access to this booking.")
-        return redirect('home')
+    # If not staff, barber can only verify their own appointments
+    if not request.user.is_staff:
+        barber = getattr(request.user, 'barber_profile', None)
+        if not barber or booking.barber != barber:
+            messages.error(request, "You can only verify payments for your own appointments.")
+            return redirect('barber_dashboard')
 
-    if booking.status == Booking.STATUS_CONFIRMED:
-        return redirect('booking_confirm', booking_id=booking.booking_id)
+    payment, _ = Payment.objects.get_or_create(
+        booking=booking,
+        defaults={'amount': booking.amount}
+    )
+    payment.is_verified_by_barber = True
+    payment.status = Payment.STATUS_PAID
+    payment.verified_at = timezone.now()
+    payment.verified_by = request.user
+    payment.save()
 
-    payment = get_object_or_404(Payment, booking=booking)
-
-    razorpay_order_id = request.POST.get('razorpay_order_id', '').strip()
-    razorpay_payment_id = request.POST.get('razorpay_payment_id', '').strip()
-    razorpay_signature = request.POST.get('razorpay_signature', '').strip()
-
-    key_id, key_secret = get_razorpay_keys()
-    verified = False
-
-    if key_id and key_secret and not key_id.startswith('rzp_test_placeholder'):
-        try:
-            import razorpay
-            client = razorpay.Client(auth=(key_id, key_secret))
-            params_dict = {
-                'razorpay_order_id': razorpay_order_id,
-                'razorpay_payment_id': razorpay_payment_id,
-                'razorpay_signature': razorpay_signature
-            }
-            client.utility.verify_payment_signature(params_dict)
-            verified = True
-        except Exception as exc:
-            import logging
-            logging.getLogger(__name__).error(f"Razorpay signature verification failed for {booking_id}: {exc}")
-            messages.error(request, "Payment signature verification failed. Please try again.")
-            return redirect('payment_page', booking_id=booking.booking_id)
-    else:
-        # Development / Sandbox fallback verification
-        verified = bool(razorpay_payment_id)
-
-    if verified:
-        payment.razorpay_order_id = razorpay_order_id
-        payment.razorpay_payment_id = razorpay_payment_id
-        payment.razorpay_signature = razorpay_signature
-        payment.transaction_id = razorpay_payment_id or f"RZP-{uuid.uuid4().hex[:10].upper()}"
-        payment.payment_method = 'RAZORPAY'
-        payment.status = Payment.STATUS_PAID
-        payment.save()
-
-        booking.status = Booking.STATUS_CONFIRMED
+    # If requested to also complete the service
+    if request.POST.get('complete_service') == '1':
+        booking.status = Booking.STATUS_COMPLETED
         booking.save()
+        messages.success(request, f"Payment for {booking.booking_id} verified & service marked Completed!")
+    else:
+        messages.success(request, f"Payment for {booking.booking_id} verified in salon by {request.user.get_full_name() or request.user.username}!")
 
-        # Send confirmation SMS
-        try:
-            from .sms import send_booking_confirmation, schedule_reminders
-            send_booking_confirmation(booking)
-            schedule_reminders(booking)
-        except Exception as exc:
-            import logging
-            logging.getLogger(__name__).exception(f'SMS error for {booking_id}: {exc}')
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({
+            'success': True,
+            'is_verified': True,
+            'booking_status': booking.status,
+            'booking_id': booking.booking_id
+        })
 
-        messages.success(request, f"Payment verified via Razorpay! Booking {booking.booking_id} is confirmed.")
-        return redirect('booking_confirm', booking_id=booking.booking_id)
-
-    messages.error(request, "Payment could not be verified.")
-    return redirect('payment_page', booking_id=booking.booking_id)
+    return redirect(request.META.get('HTTP_REFERER', 'barber_dashboard'))
 
 
 @require_POST
@@ -543,10 +481,10 @@ def process_mock_payment(request, booking_id):
         messages.error(request, "This booking cannot be processed.")
         return redirect('home')
 
-    payment = get_object_or_404(Payment, booking=booking)
-
-    if payment.status == Payment.STATUS_PAID:
-        return redirect('booking_confirm', booking_id=booking.booking_id)
+    payment, _ = Payment.objects.get_or_create(
+        booking=booking,
+        defaults={'amount': booking.amount}
+    )
 
     utr_number = request.POST.get('utr_number', '').strip()
     if utr_number:
@@ -557,6 +495,7 @@ def process_mock_payment(request, booking_id):
     payment.transaction_id = txn_id
     payment.status = Payment.STATUS_PAID
     payment.payment_method = 'UPI'
+    payment.is_verified_by_barber = False
     payment.save()
 
     booking.status = Booking.STATUS_CONFIRMED
@@ -989,7 +928,7 @@ def admin_hours(request):
 
 @barber_staff_required
 def admin_settings(request):
-    """Shop-wide knobs: slot duration, Razorpay Gateway keys, and Shop UPI Payment settings."""
+    """Shop-wide knobs: slot duration and Salon Direct UPI Payment settings."""
     if request.method == 'POST':
         # Slot duration step
         try:
@@ -998,13 +937,6 @@ def admin_settings(request):
             step = 30
         step = max(5, min(step, 120))
         ShopSetting.objects.update_or_create(key='slot_step', defaults={'value': str(step)})
-
-        # Razorpay API Keys
-        razorpay_key_id = request.POST.get('razorpay_key_id', '').strip()
-        razorpay_key_secret = request.POST.get('razorpay_key_secret', '').strip()
-        ShopSetting.objects.update_or_create(key='razorpay_key_id', defaults={'value': razorpay_key_id})
-        if razorpay_key_secret:
-            ShopSetting.objects.update_or_create(key='razorpay_key_secret', defaults={'value': razorpay_key_secret})
 
         # Shop UPI ID & Name
         shop_upi_id = request.POST.get('shop_upi_id', '').strip()
@@ -1015,18 +947,15 @@ def admin_settings(request):
         if shop_upi_name:
             ShopSetting.objects.update_or_create(key='shop_upi_name', defaults={'value': shop_upi_name})
 
-        messages.success(request, "Shop settings, Razorpay keys, and UPI details updated successfully.")
+        messages.success(request, "Shop settings and Salon UPI payment details updated successfully.")
         return redirect('admin_settings')
 
-    rzp_key_id, rzp_key_secret = get_razorpay_keys()
     context = {
         'active_nav': 'settings',
         'slot_step': slot_step_minutes(),
         'slot_choices': [15, 20, 30, 45, 60, 90, 120],
         'shop_upi_id': get_shop_upi_id(),
         'shop_upi_name': get_shop_upi_name(),
-        'razorpay_key_id': rzp_key_id,
-        'razorpay_key_secret': rzp_key_secret,
     }
     return render(request, 'admin_settings.html', context)
 
