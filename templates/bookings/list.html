@@ -4,111 +4,429 @@
 {% block title %}My Bookings | 24 K Hair Studio{% endblock %}
 
 {% block content %}
+<style>
+/* ─────────────────────────────────────────────────────────────
+   BARBER STACK STYLE — MY BOOKINGS LUXURY UI
+───────────────────────────────────────────────────────────── */
+.stack-bookings-bg {
+  min-height: 80vh;
+  padding: 2.5rem 0 5rem;
+  background: radial-gradient(circle at 50% 0%, rgba(212, 175, 55, 0.08) 0%, transparent 60%), #08090d;
+}
 
-<div class="page-hero page-hero-sm">
-  <div class="page-hero-overlay"></div>
-  <div class="page-hero-content" data-animate="fade-up">
-    <h1 class="page-hero-title">My <span class="text-gold">Bookings</span></h1>
-    <p class="page-hero-sub">View your upcoming and completed salon appointments.</p>
-  </div>
-</div>
+.stack-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 2rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.15);
+  flex-wrap: wrap;
+  gap: 1rem;
+}
 
-<section class="section">
+.stack-title {
+  font-size: clamp(1.8rem, 4vw, 2.4rem);
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.4rem;
+}
+
+.stack-sub {
+  color: #9ca3af;
+  font-size: 0.92rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+}
+
+.stack-chips {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.stack-chip {
+  background: #11141c;
+  border: 1px solid #222634;
+  border-radius: 30px;
+  padding: 0.45rem 1rem;
+  font-size: 0.82rem;
+  color: #d1d5db;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.3);
+}
+
+.stack-chip strong {
+  color: #ffd700;
+  font-weight: 700;
+}
+
+.chip-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.dot-total { background: #3b82f6; box-shadow: 0 0 8px rgba(59, 130, 246, 0.6); }
+.dot-confirmed { background: #10b981; box-shadow: 0 0 8px rgba(16, 185, 129, 0.6); }
+.dot-completed { background: #d4af37; box-shadow: 0 0 8px rgba(212, 175, 55, 0.6); }
+
+/* Filter Tabs */
+.stack-filter-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 2.25rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+
+.stack-tab {
+  padding: 0.5rem 1.15rem;
+  background: #12151f;
+  border: 1px solid #242938;
+  border-radius: 10px;
+  color: #9ca3af;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.stack-tab:hover {
+  background: #1a1e2d;
+  color: #fff;
+  border-color: rgba(212, 175, 55, 0.4);
+}
+
+.stack-tab.active {
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.25), rgba(212, 175, 55, 0.08));
+  border-color: #d4af37;
+  color: #ffd700;
+  box-shadow: 0 4px 15px rgba(212, 175, 55, 0.15);
+}
+
+/* Timeline & Cards */
+.stack-timeline {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.stack-card {
+  background: linear-gradient(135deg, #131620 0%, #0d0f15 100%);
+  border: 1px solid #222634;
+  border-radius: 16px;
+  padding: 1.35rem 1.6rem;
+  display: grid;
+  grid-template-columns: 140px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1.5rem;
+  position: relative;
+  transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+.stack-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 14px;
+  bottom: 14px;
+  width: 4px;
+  border-radius: 0 4px 4px 0;
+  background: #d4af37;
+  opacity: 0.4;
+  transition: opacity 0.2s;
+}
+
+.stack-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(212, 175, 55, 0.5);
+  box-shadow: 0 12px 32px rgba(212, 175, 55, 0.12);
+}
+
+.stack-card:hover::before {
+  opacity: 1;
+  box-shadow: 0 0 10px #d4af37;
+}
+
+.stack-card.status-confirmed-card::before { background: #10b981; }
+.stack-card.status-completed-card::before { background: #3b82f6; }
+.stack-card.status-cancelled-card { opacity: 0.55; }
+.stack-card.status-cancelled-card::before { background: #ef4444; }
+
+/* Time Block */
+.stack-time-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.stack-time-val {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.stack-time-ampm {
+  font-size: 0.85rem;
+  color: #d4af37;
+  margin-left: 0.25rem;
+  font-weight: 700;
+}
+
+.stack-duration-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  color: #9ca3af;
+  font-weight: 600;
+  background: rgba(255,255,255,0.04);
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+  width: fit-content;
+}
+
+/* Details Block */
+.stack-details-block h3 {
+  font-size: 1.18rem;
+  font-weight: 700;
+  color: #f8fafc;
+  margin: 0 0 0.45rem;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.stack-details-block h3 i {
+  color: #d4af37;
+  font-size: 1rem;
+}
+
+.stack-meta-items {
+  display: flex;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.stack-meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.82rem;
+  color: #9ca3af;
+}
+
+.stack-meta-item i {
+  color: #d4af37;
+}
+
+/* Right Status & ID */
+.stack-right-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.6rem;
+}
+
+.stack-status-badge {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 0.35rem 0.85rem;
+  border-radius: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  text-transform: uppercase;
+}
+
+.status-badge-confirmed {
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  color: #34d399;
+}
+.status-badge-completed {
+  background: rgba(59, 130, 246, 0.15);
+  border: 1px solid rgba(59, 130, 246, 0.4);
+  color: #60a5fa;
+}
+.status-badge-pending {
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  color: #fbbf24;
+}
+.status-badge-cancelled {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #f87171;
+}
+
+.stack-id-badge {
+  font-size: 0.74rem;
+  color: #9ca3af;
+  font-family: monospace;
+  background: #171b26;
+  border: 1px solid #282f42;
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+}
+.stack-id-badge strong {
+  color: #ffd700;
+}
+
+/* Empty State */
+.stack-empty-card {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: #11141c;
+  border: 1px dashed #242938;
+  border-radius: 16px;
+}
+.stack-empty-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(212, 175, 55, 0.1);
+  color: #d4af37;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  margin: 0 auto 1.25rem;
+}
+.stack-empty-card h3 {
+  color: #fff;
+  font-size: 1.3rem;
+  margin-bottom: 0.5rem;
+}
+.stack-empty-card p {
+  color: #9ca3af;
+  margin-bottom: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .stack-card {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    padding: 1.2rem;
+  }
+  .stack-right-block {
+    align-items: flex-start;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+    padding-top: 0.75rem;
+    border-top: 1px solid #1e2230;
+  }
+}
+</style>
+
+<section class="stack-bookings-bg">
   <div class="container">
 
-    <!-- Next Appointment Highlight -->
-    {% if next_booking %}
-    <div class="next-appointment-card" data-animate="fade-up">
-      <div class="next-apt-badge"><i class="fa-solid fa-bolt"></i> NEXT APPOINTMENT</div>
-      <div class="next-apt-body">
-        <div class="next-apt-info">
-          <h2 class="next-apt-service">{{ next_booking.service.name }}</h2>
-          <div class="next-apt-meta">
-            <span><i class="fa-regular fa-calendar"></i>
-              {% if next_booking.booking_date == today %}
-                Today
-              {% elif next_booking.booking_date == today|add:"1" %}
-                Tomorrow
-              {% else %}
-                {{ next_booking.booking_date|date:"d M Y" }}
-              {% endif %}
-            </span>
-            <span><i class="fa-regular fa-clock"></i> {{ next_booking.booking_time|time:"g:i A" }}</span>
-            <span><i class="fa-regular fa-hourglass"></i> {{ next_booking.service.duration }} min</span>
-            {% if next_booking.barber %}
-            <span><i class="fa-solid fa-user-tie"></i> {{ next_booking.barber.name }}</span>
-            {% endif %}
-          </div>
-        </div>
-        <span class="status-badge status-{{ next_booking.status|lower }}">{{ next_booking.status }}</span>
+    <!-- ═══════ Header ═══════ -->
+    <div class="stack-header" data-animate="fade-up">
+      <div>
+        <h1 class="stack-title">My <span class="text-gold">Appointments</span></h1>
+        <p class="stack-sub">
+          <i class="fa-solid fa-scissors text-gold"></i> Live status of your salon appointments at 24 K Hair Studio
+        </p>
+      </div>
+      <div>
+        <a href="{% url 'home' %}#services" class="dashboard-header-button dashboard-header-button--primary">
+          <i class="fa-solid fa-plus"></i> Book New Service
+        </a>
       </div>
     </div>
-    {% endif %}
 
-    <!-- Filter Tabs -->
-    <div class="filter-tabs" data-animate="fade-up">
-      <a href="?status=ALL" class="filter-tab {% if status_filter == 'ALL' %}active{% endif %}">All</a>
-      <a href="?status=UPCOMING" class="filter-tab {% if status_filter == 'UPCOMING' %}active{% endif %}">Upcoming</a>
-      <a href="?status=CONFIRMED" class="filter-tab {% if status_filter == 'CONFIRMED' %}active{% endif %}">Confirmed</a>
-      <a href="?status=COMPLETED" class="filter-tab {% if status_filter == 'COMPLETED' %}active{% endif %}">Completed</a>
-      <a href="?status=CANCELLED" class="filter-tab {% if status_filter == 'CANCELLED' %}active{% endif %}">Cancelled</a>
+    <!-- ═══════ Summary Chips ═══════ -->
+    <div class="stack-chips" data-animate="fade-up" data-delay="50">
+      <div class="stack-chip"><span class="chip-dot dot-total"></span> Total: <strong>{{ bookings|length }}</strong></div>
+      <div class="stack-chip"><span class="chip-dot dot-confirmed"></span> Confirmed: <strong>{{ confirmed_count|default:bookings|length }}</strong></div>
+      <div class="stack-chip"><span class="chip-dot dot-completed"></span> Salon: <strong>Sangamner</strong></div>
     </div>
 
-    <!-- Bookings List -->
+    <!-- ═══════ Filter Tabs ═══════ -->
+    <div class="stack-filter-tabs" data-animate="fade-up" data-delay="75">
+      <a href="?status=ALL" class="stack-tab {% if status_filter == 'ALL' or not status_filter %}active{% endif %}">All Appointments</a>
+      <a href="?status=UPCOMING" class="stack-tab {% if status_filter == 'UPCOMING' %}active{% endif %}">Upcoming</a>
+      <a href="?status=CONFIRMED" class="stack-tab {% if status_filter == 'CONFIRMED' %}active{% endif %}">Confirmed</a>
+      <a href="?status=COMPLETED" class="stack-tab {% if status_filter == 'COMPLETED' %}active{% endif %}">Completed</a>
+      <a href="?status=CANCELLED" class="stack-tab {% if status_filter == 'CANCELLED' %}active{% endif %}">Cancelled</a>
+    </div>
+
+    <!-- ═══════ Timeline Stack List ═══════ -->
     {% if bookings %}
-    <div class="bookings-list">
+    <div class="stack-timeline" data-animate="fade-up" data-delay="100">
       {% for booking in bookings %}
-      <div class="booking-card {% if booking.status == 'CANCELLED' %}booking-card-cancelled{% endif %}" data-animate="fade-up" data-delay="{{ forloop.counter0 }}00">
-        <div class="booking-card-header">
-          <div class="booking-service-name">{{ booking.service.name }}</div>
-          <div class="status-badge status-{{ booking.status|lower }}">{{ booking.status }}</div>
+      <div class="stack-card status-{{ booking.status|lower }}-card">
+        <!-- Time Block -->
+        <div class="stack-time-block">
+          <div class="stack-time-val">
+            {{ booking.booking_time|time:"g:i" }}<span class="stack-time-ampm">{{ booking.booking_time|time:"A" }}</span>
+          </div>
+          <span class="stack-duration-badge">
+            <i class="fa-regular fa-clock"></i> {{ booking.service.duration }} min
+          </span>
         </div>
 
-        <div class="booking-card-body">
-          <div class="booking-meta-row">
-            <div class="booking-meta-item">
-              <i class="fa-regular fa-calendar"></i>
-              <span>{{ booking.booking_date|date:"d M Y" }}</span>
-            </div>
-            <div class="booking-meta-item">
-              <i class="fa-regular fa-clock"></i>
-              <span>{{ booking.booking_time|time:"g:i A" }}</span>
-            </div>
-            <div class="booking-meta-item">
-              <i class="fa-regular fa-hourglass"></i>
-              <span>{{ booking.service.duration }} min</span>
+        <!-- Details Block -->
+        <div class="stack-details-block">
+          <h3>
+            <i class="fa-solid fa-scissors"></i> {{ booking.service.name }}
+          </h3>
+          <div class="stack-meta-items">
+            <div class="stack-meta-item">
+              <i class="fa-regular fa-calendar-days"></i>
+              <span>{{ booking.booking_date|date:"D, d M Y" }}</span>
             </div>
             {% if booking.barber %}
-            <div class="booking-meta-item">
+            <div class="stack-meta-item">
               <i class="fa-solid fa-user-tie"></i>
-              <span>{{ booking.barber.name }}</span>
+              <span>{{ booking.barber.name }} ({{ booking.barber.title }})</span>
             </div>
             {% endif %}
           </div>
+        </div>
 
-          <div class="booking-footer-row" style="margin-top: 0.6rem; padding-top: 0.6rem; border-top: 1px solid #1f2330;">
-            <div class="booking-id-row">
-              <span class="booking-id-label" style="color:#9ca3af; font-size:0.8rem;">ID:</span>
-              <span class="booking-id-val" style="color:#ffd700; font-family:monospace; font-weight:700; font-size:0.85rem;">{{ booking.booking_id }}</span>
-            </div>
-          </div>
+        <!-- Right Status & ID Block -->
+        <div class="stack-right-block">
+          <span class="stack-status-badge status-badge-{{ booking.status|lower }}">
+            <i class="fa-solid fa-circle" style="font-size:0.5rem;"></i> {{ booking.get_status_display|default:booking.status }}
+          </span>
+          <span class="stack-id-badge">
+            ID: <strong>{{ booking.booking_id }}</strong>
+          </span>
         </div>
       </div>
       {% endfor %}
     </div>
-
     {% else %}
-    <!-- Empty State -->
-    <div class="empty-state" data-animate="fade-up">
-      <div class="empty-icon"><i class="fa-solid fa-calendar-xmark"></i></div>
-      <h3>No Appointments Yet</h3>
-      {% if status_filter != 'ALL' %}
-      <p>No {{ status_filter|lower }} appointments found.</p>
-      <a href="?status=ALL" class="btn-ghost">View All Bookings</a>
+    <!-- Empty State Card -->
+    <div class="stack-empty-card" data-animate="fade-up">
+      <div class="stack-empty-icon">
+        <i class="fa-solid fa-calendar-check"></i>
+      </div>
+      <h3>No Appointments Found</h3>
+      {% if status_filter != 'ALL' and status_filter %}
+      <p>No {{ status_filter|lower }} appointments found in your queue.</p>
+      <a href="?status=ALL" class="stack-tab active">View All Bookings</a>
       {% else %}
-      <p>You haven't booked an appointment yet.</p>
-      <a href="{% url 'home' %}#services" class="btn-gold">
-        <i class="fa-solid fa-scissors"></i> Book Your First Appointment
+      <p>You haven't booked an appointment yet at 24 K Hair Studio.</p>
+      <a href="{% url 'home' %}#services" class="dashboard-header-button dashboard-header-button--primary">
+        <i class="fa-solid fa-scissors"></i> Book Your First Service
       </a>
       {% endif %}
     </div>
@@ -116,41 +434,4 @@
 
   </div>
 </section>
-
-<!-- Cancel Confirmation Modal -->
-<div class="modal-backdrop" id="cancelModalBackdrop" style="display:none;" onclick="closeCancelModal()"></div>
-<div class="modal" id="cancelModal" style="display:none;" role="dialog" aria-modal="true">
-  <div class="modal-header">
-    <div class="modal-icon modal-icon-danger"><i class="fa-solid fa-triangle-exclamation"></i></div>
-    <h3>Cancel Appointment?</h3>
-  </div>
-  <div class="modal-body">
-    <p>Are you sure you want to cancel your <strong id="cancelServiceName"></strong> appointment on <strong id="cancelDateLabel"></strong>?</p>
-    <p class="modal-note">If you've already paid, a refund will be processed within 5–7 business days.</p>
-  </div>
-  <div class="modal-actions">
-    <button class="btn-ghost" onclick="closeCancelModal()">Keep Booking</button>
-    <form id="cancelForm" method="post" action="">
-      {% csrf_token %}
-      <button type="submit" class="btn-danger">Cancel Appointment</button>
-    </form>
-  </div>
-</div>
-
-<script>
-function openCancelModal(bookingId, serviceName, dateLabel) {
-  document.getElementById('cancelServiceName').textContent = serviceName;
-  document.getElementById('cancelDateLabel').textContent = dateLabel;
-  document.getElementById('cancelForm').action = `/bookings/${bookingId}/cancel/`;
-  document.getElementById('cancelModal').style.display = 'block';
-  document.getElementById('cancelModalBackdrop').style.display = 'block';
-  document.body.classList.add('no-scroll');
-}
-function closeCancelModal() {
-  document.getElementById('cancelModal').style.display = 'none';
-  document.getElementById('cancelModalBackdrop').style.display = 'none';
-  document.body.classList.remove('no-scroll');
-}
-</script>
-
 {% endblock %}
