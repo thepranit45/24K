@@ -306,6 +306,7 @@
                  aria-checked="{% if b.is_featured %}true{% else %}false{% endif %}" tabindex="-1"
                  {% if b.is_featured %}data-preferred-barber{% endif %}>
               <div class="barber-wheel__avatar">
+                <span class="barber-halo-ring" aria-hidden="true"></span>
                 <div class="barber-photo">
                   {% if b.photo %}
                     <img src="{{ b.photo.url }}" alt="{{ b.name }}" loading="lazy" />
@@ -329,6 +330,7 @@
                 </div>
                 <div class="barber-card-meta">
                   <span class="b-rating"><i class="fa-solid fa-star text-white"></i> {{ b.rating }}</span>
+                  <span class="meta-divider" aria-hidden="true"></span>
                   <span class="barber-exp-badge"><i class="fa-regular fa-calendar"></i> {{ b.experience_years }} yrs exp</span>
                   {% if b.is_active %}
                     <span class="barber-availability"><i class="fa-solid fa-circle-check"></i> Available today</span>
@@ -351,6 +353,7 @@
                  data-barber-id="" data-barber-name="Any Available Barber" role="radio"
                  aria-checked="false" tabindex="-1">
               <div class="barber-wheel__avatar">
+                <span class="barber-halo-ring" aria-hidden="true"></span>
                 <div class="barber-card-icon"><i class="fa-solid fa-bolt"></i></div>
               </div>
               <div class="barber-wheel__body">
