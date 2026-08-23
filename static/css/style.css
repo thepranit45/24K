@@ -2979,17 +2979,17 @@ textarea.form-control { resize:vertical; min-height:100px; }
    Exact Luxury Mockup Match: Breaking-the-Frame Card Architecture
 --------------------------------------------------------------- */
 .barber-wheel { 
-  margin: 5.5rem 0 1rem; 
+  margin: 7.5rem 0 1rem; 
   --wheel-w: min(395px, calc(100vw - 36px)); 
   position: relative;
 }
 .barber-wheel__stage {
   cursor: grab; 
-  height: 570px; 
-  min-height: 560px; 
+  height: 530px; 
+  min-height: 520px; 
   outline: none; 
   overflow: visible !important;
-  padding: 40px 0 20px; 
+  padding: 0 0 20px; 
   perspective: 1000px; 
   perspective-origin: 50% 34%;
   position: relative; 
@@ -3014,14 +3014,14 @@ textarea.form-control { resize:vertical; min-height:100px; }
   display: flex; 
   flex-direction: column; 
   justify-content: space-between;
-  gap: 12px; 
-  height: calc(100% - 80px);
-  min-height: 460px;
+  gap: 10px; 
+  height: 460px;
+  min-height: 450px;
   left: 50%; 
   overflow: visible !important; 
-  padding: 150px 22px 22px 22px; 
+  padding: 130px 22px 20px 22px; 
   position: absolute;
-  top: 80px; 
+  top: 60px; 
   transform-style: preserve-3d; 
   text-align: left; 
   width: var(--wheel-w);
@@ -3048,11 +3048,11 @@ textarea.form-control { resize:vertical; min-height:100px; }
 .barber-wheel__avatar { 
   margin: 0;
   position: absolute; 
-  top: -125px; 
+  top: -150px; 
   left: 50%;
   transform: translateX(-50%);
-  width: 340px; 
-  height: 390px; 
+  width: 300px; 
+  height: 350px; 
   z-index: 15;
   display: flex;
   align-items: center;
@@ -3325,36 +3325,36 @@ textarea.form-control { resize:vertical; min-height:100px; }
 /* 8. Mobile & Responsive Refinements */
 @media (max-width: 768px) {
   .barber-wheel { 
-    margin: 4.5rem 0 1rem; 
+    margin: 6rem 0 1rem; 
     --wheel-w: calc(100vw - 36px); 
   }
   .barber-wheel__stage {
-    height: 540px; 
-    min-height: 530px; 
-    padding: 30px 0 15px; 
+    height: 500px; 
+    min-height: 490px; 
+    padding: 0 0 15px; 
   }
   .barber-wheel__card {
-    top: 70px;
-    height: calc(100% - 70px);
-    min-height: 440px;
-    padding: 135px 18px 18px 18px;
-    gap: 10px;
+    top: 50px;
+    height: 440px;
+    min-height: 430px;
+    padding: 120px 18px 18px 18px;
+    gap: 8px;
     border-radius: 26px;
   }
   .barber-wheel__avatar {
-    top: -110px;
-    width: 270px;
-    height: 320px;
+    top: -130px;
+    width: 260px;
+    height: 310px;
   }
   .barber-wheel__body h4 {
-    font-size: 1.28rem;
+    font-size: 1.25rem;
   }
   .b-role {
-    font-size: 0.98rem;
+    font-size: 0.95rem;
   }
   .barber-spec-chip {
-    padding: 0.28rem 0.7rem;
-    font-size: 0.76rem;
+    padding: 0.25rem 0.65rem;
+    font-size: 0.74rem;
   }
 }
 @media (prefers-reduced-motion: reduce) {
