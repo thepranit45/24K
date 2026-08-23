@@ -405,8 +405,8 @@ def payment_page(request, booking_id):
     amt_val = booking.amount
     amount_str = str(int(amt_val)) if amt_val == int(amt_val) else f"{amt_val:.2f}"
 
-    # Clean Official NPCI Web Intent Query (No mode=01 / aid / tr which triggers security/risky fraud flags on web deep links)
-    merchant_query = f"pa={shop_upi_id}&pn=24%20K%20HAIR%20STUDIO&mc=7230&am={amount_str}&cu=INR&tn=24K%20Salon"
+    # Clean Universal UPI Query (Removing restrictive MCC flag that causes NPCI web gateway block)
+    merchant_query = f"pa={shop_upi_id}&pn=24%20K%20HAIR%20STUDIO&am={amount_str}&cu=INR"
     
     # Universal UPI link (for Any UPI App / QR Scanner)
     upi_link = f"upi://pay?{merchant_query}"
