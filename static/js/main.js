@@ -800,7 +800,7 @@ function initBarberWheel() {
       });
       card.classList.add('selected');
       card.setAttribute('aria-checked', 'true');
-      card.querySelectorAll('.barber-wheel__select-btn').forEach(b => { b.textContent = 'Selected ✓'; });
+      card.querySelectorAll('.barber-wheel__select-btn').forEach(b => { b.textContent = 'Selected'; });
       if (!wasSelected && !initialSelect) {
         card.classList.remove('wheel-just-selected');
         card.offsetHeight;
