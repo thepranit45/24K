@@ -38,7 +38,9 @@
 <nav class="navbar" id="navbar">
   <div class="nav-container">
     <a href="{% url 'home' %}" class="nav-logo">
-      <span class="logo-icon"><i class="fa-solid fa-scissors"></i></span>
+      <span class="logo-icon" style="display:flex; align-items:center;">
+        <img src="{% static 'images/logo_crest.jpg' %}" alt="24 K" style="width:36px; height:36px; border-radius:50%; object-fit:cover; border:1.5px solid #d4af37; box-shadow:0 0 10px rgba(212,175,55,0.3);" />
+      </span>
       <span class="logo-text">24 K</span>
     </a>
 
@@ -59,7 +61,10 @@
 <div class="mobile-nav-overlay" id="mobileNavOverlay"></div>
 <div class="mobile-nav" id="mobileNav">
   <div class="mobile-nav-header">
-    <div class="mobile-nav-logo"><i class="fa-solid fa-scissors"></i> 24 K</div>
+    <div class="mobile-nav-logo" style="display:flex; align-items:center; gap:8px;">
+      <img src="{% static 'images/logo_crest.jpg' %}" alt="24 K" style="width:32px; height:32px; border-radius:50%; object-fit:cover; border:1.5px solid #d4af37;" />
+      <span>24 K</span>
+    </div>
     <button class="mobile-nav-close" onclick="closeMobileNav()">&times;</button>
   </div>
   <ul>
@@ -101,9 +106,9 @@
 <footer class="footer">
   <div class="footer-container">
     <div class="footer-brand">
-      <div class="footer-logo">
-        <i class="fa-solid fa-scissors"></i>
-        24 K
+      <div class="footer-logo" style="display:flex; align-items:center; gap:10px;">
+        <img src="{% static 'images/logo_crest.jpg' %}" alt="24 K" style="width:44px; height:44px; border-radius:50%; object-fit:cover; border:1.5px solid #d4af37; box-shadow:0 0 12px rgba(212,175,55,0.35);" />
+        <span>24 K Hair Studio</span>
       </div>
       <p class="footer-tagline">24-karat grooming. Zero compromise.</p>
       <div class="footer-social">
