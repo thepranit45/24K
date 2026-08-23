@@ -291,11 +291,12 @@
   <!-- Step 2: Barber Selection -->
   <div class="wizard-panel" id="wizard-panel-2">
     <div class="wizard-panel-inner">
-      <p class="barber-wizard-kicker"><i class="fa-solid fa-sparkles"></i> Personalize your visit</p>
-      <h2 class="wizard-heading">Choose Your Barber</h2>
-      <p class="wizard-sub barber-wizard-sub">Choose your preferred barber, or let us secure the earliest available appointment.</p>
-
-      <p class="barber-grid-label">MASTER BARBERS</p>
+      <div class="wizard-step-topline">
+        <span class="wso-step-pill"><i class="fa-solid fa-scissors"></i> Step 2 of 6</span>
+        <span class="wso-badge-location"><i class="fa-solid fa-crown text-gold"></i> Master Barbers</span>
+      </div>
+      <h2 class="wizard-heading">Choose <span class="text-gold">Your Barber</span></h2>
+      <p class="wizard-step-desc">Select your preferred specialist or let us assign the next available master barber.</p>
 
       <div class="barber-wheel" id="barberWheel" data-count="{{ barbers|length|add:1 }}">
         <div class="barber-wheel__stage" id="barberWheelStage" role="radiogroup" aria-label="Choose a barber" aria-orientation="horizontal" tabindex="0">
