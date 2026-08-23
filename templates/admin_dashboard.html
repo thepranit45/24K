@@ -89,21 +89,21 @@
     </div>
 
     <!-- Day-at-a-glance keeps active appointments visible before the full queue. -->
-    <div class="dashboard-operations-grid" data-animate="fade-up" data-delay="75">
-      <section class="dashboard-section dashboard-today-card">
+    <div class="dashboard-today-wrapper" data-animate="fade-up" data-delay="75" style="margin-bottom: 2rem;">
+      <section class="dashboard-section dashboard-today-card" style="margin-bottom: 0;">
         <div class="section-title-wrap">
           <div>
             <span class="section-overline"><i class="fa-regular fa-calendar"></i> {{ today|date:"l, d M" }}</span>
-            <h2><i class="fa-solid fa-bolt text-gold"></i> Today's chair</h2>
+            <h2><i class="fa-solid fa-bolt text-gold"></i> Today's Schedule &amp; Live Chair</h2>
           </div>
-          <span class="section-badge">{{ today_bookings }} booked</span>
+          <span class="section-badge">{{ today_bookings }} booked today</span>
         </div>
 
         {% if next_appointment %}
           <div class="next-queue-item">
             <div class="next-queue-icon"><i class="fa-solid fa-clock"></i></div>
             <div>
-              <span class="next-queue-label">Next appointment</span>
+              <span class="next-queue-label">Next in line</span>
               <strong>{{ next_appointment.booking_time|time:"g:i A" }} · {{ next_appointment.customer_name }}</strong>
               <span>{{ next_appointment.service.name }}{% if next_appointment.barber %} with {{ next_appointment.barber.name }}{% endif %}</span>
             </div>
@@ -122,7 +122,7 @@
               <time>{{ booking.booking_time|time:"g:i A" }}</time>
               <div>
                 <strong>{{ booking.customer_name }}</strong>
-                <span>{{ booking.service.name }}</span>
+                <span>{{ booking.service.name }}{% if booking.barber %} · {{ booking.barber.name }}{% endif %}</span>
               </div>
               <span class="status-badge status-{{ booking.status|lower }}">{{ booking.get_status_display }}</span>
             </div>
@@ -130,24 +130,6 @@
             <p class="today-queue-empty">New appointments will appear here as soon as customers book.</p>
           {% endfor %}
         </div>
-      </section>
-
-      <section class="dashboard-section dashboard-tools-card">
-        <div class="section-title-wrap">
-          <div>
-            <span class="section-overline"><i class="fa-solid fa-wand-magic-sparkles"></i> Quick tools</span>
-            <h2><i class="fa-solid fa-sliders text-gold"></i> Manage the shop</h2>
-          </div>
-        </div>
-        <p>Use the dashboard for appointments; use the management pages to edit services, rates, business hours or slot settings.</p>
-        <div class="dashboard-tools-actions">
-          <a href="{% url 'admin_appointments' %}" class="dashboard-tool-link primary"><i class="fa-solid fa-calendar-pen"></i> Manage appointments</a>
-          <a href="{% url 'admin_barbers' %}" class="dashboard-tool-link"><i class="fa-solid fa-user-tie"></i> Barbers &amp; Team</a>
-          <a href="{% url 'admin_services' %}" class="dashboard-tool-link"><i class="fa-solid fa-scissors"></i> Services &amp; rates</a>
-          <a href="{% url 'admin_hours' %}" class="dashboard-tool-link"><i class="fa-solid fa-clock"></i> Business hours</a>
-          <a href="{% url 'admin_settings' %}" class="dashboard-tool-link"><i class="fa-solid fa-gear"></i> Settings &amp; UPI</a>
-        </div>
-        <div class="dashboard-live-note"><span></span>{{ active_barbers_count }} barber{% if active_barbers_count != 1 %}s{% endif %} currently available for new bookings.</div>
       </section>
     </div>
 
