@@ -184,17 +184,32 @@
         </button>
       </div>
 
-      <!-- Category Filter Tabs -->
-      <div class="wizard-service-category-tabs">
-        <button type="button" class="wiz-cat-tab active" onclick="filterWizardServices('all', this)">
-          <span>✨ All Services</span> <span class="tab-count">{{ total_services_count|default:23 }}</span>
-        </button>
-        <button type="button" class="wiz-cat-tab" onclick="filterWizardServices('MALE', this)">
-          <span>💈 Men</span> <span class="tab-count">{{ male_services|length }}</span>
-        </button>
-        <button type="button" class="wiz-cat-tab" onclick="filterWizardServices('FEMALE', this)">
-          <span>💅 Women</span> <span class="tab-count">{{ female_services|length }}</span>
-        </button>
+      <!-- Quick Search Keywords Chips -->
+      <div class="wizard-quick-chips">
+        <span class="wqc-label">Quick filter:</span>
+        <button type="button" class="wqc-chip" onclick="quickFilterKeyword('hair')">✂️ Haircut</button>
+        <button type="button" class="wqc-chip" onclick="quickFilterKeyword('beard')">🧔 Beard</button>
+        <button type="button" class="wqc-chip" onclick="quickFilterKeyword('spa')">💆 Spa</button>
+        <button type="button" class="wqc-chip" onclick="quickFilterKeyword('facial')">✨ Facial</button>
+        <button type="button" class="wqc-chip" onclick="quickFilterKeyword('colour')">🎨 Color</button>
+      </div>
+
+      <!-- Category Filter Tabs & Live Counter Header -->
+      <div class="wizard-tabs-and-counter">
+        <div class="wizard-service-category-tabs">
+          <button type="button" class="wiz-cat-tab active" onclick="filterWizardServices('all', this)">
+            <span>✨ All</span> <span class="tab-count">{{ total_services_count|default:23 }}</span>
+          </button>
+          <button type="button" class="wiz-cat-tab" onclick="filterWizardServices('MALE', this)">
+            <span>💈 Men</span> <span class="tab-count">{{ male_services|length }}</span>
+          </button>
+          <button type="button" class="wiz-cat-tab" onclick="filterWizardServices('FEMALE', this)">
+            <span>💅 Women</span> <span class="tab-count">{{ female_services|length }}</span>
+          </button>
+        </div>
+        <div class="wso-live-counter" id="wizardServiceLiveCount">
+          <i class="fa-solid fa-scissors text-gold"></i> <span>{{ total_services_count|default:23 }} services available</span>
+        </div>
       </div>
 
       <!-- Services Grid Directly Displayed -->

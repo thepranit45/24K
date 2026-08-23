@@ -293,6 +293,22 @@ function clearServiceSearch() {
   applyWizardServiceFilters('', currentWizardCategory);
 }
 
+/** Quick filter by keyword chip */
+function quickFilterKeyword(kw) {
+  const searchInp = document.getElementById('wizardServiceSearchInput');
+  const clearBtn = document.getElementById('searchClearBtn');
+  if (searchInp) {
+    if (searchInp.value.toLowerCase().trim() === kw) {
+      searchInp.value = '';
+      if (clearBtn) clearBtn.style.display = 'none';
+    } else {
+      searchInp.value = kw;
+      if (clearBtn) clearBtn.style.display = 'flex';
+    }
+    applyWizardServiceFilters(searchInp.value.toLowerCase().trim(), currentWizardCategory);
+  }
+}
+
 function applyWizardServiceFilters(query, cat) {
   let matchCount = 0;
   document.querySelectorAll('.wizard-service-option').forEach(opt => {
@@ -312,6 +328,15 @@ function applyWizardServiceFilters(query, cat) {
   const noMsg = document.getElementById('wizardNoServices');
   if (noMsg) {
     noMsg.style.display = matchCount === 0 ? 'block' : 'none';
+  }
+
+  const liveCounter = document.getElementById('wizardServiceLiveCount');
+  if (liveCounter) {
+    if (matchCount === 0) {
+      liveCounter.innerHTML = '<i class="fa-solid fa-circle-exclamation text-gold"></i> <span>0 services found</span>';
+    } else {
+      liveCounter.innerHTML = `<i class="fa-solid fa-scissors text-gold"></i> <span>${matchCount} services available</span>`;
+    }
   }
 }
 
