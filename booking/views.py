@@ -405,9 +405,8 @@ def payment_page(request, booking_id):
     amt_val = booking.amount
     amount_str = str(int(amt_val)) if amt_val == int(amt_val) else f"{amt_val:.2f}"
 
-    # Exact Official Google Pay Business Merchant Parameters decoded from standee
-    # mc=7230 (Barber Shops / Salons), aid=uGICAgMDy4ou1Qg, tr=BCR2DN4TZLEKTG3Z
-    merchant_query = f"pa=9921028084@okbizaxis&pn=24%20K%20HAIR%20STUDIO%20&mc=7230&aid=uGICAgMDy4ou1Qg&ver=01&mode=01&tr=BCR2DN4TZLEKTG3Z&am={amount_str}&cu=INR"
+    # Clean Official NPCI Web Intent Query (No mode=01 / aid / tr which triggers security/risky fraud flags on web deep links)
+    merchant_query = f"pa={shop_upi_id}&pn=24%20K%20HAIR%20STUDIO&mc=7230&am={amount_str}&cu=INR&tn=24K%20Salon"
     
     # Universal UPI link (for Any UPI App / QR Scanner)
     upi_link = f"upi://pay?{merchant_query}"
