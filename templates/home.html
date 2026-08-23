@@ -167,9 +167,12 @@
   <!-- Step 1: Select Service -->
   <div class="wizard-panel active" id="wizard-panel-1">
     <div class="wizard-panel-inner">
-      <p class="barber-wizard-kicker"><i class="fa-solid fa-sparkles"></i> Step 1 • Service Selection</p>
-      <h2 class="wizard-heading">Select Service</h2>
-      <p class="wizard-step-desc">Choose your preferred grooming service to proceed.</p>
+      <div class="wizard-step-topline">
+        <span class="wso-step-pill"><i class="fa-solid fa-sparkles"></i> Step 1 of 6</span>
+        <span class="wso-badge-location"><i class="fa-solid fa-location-dot"></i> Sangamner</span>
+      </div>
+      <h2 class="wizard-heading">Select <span class="text-gold">Your Service</span></h2>
+      <p class="wizard-step-desc">Pick your tailored grooming service to unlock available master barbers.</p>
 
       <!-- Search Bar -->
       <div class="wizard-service-search-box">
@@ -184,13 +187,13 @@
       <!-- Category Filter Tabs -->
       <div class="wizard-service-category-tabs">
         <button type="button" class="wiz-cat-tab active" onclick="filterWizardServices('all', this)">
-          <span>✨ All</span> <span class="tab-count">{{ total_services_count|default:23 }}</span>
+          <span>✨ All Services</span> <span class="tab-count">{{ total_services_count|default:23 }}</span>
         </button>
         <button type="button" class="wiz-cat-tab" onclick="filterWizardServices('MALE', this)">
-          <span>✂️ Men</span> <span class="tab-count">{{ male_services|length }}</span>
+          <span>💈 Men</span> <span class="tab-count">{{ male_services|length }}</span>
         </button>
         <button type="button" class="wiz-cat-tab" onclick="filterWizardServices('FEMALE', this)">
-          <span>💇‍♀️ Women</span> <span class="tab-count">{{ female_services|length }}</span>
+          <span>💅 Women</span> <span class="tab-count">{{ female_services|length }}</span>
         </button>
       </div>
 
@@ -210,7 +213,7 @@
             <div class="wso-name">{{ s.name }}</div>
             <div class="wso-meta">
               <span class="wso-duration"><i class="fa-regular fa-clock"></i> {{ s.duration }} min</span>
-              <span class="wso-category wso-cat-male">Men</span>
+              <span class="wso-category wso-cat-male">Men's Care</span>
             </div>
           </div>
           <div class="wso-right">
@@ -234,7 +237,7 @@
             <div class="wso-name">{{ s.name }}</div>
             <div class="wso-meta">
               <span class="wso-duration"><i class="fa-regular fa-clock"></i> {{ s.duration }} min</span>
-              <span class="wso-category wso-cat-female">Women</span>
+              <span class="wso-category wso-cat-female">Women's Care</span>
             </div>
           </div>
           <div class="wso-right">
@@ -250,7 +253,19 @@
         </div>
       </div>
 
-      <div class="wizard-nav" style="margin-top: 1.5rem;">
+      <!-- Live Selection Summary & Action -->
+      <div class="wizard-step1-bottom-bar">
+        <div class="selected-service-summary-pill" id="step1ServicePill">
+          <div class="ssp-left">
+            <span class="ssp-icon"><i class="fa-solid fa-check text-gold"></i></span>
+            <div class="ssp-info">
+              <span class="ssp-name" id="wiz-service-name">{% if male_services %}{{ male_services.0.name }}{% else %}Select a service{% endif %}</span>
+              <span class="ssp-duration" id="wiz-service-duration"><i class="fa-regular fa-clock"></i> {% if male_services %}{{ male_services.0.duration }}{% else %}0{% endif %} min</span>
+            </div>
+          </div>
+          <div class="ssp-price" id="wiz-service-price">₹{% if male_services %}{{ male_services.0.price|floatformat:0 }}{% else %}0{% endif %}</div>
+        </div>
+
         <button class="btn-wizard-next" id="btnServiceNext" onclick="wizardGoTo(2)">
           Choose Barber <i class="fa-solid fa-arrow-right"></i>
         </button>
