@@ -293,15 +293,6 @@ function clearServiceSearch() {
   applyWizardServiceFilters('', currentWizardCategory);
 }
 
-/** Smooth horizontal scroll for wizard services */
-function scrollWizardServices(dir) {
-  const grid = document.getElementById('wizardServicesGrid');
-  if (grid) {
-    const cardWidth = 240;
-    grid.scrollBy({ left: dir * cardWidth, behavior: 'smooth' });
-  }
-}
-
 /** Quick filter by keyword chip */
 function quickFilterKeyword(kw) {
   const searchInp = document.getElementById('wizardServiceSearchInput');
