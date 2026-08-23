@@ -115,10 +115,16 @@
         <a href="https://www.instagram.com/24k_hair_studio_/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
         <a href="https://wa.me/919209597436" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
       </div>
-      <button class="footer-ios-install" id="iosInstallLink" type="button">
-        <i class="fa-brands fa-apple" aria-hidden="true"></i>
-        Install on iPhone / iPad
-      </button>
+      <div style="display:flex; flex-direction:column; gap:8px; margin-top:14px;">
+        <button class="footer-ios-install" id="iosInstallLink" type="button">
+          <i class="fa-brands fa-apple" aria-hidden="true"></i>
+          Install on iPhone / iPad
+        </button>
+        <button class="footer-ios-install footer-android-install" id="androidInstallLink" type="button" style="border-color: rgba(16, 185, 129, 0.4); background: rgba(16, 185, 129, 0.08);">
+          <i class="fa-brands fa-android" aria-hidden="true" style="color:#34d399;"></i>
+          Install on Android
+        </button>
+      </div>
     </div>
 
     <div class="footer-links">
@@ -175,15 +181,17 @@
   </a>
 </nav>
 
-<!-- iPhone Safari cannot trigger installation programmatically, so this gives
-     customers the exact Add to Home Screen path in a compact bottom panel. -->
-<aside class="ios-install-prompt" id="iosInstallPrompt" hidden aria-label="Install 24K Salon">
-  <span class="ios-install-prompt__icon"><i class="fa-solid fa-scissors"></i></span>
+<!-- PWA & Mobile App Installation Banner (iOS + Android) -->
+<aside class="ios-install-prompt" id="iosInstallPrompt" hidden aria-label="Install 24K Salon App">
+  <span class="ios-install-prompt__icon" id="installPromptIcon"><i class="fa-solid fa-scissors"></i></span>
   <div class="ios-install-prompt__content">
-    <strong>Install 24K Salon</strong>
-    <span id="iosInstallPromptText">In Safari, tap <i class="fa-solid fa-arrow-up-from-bracket" aria-hidden="true"></i> Share, then <b>Add to Home Screen</b>.</span>
+    <strong id="installPromptTitle">Install 24K Hair Studio</strong>
+    <span id="iosInstallPromptText">Tap <b>Install</b> or add to your home screen for quick booking.</span>
   </div>
-  <button class="ios-install-prompt__close" id="iosInstallPromptClose" type="button" aria-label="Close install instructions">&times;</button>
+  <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
+    <button id="btnPwaNativeInstall" type="button" style="display:none; background:linear-gradient(135deg,#d4af37,#b8860b); color:#000; font-weight:800; border:none; border-radius:20px; padding:0.4rem 0.9rem; font-size:0.8rem; cursor:pointer;">Install</button>
+    <button class="ios-install-prompt__close" id="iosInstallPromptClose" type="button" aria-label="Close install instructions">&times;</button>
+  </div>
 </aside>
 
 {% load static %}

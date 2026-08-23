@@ -944,33 +944,93 @@ function initBarberWheel() {
   return w;
 }
 
+let deferredPwaPrompt = null;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPwaPrompt = e;
+  const nativeBtn = document.getElementById('btnPwaNativeInstall');
+  if (nativeBtn) nativeBtn.style.display = 'inline-block';
+});
+
 document.addEventListener('DOMContentLoaded', () => {
   initBarberWheel();
 
   const isIOS = /iPad|iPhone|iPod/.test(window.navigator.userAgent)
     || (window.navigator.platform === 'MacIntel' && window.navigator.maxTouchPoints > 1);
+  const isAndroid = /Android/.test(window.navigator.userAgent);
   const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+
   const installPrompt = document.getElementById('iosInstallPrompt');
   const closeInstallPrompt = document.getElementById('iosInstallPromptClose');
-  const installLink = document.getElementById('iosInstallLink');
+  const iosInstallLink = document.getElementById('iosInstallLink');
+  const androidInstallLink = document.getElementById('androidInstallLink');
   const installPromptText = document.getElementById('iosInstallPromptText');
+  const installPromptTitle = document.getElementById('installPromptTitle');
+  const nativeBtn = document.getElementById('btnPwaNativeInstall');
 
-  if (isIOS && !isStandalone && installPrompt && localStorage.getItem('24k-ios-install-dismissed') !== 'true') {
-    installPrompt.hidden = false;
+  // Auto-show install prompt if not standalone and not dismissed
+  if (!isStandalone && installPrompt && localStorage.getItem('24k-app-install-dismissed') !== 'true') {
+    if (isIOS) {
+      if (installPromptTitle) installPromptTitle.textContent = 'Install 24K Salon on iPhone';
+      if (installPromptText) installPromptText.innerHTML = 'In Safari, tap <i class="fa-solid fa-arrow-up-from-bracket" aria-hidden="true"></i> Share, then <b>Add to Home Screen</b>.';
+      installPrompt.hidden = false;
+    } else if (isAndroid) {
+      if (installPromptTitle) installPromptTitle.textContent = 'Install 24K Salon App';
+      if (installPromptText) installPromptText.innerHTML = 'Install official 24 K App for fast booking & live queue updates.';
+      if (nativeBtn && deferredPwaPrompt) nativeBtn.style.display = 'inline-block';
+      installPrompt.hidden = false;
+    }
   }
 
   closeInstallPrompt?.addEventListener('click', () => {
     installPrompt.hidden = true;
-    localStorage.setItem('24k-ios-install-dismissed', 'true');
+    localStorage.setItem('24k-app-install-dismissed', 'true');
   });
 
-  installLink?.addEventListener('click', () => {
-    if (!installPrompt) return;
-    if (!isIOS && installPromptText) {
-      installPromptText.innerHTML = 'Open this website in <b>Safari on your iPhone or iPad</b>, then tap Share <i class="fa-solid fa-arrow-up-from-bracket" aria-hidden="true"></i> and <b>Add to Home Screen</b>.';
+  // Native Install Button click
+  nativeBtn?.addEventListener('click', async () => {
+    if (deferredPwaPrompt) {
+      deferredPwaPrompt.prompt();
+      const { outcome } = await deferredPwaPrompt.userChoice;
+      if (outcome === 'accepted') {
+        installPrompt.hidden = true;
+      }
+      deferredPwaPrompt = null;
     }
+  });
+
+  // iOS Install Link Click
+  iosInstallLink?.addEventListener('click', () => {
+    if (!installPrompt) return;
+    if (installPromptTitle) installPromptTitle.textContent = 'Install on iPhone / iPad';
+    if (installPromptText) {
+      installPromptText.innerHTML = 'Open in <b>Safari</b>, tap Share <i class="fa-solid fa-arrow-up-from-bracket" aria-hidden="true"></i>, then tap <b>Add to Home Screen</b>.';
+    }
+    if (nativeBtn) nativeBtn.style.display = 'none';
     installPrompt.hidden = false;
-    localStorage.removeItem('24k-ios-install-dismissed');
+    localStorage.removeItem('24k-app-install-dismissed');
+  });
+
+  // Android Install Link Click
+  androidInstallLink?.addEventListener('click', async () => {
+    if (deferredPwaPrompt) {
+      deferredPwaPrompt.prompt();
+      const { outcome } = await deferredPwaPrompt.userChoice;
+      if (outcome === 'accepted') {
+        if (installPrompt) installPrompt.hidden = true;
+      }
+      deferredPwaPrompt = null;
+      return;
+    }
+
+    if (!installPrompt) return;
+    if (installPromptTitle) installPromptTitle.textContent = 'Install on Android';
+    if (installPromptText) {
+      installPromptText.innerHTML = 'In <b>Chrome</b>, tap <b>⋮ Menu</b> (top right) and select <b>Install app</b> or <b>Add to Home screen</b>.';
+    }
+    if (nativeBtn) nativeBtn.style.display = 'none';
+    installPrompt.hidden = false;
+    localStorage.removeItem('24k-app-install-dismissed');
   });
 
   if ('serviceWorker' in navigator) {
