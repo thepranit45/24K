@@ -691,21 +691,28 @@ function initBarberWheel() {
     consumedTouch: false,
     reduced: window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches,
     raf: 0,
+    _snapTimer: null,
 
     spacing() {
-      const w = this.cards[0].getBoundingClientRect().width || 280;
-      return w + 14;
+      if (this.cards[0]) {
+        const rect = this.cards[0].getBoundingClientRect();
+        if (rect.width > 0) return rect.width + 16;
+      }
+      return 320;
     },
 
     norm(i) {
-      const n = ((i % this.count) + this.count) % this.count;
-      return n;
+      if (this.count <= 0) return 0;
+      return ((i % this.count) + this.count) % this.count;
     },
 
-    /** Fractional distance of card i from the visual center (wrapped). */
+    /** Fractional distance of card i from visual center */
     dist(i) {
       let d = i - (this.active + this.raw);
-      d = ((d + this.count) % this.count + this.count / 2) % this.count - this.count / 2;
+      if (this.count > 1) {
+        while (d > this.count / 2) d -= this.count;
+        while (d < -this.count / 2) d += this.count;
+      }
       return d;
     },
 
@@ -714,20 +721,18 @@ function initBarberWheel() {
       this.cards.forEach((card, i) => {
         const d = this.dist(i);
         const ad = Math.abs(d);
-        const y = 18 * Math.sin(Math.min(ad, 4) * Math.PI / 4) * Math.min(1, ad * 2);
-        const scale = ad < 1 ? 1 - 0.16 * ad : (ad < 2 ? 0.84 - 0.14 * (ad - 1) : 0.7);
-        const opacity = ad < 1 ? 1 - 0.35 * ad : (ad < 2 ? 0.65 - 0.3 * (ad - 1) : 0.32);
-        const blur = ad < 1 ? 0 : (ad < 2 ? (ad - 1) * 6 : 7);
-        const ry = -Math.min(ad, 1.5) * 18;
+        const y = 14 * Math.sin(Math.min(ad, 3) * Math.PI / 3) * Math.min(1, ad * 1.5);
+        const scale = ad < 1 ? 1 - 0.12 * ad : (ad < 2 ? 0.88 - 0.12 * (ad - 1) : 0.74);
+        const opacity = ad < 1 ? 1 - 0.35 * ad : (ad < 2 ? 0.65 - 0.3 * (ad - 1) : 0.3);
+        const ry = -Math.min(ad, 1.2) * 12;
         card.style.transform =
           `translateX(calc(-50% + ${(away * d).toFixed(1)}px)) translateY(${y.toFixed(1)}px) ` +
           `scale(${scale.toFixed(3)}) rotateY(${ry.toFixed(1)}deg)`;
-        card.style.zIndex = String(20 - Math.min(ad, 9));
+        card.style.zIndex = String(20 - Math.min(Math.round(ad * 2), 12));
         card.style.opacity = opacity.toFixed(3);
-        card.style.filter = blur > 0 ? `blur(${blur.toFixed(1)}px)` : 'none';
-        card.classList.toggle('wheel-active', Math.abs(d) < 0.5);
-        card.classList.toggle('wheel-side', Math.abs(d) >= 0.5 && Math.abs(d) < 1.5);
-        card.setAttribute('aria-hidden', Math.abs(d) >= 1.5 ? 'true' : 'false');
+        card.classList.toggle('wheel-active', Math.abs(d) < 0.45);
+        card.classList.toggle('wheel-side', Math.abs(d) >= 0.45 && Math.abs(d) < 1.45);
+        card.setAttribute('aria-hidden', Math.abs(d) >= 1.45 ? 'true' : 'false');
       });
       if (this.counter) {
         const shown = this.norm(this.active + Math.round(this.raw));
@@ -746,19 +751,23 @@ function initBarberWheel() {
         if (animate && on) {
           dot.style.animation = 'none';
           dot.offsetHeight;
-          dot.style.animation = 'wheelDotPulse 0.45s cubic-bezier(0.34, 1.56, 0.64, 1)';
+          dot.style.animation = 'wheelDotPulse 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)';
         }
       });
     },
 
     snap(target, withSpring) {
-      if (this.animating) return;
+      if (this._snapTimer) {
+        clearTimeout(this._snapTimer);
+        this._snapTimer = null;
+      }
       this.animating = true;
       this.raw = 0;
       this.active = this.norm(target);
       const changed = this.changed !== this.active;
       this.changed = this.active;
 
+      this.stage.classList.remove('wheel-dragging');
       this.stage.classList.toggle('wheel-snapping', withSpring && !this.reduced);
       this.positionCards(withSpring && !this.reduced);
 
@@ -770,15 +779,17 @@ function initBarberWheel() {
           try { navigator.vibrate && navigator.vibrate(10); } catch (e) { /* not supported */ }
         }
       };
+
       if (withSpring && !this.reduced) {
-        setTimeout(finish, 600);
+        this._snapTimer = setTimeout(finish, 360);
       } else {
         finish();
       }
     },
 
-    applySelection() {
+    applySelection(initialSelect) {
       const card = this.cards[this.active];
+      if (!card) return;
       const id = card.dataset.barberId || '';
       const name = card.dataset.barberName || 'Any Available Barber';
       const wasSelected = wizard.barberId === id;
@@ -790,12 +801,11 @@ function initBarberWheel() {
       card.classList.add('selected');
       card.setAttribute('aria-checked', 'true');
       card.querySelectorAll('.barber-wheel__select-btn').forEach(b => { b.textContent = 'Selected ✓'; });
-      if (!wasSelected) {
+      if (!wasSelected && !initialSelect) {
         card.classList.remove('wheel-just-selected');
         card.offsetHeight;
         card.classList.add('wheel-just-selected');
       }
-      if (stage) stage.focus({ preventScroll: true });
       if (wizard.barberId !== id || wizard.barberName !== name) {
         selectBarber(card, id, name);
       }
@@ -806,10 +816,13 @@ function initBarberWheel() {
     },
 
     destroy() {
+      if (this._snapTimer) clearTimeout(this._snapTimer);
+      if (this.raf) cancelAnimationFrame(this.raf);
       this.stage.removeEventListener('pointerdown', this._onDown);
       this.stage.removeEventListener('pointermove', this._onMove);
       this.stage.removeEventListener('pointerup', this._onUp);
       this.stage.removeEventListener('pointercancel', this._onUp);
+      this.stage.removeEventListener('lostpointercapture', this._onUp);
       this.stage.removeEventListener('keydown', this._onKey);
       this.stage.removeEventListener('touchmove', this._onTouch);
       this.stage.removeEventListener('click', this._onClick);
@@ -833,10 +846,14 @@ function initBarberWheel() {
     w.stage.classList.add('wheel-single');
   }
 
-  // Pointer gestures (mouse + touch unified)
+  // Pointer gestures (interruptible and ultra-fluid)
   w._onDown = (e) => {
-    if (w.animating) return;
-    if (w.dragging || w.pointerActive) return;
+    // If interrupting a running snap animation, immediately stop and let user take control
+    if (w._snapTimer) {
+      clearTimeout(w._snapTimer);
+      w._snapTimer = null;
+    }
+    w.animating = false;
     w.pointerActive = true;
     w.pointerId = e.pointerId;
     w.dragging = true;
@@ -846,8 +863,11 @@ function initBarberWheel() {
     w.velocity = 0;
     w.raw = 0;
     w.consumedTouch = false;
+    w.stage.classList.remove('wheel-snapping');
     w.stage.classList.add('wheel-dragging');
-    w.stage.setPointerCapture && w.stage.setPointerCapture(e.pointerId);
+    try {
+      if (w.stage.setPointerCapture) w.stage.setPointerCapture(e.pointerId);
+    } catch (err) { /* ignore */ }
   };
 
   w._onMove = (e) => {
@@ -856,15 +876,13 @@ function initBarberWheel() {
     const dy = e.clientY - w.lastY;
     const now = performance.now();
     const dt = Math.max(1, now - w.lastT);
-    if (Math.abs(e.clientX - w.startX) > 10 && Math.abs(e.clientX - w.startX) > Math.abs(e.clientY - w.startY)) {
+    if (Math.abs(e.clientX - w.startX) > 8 && Math.abs(e.clientX - w.startX) > Math.abs(e.clientY - w.startY)) {
       w.consumedTouch = true;
       if (e.cancelable) e.preventDefault();
     }
-    // Track follows the pointer: dragging left (dx<0) moves the next card
-    // toward the center, so the raw offset grows positive.
     const dCards = -dx / w.spacing();
     w.raw += dCards;
-    if (dt > 0) w.velocity = 0.75 * w.velocity + 0.25 * (dCards / dt); // cards per ms
+    if (dt > 0) w.velocity = 0.7 * w.velocity + 0.3 * (dCards / dt);
     w.lastX = e.clientX; w.lastY = e.clientY; w.lastT = now;
     if (!w.raf) {
       w.raf = requestAnimationFrame(() => { w.raf = 0; w.positionCards(false); });
@@ -872,20 +890,24 @@ function initBarberWheel() {
   };
 
   w._onUp = (e) => {
-    if (!w.dragging || e.pointerId !== w.pointerId) return;
+    if (!w.dragging || (e.pointerId && e.pointerId !== w.pointerId)) return;
     w.dragging = false;
     w.pointerActive = false;
     w.stage.classList.remove('wheel-dragging');
-    w.stage.releasePointerCapture && w.stage.releasePointerCapture(e.pointerId);
+    try {
+      if (e.pointerId && w.stage.releasePointerCapture) {
+        w.stage.releasePointerCapture(e.pointerId);
+      }
+    } catch (err) { /* ignore */ }
 
     const moved = Math.abs(e.clientX - w.startX);
     let targetRaw = w.raw;
     if (!w.reduced) {
-      targetRaw += w.velocity * 240; // momentum: cards per ms * 240ms
+      targetRaw += w.velocity * 180; // Momentum calculation
     }
 
-    if (!w.consumedTouch && moved < 8 && Math.abs(w.raw) < 0.25) {
-      // Tap: rotate the tapped side card into the center
+    if (!w.consumedTouch && moved < 8 && Math.abs(w.raw) < 0.2) {
+      // Tap on a side card to bring it to center
       const card = document.elementFromPoint(e.clientX, e.clientY);
       const hit = card && card.closest ? card.closest('.barber-wheel__card') : null;
       if (hit) {
@@ -903,20 +925,20 @@ function initBarberWheel() {
     w.velocity = 0;
   };
 
-  // Block vertical page scroll only while a horizontal swipe is happening
   w._onTouch = (e) => {
     if (!w.dragging) return;
-    const dx = e.touches[0].clientX - w.startX;
-    const dy = e.touches[0].clientY - w.startY;
-    if (Math.abs(dx) > 12 && Math.abs(dx) > Math.abs(dy)) {
-      if (e.cancelable) e.preventDefault();
+    if (e.touches && e.touches.length > 0) {
+      const dx = e.touches[0].clientX - w.startX;
+      const dy = e.touches[0].clientY - w.startY;
+      if (Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(dy)) {
+        if (e.cancelable) e.preventDefault();
+      }
     }
   };
 
   w._onKey = (e) => {
     if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
       e.preventDefault();
-      if (w.animating) return;
       w.snap(w.active + (e.key === 'ArrowRight' ? 1 : -1), true);
     } else if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
@@ -949,15 +971,16 @@ function initBarberWheel() {
   stage.addEventListener('pointermove', w._onMove);
   stage.addEventListener('pointerup', w._onUp);
   stage.addEventListener('pointercancel', w._onUp);
+  stage.addEventListener('lostpointercapture', w._onUp);
   stage.addEventListener('keydown', w._onKey);
-  if (w.prevBtn) w.prevBtn.addEventListener('click', () => { if (!w.animating) w.snap(w.active - 1, true); });
-  if (w.nextBtn) w.nextBtn.addEventListener('click', () => { if (!w.animating) w.snap(w.active + 1, true); });
+  if (w.prevBtn) w.prevBtn.addEventListener('click', () => { w.snap(w.active - 1, true); });
+  if (w.nextBtn) w.nextBtn.addEventListener('click', () => { w.snap(w.active + 1, true); });
   if (dotsWrap) dotsWrap.addEventListener('click', (e) => {
     const dot = e.target.closest('.wheel-dot');
-    if (dot && !w.animating) w.snap(parseInt(dot.dataset.i, 10), true);
+    if (dot) w.snap(parseInt(dot.dataset.i, 10), true);
   });
 
-  // Native touchmove must stay non-passive for scroll prevention
+  // Native touchmove for horizontal lock
   stage.addEventListener('touchmove', (e) => w._onTouch(e), { passive: false });
   window.addEventListener('resize', w._onResize);
 
@@ -965,7 +988,6 @@ function initBarberWheel() {
   w.applySelection(true);
 
   window.__barberWheel = w;
-
   return w;
 }
 
