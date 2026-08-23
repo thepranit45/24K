@@ -228,18 +228,27 @@
   @media print {
     @page {
       size: A4 portrait;
-      margin: 10mm;
+      margin: 8mm;
     }
     html, body {
       background: #ffffff !important;
       color: #111827 !important;
       font-size: 11pt !important;
     }
-    .navbar, .footer, .mobile-bottom-nav, .receipt-particles,
+    .navbar, nav, .mobile-nav, .mobile-nav-overlay, #mobileNav, #mobileNavOverlay,
+    .mobile-bottom-nav, .hamburger, .footer, footer, .toast-container, .toast,
+    aside, .ios-install-prompt, .receipt-particles,
     .thermal-toolbar, .thermal-printer, .thermal-preview-shell,
     .receipt-quick-actions, .receipt-actions, .receipt-map-link,
-    .receipt-toast, .ios-install-prompt, #replayReceipt, .receipt-countdown {
+    .receipt-toast, #replayReceipt, .receipt-countdown, button, .no-print {
       display: none !important;
+      visibility: hidden !important;
+      opacity: 0 !important;
+      height: 0 !important;
+      width: 0 !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      overflow: hidden !important;
     }
     .receipt-experience {
       background: #ffffff !important;

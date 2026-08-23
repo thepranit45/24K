@@ -3487,3 +3487,116 @@ textarea.form-control { resize:vertical; min-height:100px; }
   align-items: center;
   gap: 4px;
 }
+
+/* ═══════════════════════════════════════════════════════════
+   Global Print Sanitation & Receipt Cleanliness
+═══════════════════════════════════════════════════════════ */
+@media print {
+  *, *::before, *::after {
+    text-shadow: none !important;
+    box-shadow: none !important;
+  }
+  
+  html, body {
+    background: #ffffff !important;
+    color: #111827 !important;
+    font-size: 11pt !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Completely eliminate all navigation, sidebars, mobile drawers, toolbars, and prompts */
+  .navbar,
+  nav,
+  .mobile-nav,
+  .mobile-nav-overlay,
+  #mobileNav,
+  #mobileNavOverlay,
+  .mobile-bottom-nav,
+  .hamburger,
+  .footer,
+  footer,
+  .toast-container,
+  .toast,
+  aside,
+  .ios-install-prompt,
+  .receipt-particles,
+  .thermal-toolbar,
+  .thermal-printer,
+  .thermal-preview-shell,
+  .receipt-quick-actions,
+  .receipt-actions,
+  .receipt-map-link,
+  .receipt-toast,
+  #replayReceipt,
+  .receipt-countdown,
+  button,
+  .btn,
+  .no-print {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+  }
+
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Enhanced Mobile Responsiveness & Safe Area Insets
+═══════════════════════════════════════════════════════════ */
+@media (max-width: 480px) {
+  body {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .gpay-standee-card {
+    max-width: 100%;
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
+  }
+
+  .gpay-standee-content {
+    padding: 1.2rem 1rem 1.4rem;
+  }
+
+  .gpay-standee-qr-img {
+    width: 190px;
+    height: 190px;
+  }
+
+  .gpay-shop-title {
+    font-size: 1.15rem;
+  }
+
+  .payment-panel {
+    padding: 1.2rem 1rem 1.5rem;
+  }
+
+  /* Ensure minimum comfortable touch targets */
+  .btn, button, .nav-link, .bottom-nav-item, input, select {
+    min-height: 44px;
+  }
+
+  /* Safe area padding for modern iPhones with notch / home bar */
+  .mobile-bottom-nav {
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+  }
+
+  .thermal-receipt {
+    max-width: 100%;
+    border-radius: 12px;
+  }
+}
