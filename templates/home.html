@@ -307,11 +307,11 @@
                  {% if b.is_featured %}data-preferred-barber{% endif %}>
               <div class="barber-wheel__avatar">
                 <span class="barber-halo-ring" aria-hidden="true"></span>
-                <div class="barber-photo">
+                <div class="barber-hero-cutout">
                   {% if b.photo %}
                     <img src="{{ b.photo.url }}" alt="{{ b.name }}" loading="lazy" />
                   {% else %}
-                    <div class="barber-photo-initials">{{ b.initials }}</div>
+                    <div class="barber-hero-initials">{{ b.initials }}</div>
                   {% endif %}
                 </div>
               </div>
@@ -354,7 +354,9 @@
                  aria-checked="false" tabindex="-1">
               <div class="barber-wheel__avatar">
                 <span class="barber-halo-ring" aria-hidden="true"></span>
-                <div class="barber-card-icon"><i class="fa-solid fa-bolt"></i></div>
+                <div class="barber-hero-cutout">
+                  <div class="barber-hero-initials"><i class="fa-solid fa-bolt"></i></div>
+                </div>
               </div>
               <div class="barber-wheel__body">
                 <div class="barber-card-title-row">
