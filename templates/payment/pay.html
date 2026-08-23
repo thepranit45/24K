@@ -101,24 +101,37 @@
           </div>
         </div>
 
-        <!-- Copy UPI ID Box -->
-        <div class="upi-copy-box">
-          <div class="upi-copy-info">
-            <span class="upi-label">Salon Payee UPI ID</span>
-            <span class="upi-value" id="upiIdValue">{{ shop_upi_id }}</span>
+        <!-- Copy UPI ID & Phone Number Box -->
+        <div class="upi-copy-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1.2rem;">
+          <div class="upi-copy-box" style="margin-bottom: 0;">
+            <div class="upi-copy-info">
+              <span class="upi-label">Payee UPI ID</span>
+              <span class="upi-value" id="upiIdValue">{{ shop_upi_id }}</span>
+            </div>
+            <button type="button" class="btn-copy-upi" id="copyUpiBtn" onclick="copyUpiId()">
+              <i class="fa-regular fa-copy" id="copyIcon"></i>
+              <span id="copyText">Copy ID</span>
+            </button>
           </div>
-          <button type="button" class="btn-copy-upi" id="copyUpiBtn" onclick="copyUpiId()">
-            <i class="fa-regular fa-copy" id="copyIcon"></i>
-            <span id="copyText">Copy ID</span>
-          </button>
+
+          <div class="upi-copy-box" style="margin-bottom: 0;">
+            <div class="upi-copy-info">
+              <span class="upi-label">Pay to Mobile No.</span>
+              <span class="upi-value" id="upiPhoneValue">8010236068</span>
+            </div>
+            <button type="button" class="btn-copy-upi" id="copyPhoneBtn" onclick="copyUpiPhone()">
+              <i class="fa-regular fa-copy" id="copyPhoneIcon"></i>
+              <span id="copyPhoneText">Copy No</span>
+            </button>
+          </div>
         </div>
 
         <!-- In-Salon Verification Notice -->
         <div class="salon-verify-notice">
           <i class="fa-solid fa-circle-info text-gold"></i>
           <div>
-            <strong>Payment Guide:</strong>
-            <span>Tap any app above or scan the QR code using Google Pay, PhonePe, or Paytm. <em>(Note: Banks do not allow transferring to your own personal UPI ID).</em></span>
+            <strong>How to Pay:</strong>
+            <span>1. Tap your UPI app or scan the QR code.<br />2. Or search mobile no. <strong>8010236068</strong> / UPI ID <strong>{{ shop_upi_id }}</strong> in GPay / PhonePe / Paytm.</span>
           </div>
         </div>
 
@@ -173,8 +186,24 @@ function copyUpiId() {
       copyIcon.className = "fa-regular fa-copy";
       btn.classList.remove('copied');
     }, 2500);
+function copyUpiPhone() {
+  const phone = document.getElementById('upiPhoneValue').textContent.trim();
+  navigator.clipboard.writeText(phone).then(() => {
+    const copyText = document.getElementById('copyPhoneText');
+    const copyIcon = document.getElementById('copyPhoneIcon');
+    const btn = document.getElementById('copyPhoneBtn');
+    
+    copyText.innerText = "Copied!";
+    copyIcon.className = "fa-solid fa-check";
+    btn.classList.add('copied');
+    
+    setTimeout(() => {
+      copyText.innerText = "Copy No";
+      copyIcon.className = "fa-regular fa-copy";
+      btn.classList.remove('copied');
+    }, 2500);
   }).catch(err => {
-    console.error('Failed to copy UPI ID: ', err);
+    console.error('Failed to copy Phone: ', err);
   });
 }
 
