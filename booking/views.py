@@ -400,19 +400,23 @@ def payment_page(request, booking_id):
     shop_upi_id = get_shop_upi_id()
     shop_upi_name = get_shop_upi_name()
     amount_str = f"{booking.amount:.2f}"
+    booking_note = f"24K Salon {booking.booking_id}"
 
-    # Build standard UPI URI
-    # upi://pay?pa=VPA&pn=NAME&am=AMOUNT&tr=REF&cu=INR
-    encoded_name = urllib.parse.quote_plus(shop_upi_name)
-    upi_link = f"upi://pay?pa={shop_upi_id}&pn={encoded_name}&am={amount_str}&tr={booking.booking_id}&cu=INR"
+    # Build standard NPCI-compliant UPI URI
+    # upi://pay?pa=VPA&pn=NAME&am=AMOUNT&cu=INR&tn=NOTE
+    encoded_name = urllib.parse.quote(shop_upi_name)
+    encoded_note = urllib.parse.quote(booking_note)
     
-    # Specific mobile intent links
-    gpay_link = f"gpay://upi/pay?pa={shop_upi_id}&pn={encoded_name}&am={amount_str}&tr={booking.booking_id}&cu=INR"
-    phonepe_link = f"phonepe://pay?pa={shop_upi_id}&pn={encoded_name}&am={amount_str}&tr={booking.booking_id}&cu=INR"
-    paytm_link = f"paytmmp://pay?pa={shop_upi_id}&pn={encoded_name}&am={amount_str}&tr={booking.booking_id}&cu=INR"
+    # Universal UPI Intent URL (accepted by PhonePe, GPay, Paytm, BHIM, Navi, Cred)
+    upi_link = f"upi://pay?pa={shop_upi_id}&pn={encoded_name}&am={amount_str}&cu=INR&tn={encoded_note}"
+    
+    # Direct intents all use the universal standard upi:// scheme for native OS app selection
+    gpay_link = upi_link
+    phonepe_link = upi_link
+    paytm_link = upi_link
 
-    # Generate dynamic QR Code URL
-    encoded_upi_link = urllib.parse.quote_plus(upi_link)
+    # Generate high-contrast crisp dynamic QR Code URL
+    encoded_upi_link = urllib.parse.quote(upi_link, safe='')
     qr_code_url = f"https://api.qrserver.com/v1/create-qr-code/?data={encoded_upi_link}&size=340x340&margin=12&color=000000&bgcolor=ffffff"
 
     context = {
