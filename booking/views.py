@@ -397,26 +397,25 @@ def payment_page(request, booking_id):
         defaults={'amount': booking.amount, 'status': Payment.STATUS_PENDING}
     )
 
-    shop_upi_id = get_shop_upi_id()
-    shop_upi_name = get_shop_upi_name()
+    shop_upi_id = "9921028084@okbizaxis"
+    shop_upi_name = "24 K HAIR STUDIO"
+    shop_phone = "+91 99210 28084"
     
-    # Format amount cleanly without trailing zeroes if integer (e.g. 150 or 1.50)
+    # Format amount cleanly
     amt_val = booking.amount
     amount_str = str(int(amt_val)) if amt_val == int(amt_val) else f"{amt_val:.2f}"
-    booking_note = f"24K Salon {booking.booking_id}"
 
-    # Build standard NPCI-compliant UPI URI
-    # upi://pay?pa=VPA&pn=NAME&am=AMOUNT&cu=INR&tn=NOTE
-    encoded_name = urllib.parse.quote(shop_upi_name)
-    encoded_note = urllib.parse.quote(booking_note)
+    # Exact Official Google Pay Business Merchant Parameters decoded from standee
+    # mc=7230 (Barber Shops / Salons), aid=uGICAgMDy4ou1Qg, tr=BCR2DN4TZLEKTG3Z
+    merchant_query = f"pa=9921028084@okbizaxis&pn=24%20K%20HAIR%20STUDIO%20&mc=7230&aid=uGICAgMDy4ou1Qg&ver=01&mode=01&tr=BCR2DN4TZLEKTG3Z&am={amount_str}&cu=INR"
     
-    # Universal UPI Intent URL (accepted by PhonePe, GPay, Paytm, BHIM, Navi, Cred)
-    upi_link = f"upi://pay?pa={shop_upi_id}&pn={encoded_name}&am={amount_str}&cu=INR&tn={encoded_note}"
+    # Universal UPI link (for Any UPI App / QR Scanner)
+    upi_link = f"upi://pay?{merchant_query}"
     
-    # Direct app intents
-    gpay_link = upi_link
-    phonepe_link = upi_link
-    paytm_link = upi_link
+    # Dedicated Android Package Intents to open specific apps directly (prevents WhatsApp hijack)
+    gpay_link = f"intent://pay?{merchant_query}#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end"
+    phonepe_link = f"intent://pay?{merchant_query}#Intent;scheme=upi;package=com.phonepe.app;end"
+    paytm_link = f"intent://pay?{merchant_query}#Intent;scheme=upi;package=net.one97.paytm;end"
 
     # Generate crisp dynamic QR Code using local Python qrcode (offline, zero third-party dependency)
     qr_code_url = ""
@@ -443,7 +442,7 @@ def payment_page(request, booking_id):
         'payment': payment,
         'shop_upi_id': shop_upi_id,
         'shop_upi_name': shop_upi_name,
-        'shop_phone': '+91 99210 28084',
+        'shop_phone': shop_phone,
         'gpay_standee_img': '/static/images/gpay_standee_qr.jpg',
         'upi_link': upi_link,
         'gpay_link': gpay_link,
