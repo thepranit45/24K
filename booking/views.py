@@ -443,6 +443,8 @@ def payment_page(request, booking_id):
         'payment': payment,
         'shop_upi_id': shop_upi_id,
         'shop_upi_name': shop_upi_name,
+        'shop_phone': '+91 99210 28084',
+        'gpay_standee_img': '/static/images/gpay_standee_qr.jpg',
         'upi_link': upi_link,
         'gpay_link': gpay_link,
         'phonepe_link': phonepe_link,

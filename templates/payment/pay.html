@@ -66,9 +66,56 @@
           <p class="payment-desc">{{ booking.service.name }} · {{ shop_upi_name }}</p>
         </div>
 
+        <!-- Official Google Pay Merchant Standee Card -->
+        <div class="gpay-standee-card">
+          <!-- Google 4-Color Header Bar -->
+          <div class="gpay-standee-bar">
+            <span style="background:#4285F4;"></span>
+            <span style="background:#34A853;"></span>
+            <span style="background:#FBBC05;"></span>
+            <span style="background:#EA4335;"></span>
+          </div>
+
+          <div class="gpay-standee-content">
+            <!-- GPay Header -->
+            <div class="gpay-brand-header">
+              <img src="https://upload.wikimedia.org/wikipedia/commons/f/f2/Google_Pay_Logo.svg" alt="Google Pay" class="gpay-logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
+              <div class="gpay-logo-fallback" style="display:none; font-weight:800; font-size:1.3rem; color:#fff;">
+                <span style="color:#4285F4;">G</span><span style="color:#EA4335;">o</span><span style="color:#FBBC05;">o</span><span style="color:#4285F4;">g</span><span style="color:#34A853;">l</span><span style="color:#EA4335;">e</span> Pay
+              </div>
+            </div>
+
+            <h3 class="gpay-shop-title">{{ shop_upi_name }}</h3>
+            <p class="gpay-shop-phone">{{ shop_phone }}</p>
+            <p class="gpay-scan-label">Scan &amp; pay</p>
+
+            <!-- QR Code Box -->
+            <div class="gpay-qr-wrapper">
+              <img src="{{ gpay_standee_img }}" alt="Official 24K Hair Studio Google Pay QR Code" class="gpay-standee-qr-img" onerror="this.src='{{ qr_code_url }}';" />
+            </div>
+
+            <!-- Merchant UPI ID -->
+            <p class="gpay-vpa-text">UPI ID: <strong>{{ shop_upi_id }}</strong></p>
+
+            <!-- Multi-App Acceptance Badges -->
+            <div class="gpay-accepted-badges">
+              <div class="bhim-upi-logos">
+                <span class="badge-bhim">BHIM</span>
+                <span class="badge-upi">UPI</span>
+              </div>
+              <div class="partner-app-pills">
+                <span class="pap-pill"><i class="fa-brands fa-google-pay text-primary"></i> GPay</span>
+                <span class="pap-pill"><i class="fa-solid fa-wallet text-info"></i> Paytm</span>
+                <span class="pap-pill"><i class="fa-solid fa-mobile-screen-button text-purple"></i> PhonePe</span>
+                <span class="pap-pill"><i class="fa-brands fa-amazon-pay text-warning"></i> Pay</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- 1-Tap Mobile UPI App Buttons -->
-        <div class="upi-mobile-apps-container">
-          <span class="upi-apps-label"><i class="fa-solid fa-bolt text-gold"></i> Pay with any UPI app on phone:</span>
+        <div class="upi-mobile-apps-container" style="margin-top: 1.5rem;">
+          <span class="upi-apps-label"><i class="fa-solid fa-bolt text-gold"></i> Or 1-Tap Direct Pay on phone:</span>
           <div class="upi-apps-grid">
             <a href="{{ gpay_link }}" class="btn-upi-app btn-gpay">
               <i class="fa-brands fa-google-pay"></i> Google Pay
@@ -85,27 +132,11 @@
           </div>
         </div>
 
-        <!-- Salon QR Code Card -->
-        <div class="upi-qr-card">
-          <div class="upi-qr-frame">
-            <img src="{{ qr_code_url }}" alt="Scan UPI QR Code for {{ shop_upi_name }}" class="upi-qr-image" id="upiQrImg" onerror="this.src='{% static 'images/upi_qr.jpg' %}';" />
-          </div>
-          
-          <div class="upi-actions-row">
-            <a href="{{ qr_code_url }}" target="_blank" download="24K_Studio_QR_{{ booking.booking_id }}.png" class="btn-qr-action btn-download-qr">
-              <i class="fa-solid fa-download"></i> Save QR Code
-            </a>
-            <a href="{{ upi_link }}" class="btn-qr-action btn-open-upi mobile-only-inline">
-              <i class="fa-solid fa-mobile-screen-button"></i> Open UPI App
-            </a>
-          </div>
-        </div>
-
         <!-- Copy UPI ID & Phone Number Box -->
-        <div class="upi-copy-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1.2rem;">
+        <div class="upi-copy-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 1.2rem; margin-bottom: 1.2rem;">
           <div class="upi-copy-box" style="margin-bottom: 0;">
             <div class="upi-copy-info">
-              <span class="upi-label">Payee UPI ID</span>
+              <span class="upi-label">Merchant UPI ID</span>
               <span class="upi-value" id="upiIdValue">{{ shop_upi_id }}</span>
             </div>
             <button type="button" class="btn-copy-upi" id="copyUpiBtn" onclick="copyUpiId()">
@@ -117,7 +148,7 @@
           <div class="upi-copy-box" style="margin-bottom: 0;">
             <div class="upi-copy-info">
               <span class="upi-label">Pay to Mobile No.</span>
-              <span class="upi-value" id="upiPhoneValue">8010236068</span>
+              <span class="upi-value" id="upiPhoneValue">9921028084</span>
             </div>
             <button type="button" class="btn-copy-upi" id="copyPhoneBtn" onclick="copyUpiPhone()">
               <i class="fa-regular fa-copy" id="copyPhoneIcon"></i>
@@ -126,12 +157,12 @@
           </div>
         </div>
 
-        <!-- In-Salon Verification Notice -->
+        <!-- Verification Notice -->
         <div class="salon-verify-notice">
-          <i class="fa-solid fa-circle-info text-gold"></i>
+          <i class="fa-solid fa-circle-check text-gold"></i>
           <div>
-            <strong>How to Pay:</strong>
-            <span>1. Tap your UPI app or scan the QR code.<br />2. Or search mobile no. <strong>8010236068</strong> / UPI ID <strong>{{ shop_upi_id }}</strong> in GPay / PhonePe / Paytm.</span>
+            <strong>Verified Merchant Account:</strong>
+            <span>Payments to <strong>{{ shop_upi_id }}</strong> are accepted across all UPI apps (Google Pay, PhonePe, Paytm, BHIM) with 0% gateway fee.</span>
           </div>
         </div>
 

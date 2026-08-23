@@ -3364,3 +3364,126 @@ textarea.form-control { resize:vertical; min-height:100px; }
     animation: none !important;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════
+   Google Pay Official Business Standee Card UI
+═══════════════════════════════════════════════════════════ */
+.gpay-standee-card {
+  background: #ffffff;
+  color: #202124;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.15);
+  margin: 1.5rem auto 0;
+  max-width: 380px;
+  text-align: center;
+  position: relative;
+}
+.gpay-standee-bar {
+  display: flex;
+  height: 6px;
+  width: 100%;
+}
+.gpay-standee-bar span {
+  flex: 1;
+  height: 100%;
+}
+.gpay-standee-content {
+  padding: 1.4rem 1.6rem 1.6rem;
+}
+.gpay-brand-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 0.8rem;
+}
+.gpay-logo-img {
+  height: 32px;
+  width: auto;
+  object-fit: contain;
+}
+.gpay-shop-title {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #3c4043;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin: 0 0 0.15rem;
+}
+.gpay-shop-phone {
+  font-size: 0.95rem;
+  color: #5f6368;
+  font-weight: 600;
+  margin: 0 0 0.6rem;
+}
+.gpay-scan-label {
+  font-size: 0.88rem;
+  color: #202124;
+  font-weight: 700;
+  margin: 0 0 0.8rem;
+}
+.gpay-qr-wrapper {
+  background: #ffffff;
+  padding: 8px;
+  border-radius: 14px;
+  display: inline-block;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  margin-bottom: 0.9rem;
+}
+.gpay-standee-qr-img {
+  width: 220px;
+  height: 220px;
+  object-fit: contain;
+  display: block;
+  border-radius: 8px;
+}
+.gpay-vpa-text {
+  font-size: 0.86rem;
+  color: #3c4043;
+  margin: 0 0 1rem;
+}
+.gpay-vpa-text strong {
+  color: #1a73e8;
+  font-weight: 700;
+}
+.gpay-accepted-badges {
+  border-top: 1px solid #e8eaed;
+  padding-top: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+}
+.bhim-upi-logos {
+  display: flex;
+  gap: 8px;
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: #3c4043;
+}
+.badge-bhim {
+  color: #0b7a75;
+  letter-spacing: 0.05em;
+}
+.badge-upi {
+  color: #e37400;
+  letter-spacing: 0.05em;
+}
+.partner-app-pills {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+}
+.pap-pill {
+  background: #f1f3f4;
+  color: #3c4043;
+  font-size: 0.74rem;
+  font-weight: 700;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
