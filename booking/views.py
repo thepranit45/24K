@@ -399,7 +399,10 @@ def payment_page(request, booking_id):
 
     shop_upi_id = get_shop_upi_id()
     shop_upi_name = get_shop_upi_name()
-    amount_str = f"{booking.amount:.2f}"
+    
+    # Format amount cleanly without trailing zeroes if integer (e.g. 150 or 1.50)
+    amt_val = booking.amount
+    amount_str = str(int(amt_val)) if amt_val == int(amt_val) else f"{amt_val:.2f}"
     booking_note = f"24K Salon {booking.booking_id}"
 
     # Build standard NPCI-compliant UPI URI
@@ -410,14 +413,30 @@ def payment_page(request, booking_id):
     # Universal UPI Intent URL (accepted by PhonePe, GPay, Paytm, BHIM, Navi, Cred)
     upi_link = f"upi://pay?pa={shop_upi_id}&pn={encoded_name}&am={amount_str}&cu=INR&tn={encoded_note}"
     
-    # Direct intents all use the universal standard upi:// scheme for native OS app selection
+    # Direct app intents
     gpay_link = upi_link
     phonepe_link = upi_link
     paytm_link = upi_link
 
-    # Generate high-contrast crisp dynamic QR Code URL
-    encoded_upi_link = urllib.parse.quote(upi_link, safe='')
-    qr_code_url = f"https://api.qrserver.com/v1/create-qr-code/?data={encoded_upi_link}&size=340x340&margin=12&color=000000&bgcolor=ffffff"
+    # Generate crisp dynamic QR Code using local Python qrcode (offline, zero third-party dependency)
+    qr_code_url = ""
+    try:
+        import io, base64, qrcode
+        qr = qrcode.QRCode(
+            version=None,
+            error_correction=qrcode.constants.ERROR_CORRECT_M,
+            box_size=10,
+            border=2,
+        )
+        qr.add_data(upi_link)
+        qr.make(fit=True)
+        img = qr.make_image(fill_color="black", back_color="white")
+        buf = io.BytesIO()
+        img.save(buf, format="PNG")
+        qr_code_url = "data:image/png;base64," + base64.b64encode(buf.getvalue()).decode("utf-8")
+    except Exception as e:
+        encoded_upi_link = urllib.parse.quote(upi_link, safe='')
+        qr_code_url = f"https://api.qrserver.com/v1/create-qr-code/?data={encoded_upi_link}&size=340x340&margin=12&color=000000&bgcolor=ffffff"
 
     context = {
         'booking': booking,
