@@ -184,7 +184,7 @@
       <!-- Category Filter Tabs -->
       <div class="wizard-service-category-tabs">
         <button type="button" class="wiz-cat-tab active" onclick="filterWizardServices('all', this)">
-          <span>✨ All</span> <span class="tab-count">{{ male_services|length|add:female_services|length }}</span>
+          <span>✨ All</span> <span class="tab-count">{{ total_services_count|default:23 }}</span>
         </button>
         <button type="button" class="wiz-cat-tab" onclick="filterWizardServices('MALE', this)">
           <span>✂️ Men</span> <span class="tab-count">{{ male_services|length }}</span>

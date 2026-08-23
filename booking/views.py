@@ -154,9 +154,11 @@ def home(request):
         else:
             b.next_slot_label = None
     available_dates = _available_dates(30)
+    total_services_count = male_services.count() + female_services.count()
     context = {
         'male_services': male_services,
         'female_services': female_services,
+        'total_services_count': total_services_count,
         'barbers': barbers,
         'available_dates': available_dates,
     }
