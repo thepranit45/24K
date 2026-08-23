@@ -2979,17 +2979,17 @@ textarea.form-control { resize:vertical; min-height:100px; }
    Exact Luxury Mockup Match: Breaking-the-Frame Card Architecture
 --------------------------------------------------------------- */
 .barber-wheel { 
-  margin: 11.5rem 0 1rem; 
+  margin: 5.5rem 0 1rem; 
   --wheel-w: min(395px, calc(100vw - 36px)); 
   position: relative;
 }
 .barber-wheel__stage {
   cursor: grab; 
-  height: 670px; 
-  min-height: 660px; 
+  height: 570px; 
+  min-height: 560px; 
   outline: none; 
   overflow: visible !important;
-  padding: 150px 0 20px; 
+  padding: 40px 0 20px; 
   perspective: 1000px; 
   perspective-origin: 50% 34%;
   position: relative; 
@@ -3015,13 +3015,13 @@ textarea.form-control { resize:vertical; min-height:100px; }
   flex-direction: column; 
   justify-content: space-between;
   gap: 12px; 
-  height: calc(100% - 130px);
-  min-height: 480px;
+  height: calc(100% - 80px);
+  min-height: 460px;
   left: 50%; 
   overflow: visible !important; 
-  padding: 175px 22px 22px 22px; 
+  padding: 150px 22px 22px 22px; 
   position: absolute;
-  top: 130px; 
+  top: 80px; 
   transform-style: preserve-3d; 
   text-align: left; 
   width: var(--wheel-w);
@@ -3048,11 +3048,11 @@ textarea.form-control { resize:vertical; min-height:100px; }
 .barber-wheel__avatar { 
   margin: 0;
   position: absolute; 
-  top: -245px; 
+  top: -125px; 
   left: 50%;
   transform: translateX(-50%);
-  width: 380px; 
-  height: 450px; 
+  width: 340px; 
+  height: 390px; 
   z-index: 15;
   display: flex;
   align-items: center;
@@ -3325,31 +3325,26 @@ textarea.form-control { resize:vertical; min-height:100px; }
 /* 8. Mobile & Responsive Refinements */
 @media (max-width: 768px) {
   .barber-wheel { 
-    margin: 8rem 0 1rem; 
+    margin: 4.5rem 0 1rem; 
     --wheel-w: calc(100vw - 36px); 
   }
   .barber-wheel__stage {
-    height: 600px; 
-    min-height: 590px; 
-    padding: 110px 0 15px; 
+    height: 540px; 
+    min-height: 530px; 
+    padding: 30px 0 15px; 
   }
   .barber-wheel__card {
-    top: 110px;
-    height: calc(100% - 110px);
-    min-height: 460px;
-    padding: 155px 18px 18px 18px;
+    top: 70px;
+    height: calc(100% - 70px);
+    min-height: 440px;
+    padding: 135px 18px 18px 18px;
     gap: 10px;
     border-radius: 26px;
   }
   .barber-wheel__avatar {
-    top: -145px;
+    top: -110px;
     width: 270px;
     height: 320px;
-  }
-  .barber-halo-ring {
-    width: 230px;
-    height: 230px;
-    top: 20px;
   }
   .barber-wheel__body h4 {
     font-size: 1.28rem;
