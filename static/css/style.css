@@ -2979,17 +2979,17 @@ textarea.form-control { resize:vertical; min-height:100px; }
    Exact Luxury Mockup Match: Breaking-the-Frame Card Architecture
 --------------------------------------------------------------- */
 .barber-wheel { 
-  margin: 9.5rem 0 1rem; 
+  margin: 11.5rem 0 1rem; 
   --wheel-w: min(395px, calc(100vw - 36px)); 
   position: relative;
 }
 .barber-wheel__stage {
   cursor: grab; 
-  height: 640px; 
-  min-height: 630px; 
+  height: 670px; 
+  min-height: 660px; 
   outline: none; 
   overflow: visible !important;
-  padding: 130px 0 20px; 
+  padding: 150px 0 20px; 
   perspective: 1000px; 
   perspective-origin: 50% 34%;
   position: relative; 
@@ -3015,13 +3015,13 @@ textarea.form-control { resize:vertical; min-height:100px; }
   flex-direction: column; 
   justify-content: space-between;
   gap: 12px; 
-  height: calc(100% - 110px);
+  height: calc(100% - 130px);
   min-height: 480px;
   left: 50%; 
   overflow: visible !important; 
-  padding: 165px 22px 22px 22px; 
+  padding: 175px 22px 22px 22px; 
   position: absolute;
-  top: 110px; 
+  top: 130px; 
   transform-style: preserve-3d; 
   text-align: left; 
   width: var(--wheel-w);
@@ -3048,11 +3048,11 @@ textarea.form-control { resize:vertical; min-height:100px; }
 .barber-wheel__avatar { 
   margin: 0;
   position: absolute; 
-  top: -195px; 
+  top: -245px; 
   left: 50%;
   transform: translateX(-50%);
-  width: 360px; 
-  height: 420px; 
+  width: 380px; 
+  height: 450px; 
   z-index: 15;
   display: flex;
   align-items: center;
@@ -3089,8 +3089,8 @@ textarea.form-control { resize:vertical; min-height:100px; }
   box-shadow: none !important;
   background: transparent !important;
   filter: drop-shadow(0 0 25px rgba(212,175,55,0.4));
-  -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
-  mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 82%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 82%, transparent 100%);
 }
 .barber-hero-initials {
   width: 120px;
@@ -3109,14 +3109,14 @@ textarea.form-control { resize:vertical; min-height:100px; }
 /* 3. Glowing Golden Halo Ring */
 .barber-halo-ring {
   position: absolute; 
-  top: 35px; 
+  top: 5px; 
   left: 50%; 
   transform: translateX(-50%); 
-  width: 315px; 
-  height: 315px; 
+  width: 330px; 
+  height: 330px; 
   border-radius: 50%; 
   border: 1.5px solid rgba(245, 208, 97, 0.75); 
-  box-shadow: 0 0 28px rgba(245, 208, 97, 0.45), inset 0 0 15px rgba(245, 208, 97, 0.12); 
+  box-shadow: 0 0 30px rgba(245, 208, 97, 0.45), inset 0 0 15px rgba(245, 208, 97, 0.12); 
   z-index: 1; 
   pointer-events: none;
 }
