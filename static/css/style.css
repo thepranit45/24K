@@ -3088,7 +3088,7 @@ textarea.form-control { resize:vertical; min-height:100px; }
   border-radius: 0 !important;
   box-shadow: none !important;
   background: transparent !important;
-  filter: drop-shadow(0 0 25px rgba(212,175,55,0.4));
+  filter: none !important;
   -webkit-mask-image: linear-gradient(to bottom, black 82%, transparent 100%);
   mask-image: linear-gradient(to bottom, black 82%, transparent 100%);
 }
