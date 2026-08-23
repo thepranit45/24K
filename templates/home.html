@@ -306,8 +306,6 @@
                  aria-checked="{% if b.is_featured %}true{% else %}false{% endif %}" tabindex="-1"
                  {% if b.is_featured %}data-preferred-barber{% endif %}>
               <div class="barber-wheel__avatar">
-                <span class="wheel-ring wheel-ring--outer" aria-hidden="true"></span>
-                <span class="wheel-ring wheel-ring--inner" aria-hidden="true"></span>
                 <div class="barber-photo">
                   {% if b.photo %}
                     <img src="{{ b.photo.url }}" alt="{{ b.name }}" loading="lazy" />
@@ -353,8 +351,6 @@
                  data-barber-id="" data-barber-name="Any Available Barber" role="radio"
                  aria-checked="false" tabindex="-1">
               <div class="barber-wheel__avatar">
-                <span class="wheel-ring wheel-ring--outer" aria-hidden="true"></span>
-                <span class="wheel-ring wheel-ring--inner" aria-hidden="true"></span>
                 <div class="barber-card-icon"><i class="fa-solid fa-bolt"></i></div>
               </div>
               <div class="barber-wheel__body">
