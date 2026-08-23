@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}My Bookings | The Gentleman's Cut{% endblock %}
+{% block title %}My Bookings | 24 K Hair Studio{% endblock %}
 
 {% block content %}
 
@@ -9,7 +9,7 @@
   <div class="page-hero-overlay"></div>
   <div class="page-hero-content" data-animate="fade-up">
     <h1 class="page-hero-title">My <span class="text-gold">Bookings</span></h1>
-    <p class="page-hero-sub">Manage your upcoming and previous appointments.</p>
+    <p class="page-hero-sub">View your upcoming and completed salon appointments.</p>
   </div>
 </div>
 
@@ -34,10 +34,13 @@
               {% endif %}
             </span>
             <span><i class="fa-regular fa-clock"></i> {{ next_booking.booking_time|time:"g:i A" }}</span>
-            <span><i class="fa-solid fa-indian-rupee-sign"></i> {{ next_booking.amount|floatformat:0 }}</span>
+            <span><i class="fa-regular fa-hourglass"></i> {{ next_booking.service.duration }} min</span>
+            {% if next_booking.barber %}
+            <span><i class="fa-solid fa-user-tie"></i> {{ next_booking.barber.name }}</span>
+            {% endif %}
           </div>
         </div>
-        <a href="{% url 'booking_detail' next_booking.booking_id %}" class="btn-gold">View Details</a>
+        <span class="status-badge status-{{ next_booking.status|lower }}">{{ next_booking.status }}</span>
       </div>
     </div>
     {% endif %}
@@ -75,32 +78,20 @@
               <i class="fa-regular fa-hourglass"></i>
               <span>{{ booking.service.duration }} min</span>
             </div>
+            {% if booking.barber %}
+            <div class="booking-meta-item">
+              <i class="fa-solid fa-user-tie"></i>
+              <span>{{ booking.barber.name }}</span>
+            </div>
+            {% endif %}
           </div>
 
-          <div class="booking-footer-row">
-            <div class="booking-amount-row">
-              <span class="booking-label">Amount</span>
-              <span class="booking-amount-val">₹{{ booking.amount|floatformat:0 }}</span>
-            </div>
+          <div class="booking-footer-row" style="margin-top: 0.6rem; padding-top: 0.6rem; border-top: 1px solid #1f2330;">
             <div class="booking-id-row">
-              <span class="booking-id-label">ID:</span>
-              <span class="booking-id-val">{{ booking.booking_id }}</span>
+              <span class="booking-id-label" style="color:#9ca3af; font-size:0.8rem;">ID:</span>
+              <span class="booking-id-val" style="color:#ffd700; font-family:monospace; font-weight:700; font-size:0.85rem;">{{ booking.booking_id }}</span>
             </div>
           </div>
-        </div>
-
-        <div class="booking-card-actions">
-          <a href="{% url 'booking_detail' booking.booking_id %}" class="btn-outline-sm">
-            <i class="fa-solid fa-eye"></i> View Details
-          </a>
-          {% if booking.can_be_cancelled %}
-          <button
-            class="btn-danger-sm"
-            onclick="openCancelModal('{{ booking.booking_id }}', '{{ booking.service.name }}', '{{ booking.booking_date|date:"d M Y" }}')"
-          >
-            <i class="fa-solid fa-xmark"></i> Cancel
-          </button>
-          {% endif %}
         </div>
       </div>
       {% endfor %}
