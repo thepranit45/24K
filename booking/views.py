@@ -817,6 +817,37 @@ def admin_add_barber(request):
 
 @barber_staff_required
 @require_POST
+def admin_edit_barber(request, barber_id):
+    """Edit existing barber details, specialties, or upload a new photo."""
+    barber = get_object_or_404(Barber, pk=barber_id)
+    name = request.POST.get('name', '').strip()
+    title = request.POST.get('title', '').strip()
+    specialties = request.POST.get('specialties', '').strip()
+    try:
+        experience_years = int(request.POST.get('experience_years', barber.experience_years))
+    except (ValueError, TypeError):
+        experience_years = barber.experience_years
+
+    if name:
+        barber.name = name
+    if title:
+        barber.title = title
+    if specialties:
+        barber.specialties = specialties
+    barber.experience_years = experience_years
+
+    if 'photo' in request.FILES:
+        barber.photo = request.FILES['photo']
+
+    barber.save()
+
+    next_url = request.POST.get('next') or request.META.get('HTTP_REFERER') or 'admin_barbers'
+    messages.success(request, f"Barber {barber.name}'s profile and photo updated successfully!")
+    return redirect(next_url)
+
+
+@barber_staff_required
+@require_POST
 def admin_delete_barber(request, barber_id):
     """Safely delete a barber and their linked staff login account."""
     barber = get_object_or_404(Barber, pk=barber_id)

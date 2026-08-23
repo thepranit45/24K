@@ -25,6 +25,7 @@ urlpatterns = [
     path('dashboard/appointments/', views.admin_appointments, name='admin_appointments'),
     path('dashboard/barbers/', views.admin_barbers, name='admin_barbers'),
     path('dashboard/barbers/add/', views.admin_add_barber, name='admin_add_barber'),
+    path('dashboard/barbers/<int:barber_id>/edit/', views.admin_edit_barber, name='admin_edit_barber'),
     path('dashboard/barbers/<int:barber_id>/delete/', views.admin_delete_barber, name='admin_delete_barber'),
     path('dashboard/services/', views.admin_services, name='admin_services'),
     path('dashboard/hours/', views.admin_hours, name='admin_hours'),

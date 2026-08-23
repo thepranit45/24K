@@ -183,6 +183,9 @@
         {% for b in barbers %}
         <div class="barber-status-card {% if not b.is_active %}inactive{% endif %}" id="barber-card-{{ b.id }}">
           <div class="barber-card-top-action">
+            <button type="button" class="btn-edit-barber-icon" title="Edit Barber & Photo" onclick="openEditBarberModal({{ b.id }}, '{{ b.name|escapejs }}', '{{ b.title|escapejs }}', {{ b.experience_years }}, '{{ b.specialties|escapejs }}', '{% if b.photo %}{{ b.photo.url }}{% endif %}')">
+              <i class="fa-solid fa-pen-to-square"></i>
+            </button>
             <button type="button" class="btn-delete-barber-icon" title="Delete Barber" onclick="confirmDeleteBarber({{ b.id }}, '{{ b.name|escapejs }}')">
               <i class="fa-solid fa-trash-can"></i>
             </button>
@@ -227,22 +230,27 @@
               </div>
             </div>
 
-            <form action="{% url 'admin_toggle_barber' b.id %}" method="POST">
-              {% csrf_token %}
-              <button type="submit" class="btn-toggle {% if b.is_active %}active{% else %}inactive{% endif %}">
-                {% if b.is_active %}
-                  <i class="fa-solid fa-circle-check"></i> Available / On Duty
-                {% else %}
-                  <i class="fa-solid fa-circle-pause"></i> Off Duty / Paused
-                {% endif %}
+            <div class="barber-actions-row" style="display:flex; gap:0.4rem; align-items:center;">
+              <form action="{% url 'admin_toggle_barber' b.id %}" method="POST" style="flex:1;">
+                {% csrf_token %}
+                <button type="submit" class="btn-toggle {% if b.is_active %}active{% else %}inactive{% endif %}">
+                  {% if b.is_active %}
+                    <i class="fa-solid fa-circle-check"></i> On Duty
+                  {% else %}
+                    <i class="fa-solid fa-circle-pause"></i> Paused
+                  {% endif %}
+                </button>
+              </form>
+              <button type="button" class="btn-filter" style="font-size:0.78rem; padding:0.4rem 0.75rem;" onclick="openEditBarberModal({{ b.id }}, '{{ b.name|escapejs }}', '{{ b.title|escapejs }}', {{ b.experience_years }}, '{{ b.specialties|escapejs }}', '{% if b.photo %}{{ b.photo.url }}{% endif %}')">
+                <i class="fa-solid fa-camera"></i> Photo
               </button>
-            </form>
+            </div>
           </div>
         </div>
         {% empty %}
         <div class="empty-table-msg" style="grid-column: 1 / -1; padding: 3rem; text-align: center;">
           <i class="fa-solid fa-user-slash" style="font-size: 2rem; color: #d4af37; margin-bottom: 1rem;"></i>
-          <p>No barbers registered yet. Click "Add Barber" to add your first barber.</p>
+          <p>No barbers added yet. Click "Add Barber" above to add your first team member.</p>
         </div>
         {% endfor %}
       </div>
@@ -257,7 +265,7 @@
 <div class="admin-modal-backdrop" id="addBarberModalBackdrop" style="display:none;" onclick="closeAddBarberModal()"></div>
 <div class="admin-modal" id="addBarberModal" style="display:none;" role="dialog" aria-labelledby="addBarberTitle" aria-modal="true">
   <div class="admin-modal-header">
-    <h3 id="addBarberTitle"><i class="fa-solid fa-user-plus text-gold"></i> Add New Barber</h3>
+    <h3 id="addBarberTitle"><i class="fa-solid fa-user-plus text-gold"></i> Add New Master Barber</h3>
     <button type="button" class="admin-modal-close" onclick="closeAddBarberModal()"><i class="fa-solid fa-xmark"></i></button>
   </div>
   <form method="POST" action="{% url 'admin_add_barber' %}" enctype="multipart/form-data">
@@ -280,34 +288,25 @@
         </div>
       </div>
 
-      <div class="form-group">
-        <label class="form-label">Login Email / Username <span class="muted">(Staff account, default password: admin)</span></label>
-        <input type="email" name="email" class="form-control" placeholder="e.g. arjun@24k.in" />
-      </div>
-
       <div class="form-row-2">
         <div class="form-group">
-          <label class="form-label">Rating</label>
-          <input type="number" name="rating" class="form-control" step="0.1" min="1.0" max="5.0" value="4.9" />
+          <label class="form-label">Login Email (Optional)</label>
+          <input type="email" name="email" class="form-control" placeholder="e.g. arjun@24k.in" />
+          <span class="muted" style="font-size:0.75rem; color:#9ca3af;">Default password will be <strong>admin</strong>.</span>
         </div>
         <div class="form-group">
-          <label class="form-label">Avatar Icon</label>
-          <select name="avatar_icon" class="form-control">
-            <option value="user-tie">User Tie</option>
-            <option value="user-ninja">Ninja</option>
-            <option value="crown">Crown</option>
-            <option value="scissors">Scissors</option>
-          </select>
+          <label class="form-label">Rating</label>
+          <input type="number" name="rating" class="form-control" min="1.0" max="5.0" step="0.1" value="4.9" />
         </div>
       </div>
 
       <div class="form-group">
-        <label class="form-label">Specialties <span class="muted">(comma-separated)</span></label>
+        <label class="form-label">Specialties</label>
         <input type="text" name="specialties" class="form-control" placeholder="Skin Fade, Beard Styling, Scissor Cut" value="Skin Fade, Beard Styling, Hair Design" />
       </div>
 
       <div class="form-group">
-        <label class="form-label">Photo <span class="muted">(optional)</span></label>
+        <label class="form-label">Photo <span class="muted">(Upload Barber Photo)</span></label>
         <input type="file" name="photo" class="form-control" accept="image/*" />
       </div>
 
@@ -323,6 +322,59 @@
     <div class="admin-modal-footer">
       <button type="button" class="btn-clear" onclick="closeAddBarberModal()">Cancel</button>
       <button type="submit" class="btn-filter"><i class="fa-solid fa-check"></i> Save Barber</button>
+    </div>
+  </form>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     MODAL: EDIT BARBER & PHOTO
+══════════════════════════════════════════════════════════ -->
+<div class="admin-modal-backdrop" id="editBarberModalBackdrop" style="display:none;" onclick="closeEditBarberModal()"></div>
+<div class="admin-modal" id="editBarberModal" style="display:none;" role="dialog" aria-labelledby="editBarberTitleDash" aria-modal="true">
+  <div class="admin-modal-header">
+    <h3 id="editBarberTitleDash"><i class="fa-solid fa-pen-to-square text-gold"></i> Edit Barber Profile &amp; Photo</h3>
+    <button type="button" class="admin-modal-close" onclick="closeEditBarberModal()"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+  <form method="POST" id="editBarberForm" action="" enctype="multipart/form-data">
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{% url 'admin_dashboard' %}" />
+    <div class="admin-modal-body">
+      <!-- Photo Preview -->
+      <div style="display:flex; align-items:center; gap:1rem; margin-bottom:1.25rem; background:#12151d; padding:0.85rem 1rem; border-radius:12px; border:1px solid #232736;">
+        <div id="editBarberPhotoPreviewDash" style="width:60px; height:60px; border-radius:50%; background:#1c202d; border:2px solid #d4af37; overflow:hidden; display:flex; align-items:center; justify-content:center;">
+          <i class="fa-solid fa-user-tie" style="font-size:1.5rem; color:#d4af37;"></i>
+        </div>
+        <div style="flex:1;">
+          <label class="form-label" style="margin-bottom:0.25rem;">Change / Upload Photo</label>
+          <input type="file" name="photo" class="form-control" accept="image/*" onchange="previewSelectedPhotoDash(this)" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Full Name <span class="required" style="color:#ef4444;">*</span></label>
+        <input type="text" name="name" id="editBarberNameDash" class="form-control" required />
+      </div>
+
+      <div class="form-row-2">
+        <div class="form-group">
+          <label class="form-label">Title / Role</label>
+          <input type="text" name="title" id="editBarberTitleInputDash" class="form-control" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Experience (Years)</label>
+          <input type="number" name="experience_years" id="editBarberExpDash" class="form-control" min="0" max="60" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Specialties</label>
+        <input type="text" name="specialties" id="editBarberSpecsDash" class="form-control" />
+      </div>
+    </div>
+
+    <div class="admin-modal-footer">
+      <button type="button" class="btn-clear" onclick="closeEditBarberModal()">Cancel</button>
+      <button type="submit" class="btn-filter"><i class="fa-solid fa-floppy-disk"></i> Update Barber</button>
     </div>
   </form>
 </div>
@@ -367,6 +419,41 @@ function closeAddBarberModal() {
   document.getElementById('addBarberModal').style.display = 'none';
   document.getElementById('addBarberModalBackdrop').style.display = 'none';
   document.body.classList.remove('no-scroll');
+}
+
+function openEditBarberModal(id, name, title, exp, specs, photoUrl) {
+  document.getElementById('editBarberForm').action = '/dashboard/barbers/' + id + '/edit/';
+  document.getElementById('editBarberNameDash').value = name;
+  document.getElementById('editBarberTitleInputDash').value = title;
+  document.getElementById('editBarberExpDash').value = exp;
+  document.getElementById('editBarberSpecsDash').value = specs;
+
+  const previewBox = document.getElementById('editBarberPhotoPreviewDash');
+  if (photoUrl) {
+    previewBox.innerHTML = '<img src="' + photoUrl + '" style="width:100%; height:100%; object-fit:cover;" />';
+  } else {
+    previewBox.innerHTML = '<i class="fa-solid fa-user-tie" style="font-size:1.5rem; color:#d4af37;"></i>';
+  }
+
+  document.getElementById('editBarberModal').style.display = 'block';
+  document.getElementById('editBarberModalBackdrop').style.display = 'block';
+  document.body.classList.add('no-scroll');
+}
+
+function closeEditBarberModal() {
+  document.getElementById('editBarberModal').style.display = 'none';
+  document.getElementById('editBarberModalBackdrop').style.display = 'none';
+  document.body.classList.remove('no-scroll');
+}
+
+function previewSelectedPhotoDash(input) {
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      document.getElementById('editBarberPhotoPreviewDash').innerHTML = '<img src="' + e.target.result + '" style="width:100%; height:100%; object-fit:cover;" />';
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
 }
 
 function confirmDeleteBarber(id, name) {

@@ -2172,7 +2172,16 @@ textarea.form-control { resize:vertical; min-height:100px; }
 .barbers-roster-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; }
 .barber-status-card { background: #12141c; border: 1px solid #222634; border-radius: 14px; padding: 1.5rem; display: flex; gap: 1rem; position: relative; transition: all 0.2s; }
 .barber-status-card.inactive { opacity: 0.6; filter: grayscale(0.8); }
-.barber-card-top-action { position: absolute; top: 0.75rem; right: 0.75rem; }
+.barber-card-top-action { position: absolute; top: 0.75rem; right: 0.75rem; display: flex; gap: 0.4rem; }
+.btn-edit-barber-icon {
+  width: 30px; height: 30px; border-radius: 8px; background: rgba(212, 175, 55, 0.12);
+  border: 1px solid rgba(212, 175, 55, 0.3); color: #ffd700; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; font-size: 0.82rem;
+  transition: all 0.2s ease;
+}
+.btn-edit-barber-icon:hover {
+  background: #d4af37; color: #111; border-color: #d4af37; transform: scale(1.1);
+}
 .btn-delete-barber-icon {
   width: 30px; height: 30px; border-radius: 8px; background: rgba(239, 68, 68, 0.1);
   border: 1px solid rgba(239, 68, 68, 0.2); color: #f87171; cursor: pointer;
