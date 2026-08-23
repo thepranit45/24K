@@ -117,18 +117,18 @@
         <div class="upi-mobile-apps-container" style="margin-top: 1.5rem;">
           <span class="upi-apps-label"><i class="fa-solid fa-bolt text-gold"></i> Or 1-Tap Direct Pay on phone:</span>
           <div class="upi-apps-grid">
-            <a href="{{ gpay_link }}" class="btn-upi-app btn-gpay">
+            <button type="button" class="btn-upi-app btn-gpay" onclick="triggerUpiPay('gpay')">
               <i class="fa-brands fa-google-pay"></i> Google Pay
-            </a>
-            <a href="{{ phonepe_link }}" class="btn-upi-app btn-phonepe">
+            </button>
+            <button type="button" class="btn-upi-app btn-phonepe" onclick="triggerUpiPay('phonepe')">
               <i class="fa-solid fa-mobile-screen-button"></i> PhonePe
-            </a>
-            <a href="{{ paytm_link }}" class="btn-upi-app btn-paytm">
+            </button>
+            <button type="button" class="btn-upi-app btn-paytm" onclick="triggerUpiPay('paytm')">
               <i class="fa-solid fa-wallet"></i> Paytm
-            </a>
-            <a href="{{ upi_link }}" class="btn-upi-app btn-any-upi">
+            </button>
+            <button type="button" class="btn-upi-app btn-any-upi" onclick="triggerUpiPay('any')">
               <i class="fa-solid fa-qrcode"></i> Any UPI App
-            </a>
+            </button>
           </div>
         </div>
 
@@ -201,6 +201,50 @@
 </section>
 
 <script>
+const UPI_INTENTS = {
+  raw: "{{ upi_link }}",
+  gpay_ios: "gpay://upi/pay?{{ merchant_query|safe }}",
+  phonepe_ios: "phonepe://pay?{{ merchant_query|safe }}",
+  paytm_ios: "paytmmp://pay?{{ merchant_query|safe }}",
+  gpay_android: "{{ gpay_link|safe }}",
+  phonepe_android: "{{ phonepe_link|safe }}",
+  paytm_android: "{{ paytm_link|safe }}",
+};
+
+function triggerUpiPay(app) {
+  const ua = navigator.userAgent || navigator.vendor || window.opera;
+  const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const isAndroid = /Android/i.test(ua);
+
+  let targetUrl = UPI_INTENTS.raw;
+
+  if (isIOS) {
+    if (app === 'gpay') targetUrl = UPI_INTENTS.gpay_ios;
+    else if (app === 'phonepe') targetUrl = UPI_INTENTS.phonepe_ios;
+    else if (app === 'paytm') targetUrl = UPI_INTENTS.paytm_ios;
+    else targetUrl = UPI_INTENTS.raw;
+  } else if (isAndroid) {
+    if (app === 'gpay') targetUrl = UPI_INTENTS.gpay_android;
+    else if (app === 'phonepe') targetUrl = UPI_INTENTS.phonepe_android;
+    else if (app === 'paytm') targetUrl = UPI_INTENTS.paytm_android;
+    else targetUrl = UPI_INTENTS.raw;
+  } else {
+    copyUpiId();
+    document.querySelector('.gpay-standee-card')?.scrollIntoView({ behavior: 'smooth' });
+    return;
+  }
+
+  // Navigate to app scheme
+  window.location.href = targetUrl;
+
+  // Fallback for iOS Safari
+  if (isIOS && app !== 'any') {
+    setTimeout(() => {
+      window.location.href = UPI_INTENTS.raw;
+    }, 1200);
+  }
+}
+
 function copyUpiId() {
   const upiId = document.getElementById('upiIdValue').textContent.trim();
   navigator.clipboard.writeText(upiId).then(() => {
@@ -217,6 +261,11 @@ function copyUpiId() {
       copyIcon.className = "fa-regular fa-copy";
       btn.classList.remove('copied');
     }, 2500);
+  }).catch(err => {
+    console.error('Failed to copy UPI ID: ', err);
+  });
+}
+
 function copyUpiPhone() {
   const phone = document.getElementById('upiPhoneValue').textContent.trim();
   navigator.clipboard.writeText(phone).then(() => {

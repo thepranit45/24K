@@ -444,6 +444,7 @@ def payment_page(request, booking_id):
         'shop_upi_name': shop_upi_name,
         'shop_phone': shop_phone,
         'gpay_standee_img': '/static/images/gpay_standee_qr.jpg',
+        'merchant_query': merchant_query,
         'upi_link': upi_link,
         'gpay_link': gpay_link,
         'phonepe_link': phonepe_link,
