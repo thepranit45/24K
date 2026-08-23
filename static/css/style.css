@@ -3048,11 +3048,11 @@ textarea.form-control { resize:vertical; min-height:100px; }
 .barber-wheel__avatar { 
   margin: 0;
   position: absolute; 
-  top: -125px; 
+  top: -130px; 
   left: 50%;
   transform: translateX(-50%);
-  width: 230px; 
-  height: 270px; 
+  width: 250px; 
+  height: 290px; 
   z-index: 15;
   display: flex;
   align-items: center;
@@ -3077,8 +3077,8 @@ textarea.form-control { resize:vertical; min-height:100px; }
   object-fit: contain;
   object-position: top center;
   filter: drop-shadow(0 0 24px rgba(212,175,55,0.45));
-  -webkit-mask-image: linear-gradient(to bottom, black 65%, transparent 98%);
-  mask-image: linear-gradient(to bottom, black 65%, transparent 98%);
+  -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 98%);
+  mask-image: linear-gradient(to bottom, black 70%, transparent 98%);
 }
 .barber-photo-initials, .barber-card-icon {
   width: 110px;
@@ -3098,9 +3098,9 @@ textarea.form-control { resize:vertical; min-height:100px; }
 .wheel-ring { border-radius: 50%; display: block; position: absolute; pointer-events: none; }
 .wheel-ring--outer { 
   border: 2px dashed rgba(212,175,55,0.65); 
-  width: 200px; 
-  height: 200px; 
-  top: 15px; 
+  width: 210px; 
+  height: 210px; 
+  top: 10px; 
   left: 50%;
   transform: translateX(-50%);
   z-index: 1;
@@ -3108,9 +3108,9 @@ textarea.form-control { resize:vertical; min-height:100px; }
 }
 .wheel-ring--inner { 
   border: 1.5px solid rgba(212,175,55,0.35); 
-  width: 184px; 
-  height: 184px; 
-  top: 23px; 
+  width: 192px; 
+  height: 192px; 
+  top: 19px; 
   left: 50%;
   transform: translateX(-50%);
   z-index: 2;
