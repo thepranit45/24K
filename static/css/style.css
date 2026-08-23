@@ -3048,11 +3048,11 @@ textarea.form-control { resize:vertical; min-height:100px; }
 .barber-wheel__avatar { 
   margin: 0;
   position: absolute; 
-  top: -165px; 
+  top: -190px; 
   left: 50%;
   transform: translateX(-50%);
-  width: 330px; 
-  height: 380px; 
+  width: 360px; 
+  height: 420px; 
   z-index: 15;
   display: flex;
   align-items: center;
@@ -3079,8 +3079,8 @@ textarea.form-control { resize:vertical; min-height:100px; }
   z-index: 10;
   position: relative;
   filter: drop-shadow(0 0 25px rgba(212,175,55,0.4));
-  -webkit-mask-image: linear-gradient(to bottom, black 74%, transparent 98%);
-  mask-image: linear-gradient(to bottom, black 74%, transparent 98%);
+  -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
 }
 .barber-photo-initials, .barber-card-icon {
   width: 120px;
@@ -3099,20 +3099,20 @@ textarea.form-control { resize:vertical; min-height:100px; }
 /* 3. Glowing Golden Halo Ring */
 .barber-halo-ring {
   position: absolute; 
-  top: 15px; 
+  top: 35px; 
   left: 50%; 
   transform: translateX(-50%); 
-  width: 275px; 
-  height: 275px; 
+  width: 315px; 
+  height: 315px; 
   border-radius: 50%; 
-  border: 1.8px solid #f5d061; 
-  box-shadow: 0 0 28px rgba(245, 208, 97, 0.55), inset 0 0 18px rgba(245, 208, 97, 0.15); 
+  border: 1.5px solid rgba(245, 208, 97, 0.75); 
+  box-shadow: 0 0 28px rgba(245, 208, 97, 0.45), inset 0 0 15px rgba(245, 208, 97, 0.12); 
   z-index: 1; 
   pointer-events: none;
 }
 .barber-wheel__card.selected .barber-halo-ring {
   border-color: #ffd700;
-  box-shadow: 0 0 35px rgba(255, 215, 0, 0.7), inset 0 0 20px rgba(255, 215, 0, 0.2);
+  box-shadow: 0 0 35px rgba(255, 215, 0, 0.65), inset 0 0 20px rgba(255, 215, 0, 0.18);
 }
 
 /* 4. Normal Document Flow Content Inside Card */
