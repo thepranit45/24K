@@ -44,8 +44,8 @@
 
     <ul class="nav-links" id="navLinks">
       <li><a href="{% url 'home' %}" class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">Home</a></li>
-      <li><a href="{% url 'booking_list' %}" class="nav-link {% if 'booking' in request.resolver_match.url_name %}active{% endif %}">Bookings</a></li>
-      <li><a href="{% url 'barber_agenda' %}" target="_blank" class="nav-link {% if request.resolver_match.url_name == 'barber_agenda' %}active{% endif %}">Barber Stack</a></li>
+      <li><a href="{% url 'home' %}#services" class="nav-link">Services</a></li>
+      <li><a href="{% url 'booking_list' %}" class="nav-link {% if 'booking' in request.resolver_match.url_name %}active{% endif %}">My Bookings</a></li>
       <li><a href="{% url 'about' %}" class="nav-link {% if request.resolver_match.url_name == 'about' %}active{% endif %}">About</a></li>
     </ul>
 
@@ -64,8 +64,8 @@
   </div>
   <ul>
     <li><a href="{% url 'home' %}" class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}"><i class="fa-solid fa-house"></i> Home</a></li>
-    <li><a href="{% url 'booking_list' %}" class="{% if 'booking' in request.resolver_match.url_name %}active{% endif %}"><i class="fa-solid fa-calendar-check"></i> Bookings</a></li>
-    <li><a href="{% url 'barber_agenda' %}" target="_blank" class="{% if request.resolver_match.url_name == 'barber_agenda' %}active{% endif %}"><i class="fa-solid fa-layer-group"></i> Barber Stack</a></li>
+    <li><a href="{% url 'home' %}#services"><i class="fa-solid fa-scissors"></i> Services</a></li>
+    <li><a href="{% url 'booking_list' %}" class="{% if 'booking' in request.resolver_match.url_name %}active{% endif %}"><i class="fa-solid fa-calendar-check"></i> My Bookings</a></li>
     <li><a href="{% url 'about' %}" class="{% if request.resolver_match.url_name == 'about' %}active{% endif %}"><i class="fa-solid fa-store"></i> About</a></li>
   </ul>
 </div>
@@ -118,20 +118,21 @@
     </div>
 
     <div class="footer-links">
-      <h4>Navigate</h4>
+      <h4>Quick Links</h4>
       <ul>
         <li><a href="{% url 'home' %}">Home</a></li>
+        <li><a href="{% url 'home' %}#services">Services</a></li>
         <li><a href="{% url 'booking_list' %}">My Bookings</a></li>
-        <li><a href="{% url 'barber_agenda' %}" target="_blank">Barber Stack</a></li>
-        <li><a href="{% url 'about' %}">About</a></li>
+        <li><a href="{% url 'barber_agenda' %}" target="_blank"><i class="fa-solid fa-layer-group text-gold"></i> Barber Stack (Live Agenda)</a></li>
+        <li><a href="{% url 'about' %}">About Us</a></li>
       </ul>
     </div>
 
     <div class="footer-links">
-      <h4>Account</h4>
+      <h4>Salon Staff</h4>
       <ul>
-        <li><a href="{% url 'booking_list' %}">My Bookings</a></li>
-        <li><a href="{% url 'barber_dashboard' %}"><i class="fa-solid fa-sliders"></i> Barber Dashboard</a></li>
+        <li><a href="{% url 'barber_agenda' %}" target="_blank"><i class="fa-solid fa-list-check"></i> Barber Stack</a></li>
+        <li><a href="{% url 'barber_dashboard' %}"><i class="fa-solid fa-sliders"></i> Barber Desk / Admin</a></li>
       </ul>
     </div>
 
