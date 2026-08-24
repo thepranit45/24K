@@ -949,11 +949,23 @@ function initBarberWheel() {
       this.cards.forEach(c => {
         c.classList.remove('selected');
         c.setAttribute('aria-checked', 'false');
-        c.querySelectorAll('.barber-wheel__select-btn').forEach(b => { b.textContent = 'Select Barber'; });
+        c.querySelectorAll('.barber-wheel__select-btn').forEach(b => { 
+          b.innerHTML = '<i class="fa-solid fa-scissors"></i> Select Barber'; 
+        });
       });
       card.classList.add('selected');
       card.setAttribute('aria-checked', 'true');
-      card.querySelectorAll('.barber-wheel__select-btn').forEach(b => { b.textContent = 'Selected'; });
+      
+      if (userTriggered) {
+        card.querySelectorAll('.barber-wheel__select-btn').forEach(b => { 
+          b.innerHTML = '<i class="fa-solid fa-check"></i> Selected'; 
+        });
+      } else {
+        card.querySelectorAll('.barber-wheel__select-btn').forEach(b => { 
+          b.innerHTML = '<i class="fa-solid fa-scissors"></i> Select Barber'; 
+        });
+      }
+
       if (!wasSelected && !initialSelect) {
         card.classList.remove('wheel-just-selected');
         card.offsetHeight;
@@ -963,12 +975,12 @@ function initBarberWheel() {
         selectBarber(card, id, name);
       }
 
-      // Only auto-advance if user explicitly clicked/tapped Select or card in Step 3
-      if (userTriggered && currentStepIndex === 3) {
+      // When user clicks 'Select Barber', transition directly to Step 4 (Date)
+      if (userTriggered) {
         if (window._barberNextTimer) clearTimeout(window._barberNextTimer);
         window._barberNextTimer = setTimeout(() => {
           wizardGoTo(4);
-        }, 220);
+        }, 180);
       }
     },
 
