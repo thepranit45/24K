@@ -263,55 +263,36 @@ function pickWizardService(card) {
   if (sumTotal) sumTotal.textContent = '₹' + wizard.servicePrice;
 }
 
-/** Toggle Gender/Category Dropdown */
-function toggleWizardGenderDropdown() {
-  const dd = document.getElementById('wizardGenderDropdown');
-  const toggle = document.getElementById('wizardDropdownToggle');
-  if (!dd) return;
-  const isOpen = dd.classList.toggle('open');
-  if (toggle) toggle.setAttribute('aria-expanded', isOpen);
+/** Select Gender at Top of Step 1 (Men / Women) */
+function selectWizardGender(gender) {
+  currentWizardCategory = gender;
+  
+  const btnMale = document.getElementById('btnGenderMale');
+  const btnFemale = document.getElementById('btnGenderFemale');
+  
+  if (gender === 'MALE') {
+    if (btnMale) btnMale.classList.add('active');
+    if (btnFemale) btnFemale.classList.remove('active');
+  } else {
+    if (btnFemale) btnFemale.classList.add('active');
+    if (btnMale) btnMale.classList.remove('active');
+  }
+
+  // Ensure dropdown list is open
+  const container = document.getElementById('wizardServiceDropdownContainer');
+  if (container) container.classList.remove('collapsed');
+
+  const query = (document.getElementById('wizardServiceSearchInput')?.value || '').toLowerCase().trim();
+  applyWizardServiceFilters(query, gender);
 }
 
-/** Close Gender dropdown on click outside */
-document.addEventListener('click', function(e) {
-  const dd = document.getElementById('wizardGenderDropdown');
-  if (dd && !dd.contains(e.target)) {
-    dd.classList.remove('open');
-    const toggle = document.getElementById('wizardDropdownToggle');
-    if (toggle) toggle.setAttribute('aria-expanded', 'false');
-  }
-});
-
-/** Select Gender / Category from Dropdown */
-function selectGenderCategory(cat, title, iconClass, count) {
-  currentWizardCategory = cat;
-  
-  // Update toggle button text & icon
-  const labelEl = document.getElementById('wddSelectedLabel');
-  if (labelEl) {
-    labelEl.innerHTML = `<i class="fa-solid ${iconClass} text-gold"></i> <span>${title}</span>`;
-  }
-  
-  // Update active state in items
-  document.querySelectorAll('.wizard-dropdown-item').forEach(item => {
-    if (item.dataset.cat === cat) {
-      item.classList.add('active');
-    } else {
-      item.classList.remove('active');
-    }
-  });
-
-  // Close dropdown
-  const dd = document.getElementById('wizardGenderDropdown');
-  if (dd) {
-    dd.classList.remove('open');
-    const toggle = document.getElementById('wizardDropdownToggle');
-    if (toggle) toggle.setAttribute('aria-expanded', 'false');
-  }
-
-  // Filter list
-  const query = (document.getElementById('wizardServiceSearchInput')?.value || '').toLowerCase().trim();
-  applyWizardServiceFilters(query, cat);
+/** Toggle Service List Dropdown Accordion */
+function toggleServiceDropdownMenu() {
+  const container = document.getElementById('wizardServiceDropdownContainer');
+  const header = document.getElementById('wizardServiceSelectHeader');
+  if (!container) return;
+  const isCollapsed = container.classList.toggle('collapsed');
+  if (header) header.setAttribute('aria-expanded', !isCollapsed);
 }
 
 /** Filter wizard services by category (All, MALE, FEMALE) */
