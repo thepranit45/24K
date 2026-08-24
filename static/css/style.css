@@ -677,72 +677,176 @@ img { max-width: 100%; display: block; }
   transform: translateY(-1px);
 }
 
-/* 1. Gender Selection Section (Top) */
-.wizard-gender-select-section {
-  margin-bottom: 1.15rem;
-}
-.wgs-label {
-  display: block;
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: var(--white);
-  margin-bottom: 0.6rem;
-  letter-spacing: 0.02em;
-}
-.wizard-gender-buttons {
+/* 1. Step 1 Gender Hero Cards */
+.wizard-gender-hero-cards {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0.85rem;
+  gap: 1.15rem;
+  margin-top: 1rem;
 }
-.wizard-gender-btn {
+.gender-hero-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 2rem 1.25rem 1.75rem;
+  background: linear-gradient(145deg, rgba(22, 26, 38, 0.98), rgba(12, 14, 20, 0.98));
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+.gender-hero-card:hover {
+  border-color: rgba(212, 175, 55, 0.6);
+  transform: translateY(-4px);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.6), 0 0 20px rgba(212, 175, 55, 0.2);
+}
+.gender-hero-card.active {
+  border-color: #ffd700;
+  background: linear-gradient(145deg, rgba(38, 32, 14, 0.95), rgba(16, 18, 26, 0.98));
+  box-shadow: 0 0 30px rgba(212, 175, 55, 0.35), 0 12px 30px rgba(0,0,0,0.6);
+}
+.ghc-badge {
+  position: absolute;
+  top: 0.85rem;
+  right: 0.85rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.2rem 0.55rem;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.45);
+  color: var(--gray-400);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.gender-hero-card.active .ghc-badge {
+  background: #d4af37;
+  color: #000;
+  font-weight: 800;
+  border-color: #d4af37;
+}
+.ghc-icon-wrap {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.65rem;
-  padding: 0.85rem 1rem;
-  background: rgba(18, 21, 29, 0.95);
-  border: 1.5px solid rgba(255, 255, 255, 0.12);
-  border-radius: 14px;
+  font-size: 1.75rem;
   color: var(--gray-300);
-  font-size: 0.95rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  margin-bottom: 1.25rem;
+  transition: all 0.3s ease;
 }
-.wizard-gender-btn:hover {
-  border-color: rgba(212, 175, 55, 0.6);
-  background: rgba(26, 30, 42, 0.98);
-  color: var(--white);
-  transform: translateY(-1px);
-}
-.wizard-gender-btn.active {
-  background: linear-gradient(135deg, rgba(212, 175, 55, 0.18), rgba(20, 23, 33, 0.95));
+.gender-hero-card.active .ghc-icon-wrap {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #000;
   border-color: #ffd700;
-  color: #ffd700;
-  box-shadow: 0 0 16px rgba(212, 175, 55, 0.35);
+  box-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
+  transform: scale(1.08);
 }
-.wgb-icon {
-  font-size: 1.1rem;
-}
-.wgb-badge {
-  font-size: 0.72rem;
-  background: rgba(0, 0, 0, 0.4);
-  padding: 0.15rem 0.5rem;
-  border-radius: 10px;
-  color: var(--gray-400);
-}
-.wizard-gender-btn.active .wgb-badge {
-  background: #d4af37;
-  color: #0b0d12;
+.ghc-title {
+  font-family: var(--font-heading);
+  font-size: 1.35rem;
   font-weight: 800;
+  color: var(--white);
+  margin-bottom: 0.45rem;
+}
+.gender-hero-card.active .ghc-title {
+  color: #ffd700;
+}
+.ghc-sub {
+  font-size: 0.8rem;
+  color: var(--gray-400);
+  line-height: 1.4;
+  margin-bottom: 1.1rem;
+}
+.ghc-check {
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--gray-500);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.04);
+}
+.gender-hero-card.active .ghc-check {
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.15);
 }
 
-/* 2. Select Your Service Dropdown Container */
-.wizard-service-dropdown-container {
+.btn-change-gender-badge {
+  background: rgba(212, 175, 55, 0.12);
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  color: #ffd700;
+  font-size: 0.76rem;
+  font-weight: 700;
+  padding: 0.3rem 0.75rem;
+  border-radius: 20px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: all 0.2s ease;
+}
+.btn-change-gender-badge:hover {
+  background: rgba(212, 175, 55, 0.25);
+  transform: scale(1.03);
+}
+
+.wizard-services-grid.clean-grid {
   display: flex;
   flex-direction: column;
-  flex: 1;
+  gap: 0.55rem;
+  max-height: calc(100vh - 380px);
+  min-height: 220px;
+  overflow-y: auto;
+  padding-right: 0.35rem;
+  margin-bottom: 0.75rem;
+}
+
+@media (max-width: 600px) {
+  .wizard-gender-hero-cards {
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
+  }
+  .gender-hero-card {
+    flex-direction: row;
+    align-items: center;
+    text-align: left;
+    padding: 1.15rem 1rem;
+    gap: 1rem;
+  }
+  .ghc-badge {
+    position: static;
+    display: inline-block;
+    align-self: flex-start;
+    margin-bottom: 0.3rem;
+  }
+  .ghc-icon-wrap {
+    width: 52px;
+    height: 52px;
+    font-size: 1.35rem;
+    margin-bottom: 0;
+    flex-shrink: 0;
+  }
+  .ghc-title {
+    font-size: 1.15rem;
+    margin-bottom: 0.2rem;
+  }
+  .ghc-sub {
+    font-size: 0.76rem;
+    margin-bottom: 0.35rem;
+  }
+  .gender-hero-card.active .ghc-icon-wrap {
+    transform: none;
+  }
+}
   min-height: 0;
   background: rgba(14, 16, 23, 0.95);
   border: 1.5px solid rgba(212, 175, 55, 0.4);

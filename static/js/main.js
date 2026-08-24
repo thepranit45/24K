@@ -304,24 +304,31 @@ function pickWizardService(card) {
   }
 }
 
-/** Select Gender at Top of Step 1 (Men / Women) */
+/** Pick Gender on Step 1 Hero Cards & Auto Advance to Step 2 */
+function pickGenderStep(gender) {
+  selectWizardGender(gender);
+  setTimeout(() => {
+    wizardGoTo(2);
+  }, 200);
+}
+
+/** Select Gender (Men / Women) */
 function selectWizardGender(gender) {
   currentWizardCategory = gender;
   
-  const btnMale = document.getElementById('btnGenderMale');
-  const btnFemale = document.getElementById('btnGenderFemale');
+  const cardMale = document.getElementById('genderCardMale');
+  const cardFemale = document.getElementById('genderCardFemale');
+  const badgeText = document.getElementById('currentGenderBadgeText');
   
   if (gender === 'MALE') {
-    if (btnMale) btnMale.classList.add('active');
-    if (btnFemale) btnFemale.classList.remove('active');
+    if (cardMale) cardMale.classList.add('active');
+    if (cardFemale) cardFemale.classList.remove('active');
+    if (badgeText) badgeText.innerHTML = '<i class="fa-solid fa-mars"></i> Men';
   } else {
-    if (btnFemale) btnFemale.classList.add('active');
-    if (btnMale) btnMale.classList.remove('active');
+    if (cardFemale) cardFemale.classList.add('active');
+    if (cardMale) cardMale.classList.remove('active');
+    if (badgeText) badgeText.innerHTML = '<i class="fa-solid fa-venus"></i> Women';
   }
-
-  // Ensure dropdown list is open
-  const container = document.getElementById('wizardServiceDropdownContainer');
-  if (container) container.classList.remove('collapsed');
 
   const query = (document.getElementById('wizardServiceSearchInput')?.value || '').toLowerCase().trim();
   applyWizardServiceFilters(query, gender);
@@ -604,9 +611,9 @@ function selectTimeSlot(btn) {
   const btnNext = document.getElementById('btnTimeNext');
   if (btnNext) btnNext.disabled = false;
 
-  // Auto-advance to Step 5 (Customer Details) smoothly after selection
+  // Auto-advance to Step 6 (Customer Details) smoothly after selection
   setTimeout(() => {
-    wizardGoTo(5);
+    wizardGoTo(6);
   }, 220);
 }
 
@@ -655,7 +662,7 @@ function goToReview() {
   document.getElementById('sum-phone').textContent    = phone;
   document.getElementById('sum-total').textContent    = '₹' + wizard.servicePrice;
 
-  wizardGoTo(6);
+  wizardGoTo(7);
 }
 
 function clearErrors() {
