@@ -3600,54 +3600,9 @@ img { max-width: 100%; display: block; }
   box-shadow: 0 0 0 2px rgba(212,175,55,0.5), 0 6px 26px rgba(212,175,55,0.45); 
 }
 
-/* 6. Carousel Controls */
+/* 6. Carousel Controls - Hidden */
 .barber-wheel__controls { 
-  align-items: center; 
-  display: flex; 
-  gap: 0.8rem; 
-  justify-content: center; 
-  margin-top: 1.2rem; 
-}
-.barber-wheel__nav {
-  align-items: center; 
-  background: rgba(255,255,255,0.04); 
-  border: 1px solid #2a2e3b; 
-  border-radius: 50%;
-  color: #e8c54f; 
-  cursor: pointer; 
-  display: flex; 
-  flex: 0 0 36px; 
-  font-size: 0.85rem; 
-  height: 36px;
-  justify-content: center; 
-  transition: background 0.2s, color 0.2s, transform 0.2s; 
-  width: 36px;
-}
-.barber-wheel__nav:hover { 
-  background: rgba(212,175,55,0.18); 
-  color: #f3d86a; 
-  transform: translateY(-1px); 
-}
-.barber-wheel__nav:focus-visible { outline: 2px solid rgba(212,175,55,0.6); outline-offset: 2px; }
-.barber-wheel__dots { display: flex; gap: 0.45rem; }
-.wheel-dot {
-  background: rgba(255,255,255,0.16); 
-  border: none; 
-  border-radius: 999px; 
-  cursor: pointer;
-  height: 7px; 
-  padding: 0; 
-  transition: background 0.25s, width 0.25s; 
-  width: 7px;
-}
-.wheel-dot.active { background: linear-gradient(90deg, #e8c54f, #b88708); width: 20px; }
-.barber-wheel__counter { 
-  color: #f3d86a; 
-  font-size: 0.78rem; 
-  font-weight: 800; 
-  letter-spacing: 0.06em; 
-  min-width: 46px; 
-  text-align: center; 
+  display: none !important;
 }
 
 .wheel-sheen {
