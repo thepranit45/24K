@@ -127,20 +127,20 @@ img { max-width: 100%; display: block; }
   color:var(--white); white-space:nowrap;
 }
 .nav-logo .logo-text, .footer-logo span {
-  font-family: 'Abril Fatface', 'Young Serif', 'DM Serif Display', 'Playfair Display', serif;
-  font-weight: 800;
-  font-style: normal;
-  letter-spacing: 0.01em;
+  font-family: 'Cormorant Garamond', 'Playfair Display', serif;
+  font-weight: 700;
+  font-style: italic;
+  letter-spacing: 0.04em;
   font-size: 1.65rem;
   color: #ffd700;
-  background: linear-gradient(110deg, #ffffff 0%, #fff3b0 25%, #ffd700 50%, #d4af37 75%, #ffffff 100%);
+  background: linear-gradient(110deg, #ffffff 0%, #fff2a3 25%, #ffd700 50%, #d4af37 75%, #ffffff 100%);
   background-size: 220% auto;
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   animation: qcShine 5s linear infinite;
   display: inline-block;
-  filter: drop-shadow(0 0 12px rgba(255, 215, 0, 0.6)) drop-shadow(0 0 24px rgba(212, 175, 55, 0.35));
+  filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.45));
 }
 .nav-logo:hover .logo-icon img {
   transform: rotate(12deg) scale(1.08);
