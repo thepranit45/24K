@@ -339,11 +339,11 @@
         <span class="wso-step-pill"><i class="fa-solid fa-scissors"></i> Step 3 of 7</span>
         <span class="wso-badge-location"><i class="fa-solid fa-crown text-gold"></i> Master Barbers</span>
       </div>
-      <h2 class="wizard-heading">Choose <span class="text-gold">Your Barber</span></h2>
+      <h2 class="wizard-heading">Select <span class="text-gold">Your Barber</span></h2>
       <p class="wizard-step-desc">Select your preferred specialist or let us assign the next available master barber.</p>
 
       <div class="barber-wheel" id="barberWheel" data-count="{{ barbers|length|add:1 }}">
-        <div class="barber-wheel__stage" id="barberWheelStage" role="radiogroup" aria-label="Choose a barber" aria-orientation="horizontal" tabindex="0">
+        <div class="barber-wheel__stage" id="barberWheelStage" role="radiogroup" aria-label="Select a barber" aria-orientation="horizontal" tabindex="0">
           <div class="barber-wheel__track" id="barberWheelTrack">
             {% for b in barbers %}
             <div class="barber-wheel__card{% if b.is_featured %} barber-wheel__card--featured{% endif %}{% if b.is_featured %} selected{% endif %}"
@@ -428,7 +428,7 @@
       <div class="wizard-nav">
         <button class="btn-wizard-back" onclick="wizardGoTo(2)"><i class="fa-solid fa-arrow-left"></i> Back</button>
         <button class="btn-wizard-next" onclick="wizardGoTo(4)">
-          Choose Date <i class="fa-solid fa-arrow-right"></i>
+          Select Barber <i class="fa-solid fa-arrow-right"></i>
         </button>
       </div>
     </div>
