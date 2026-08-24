@@ -2880,46 +2880,46 @@ img { max-width: 100%; display: block; }
   position: relative;
 }
 .about-img-wrapper {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  aspect-ratio: 4/3;
+  background: linear-gradient(145deg, #131620, #0c0e14);
+  border: 1.5px solid rgba(212, 175, 55, 0.3);
+  border-radius: 24px;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   position: relative;
-  overflow: hidden;
-  box-shadow: var(--shadow);
-}
-.about-img-placeholder {
-  font-size: 5rem;
-  color: var(--gold);
-  opacity: 0.65;
-  animation: floatScissors 4s ease-in-out infinite;
+  overflow: visible;
+  padding: 3rem 2rem;
+  box-shadow: 0 16px 40px rgba(0,0,0,0.6), 0 0 25px rgba(212,175,55,0.15);
+  text-align: center;
 }
 .about-badge {
-  position: absolute;
-  bottom: -20px;
-  right: -20px;
-  background: linear-gradient(135deg, #d4af37, #b8860b);
-  color: var(--black);
-  padding: 1.2rem 1.8rem;
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-gold);
-  text-align: center;
-  z-index: 5;
+  position: static;
+  margin-top: 1.5rem;
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.15), rgba(212, 175, 55, 0.05));
+  border: 1.5px solid #d4af37;
+  color: #fff;
+  padding: 0.75rem 1.8rem;
+  border-radius: 30px;
+  box-shadow: 0 4px 20px rgba(212, 175, 55, 0.25);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.85rem;
+  text-align: left;
 }
 .about-badge-num {
-  font-size: 1.8rem;
+  font-size: 1.6rem;
   font-weight: 800;
+  color: #ffd700;
   line-height: 1;
 }
 .about-badge-text {
-  font-size: 0.75rem;
+  font-size: 0.76rem;
   font-weight: 700;
+  color: #e5e7eb;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-top: 0.2rem;
+  letter-spacing: 0.06em;
+  line-height: 1.2;
 }
 .about-text {
   display: flex;
