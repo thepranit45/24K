@@ -72,44 +72,154 @@
         Meet The <span class="text-gold">24 K Team</span>
       </h2>
       <p style="color: var(--gray-400); max-width: 600px; margin: 0.5rem auto 0; font-size: 1rem;">
-        Led by owner Ganesh, our dedicated team of master barbers delivers unrivaled craftsmanship.
+        Led by founder & owner Prashant Borhade, our master barbers bring unrivaled craftsmanship to Sangamner.
       </p>
     </div>
 
-    <div class="team-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; max-width: 900px; margin: 0 auto;">
+    <style>
+      .team-grid-animated {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2.2rem;
+        max-width: 900px;
+        margin: 0 auto;
+      }
+      .luxury-team-card {
+        background: linear-gradient(145deg, rgba(24, 28, 38, 0.96), rgba(13, 15, 22, 0.98));
+        border: 1.5px solid rgba(212, 175, 55, 0.25);
+        border-radius: 28px;
+        padding: 2.4rem 1.8rem 1.8rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 12px 35px rgba(0, 0, 0, 0.6);
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      .luxury-team-card:hover {
+        transform: translateY(-8px) scale(1.01);
+        border-color: #ffd700;
+        box-shadow: 0 20px 45px rgba(0, 0, 0, 0.8), 0 0 30px rgba(212, 175, 55, 0.28);
+      }
+      .luxury-team-card--owner {
+        border-color: #d4af37;
+        box-shadow: 0 14px 40px rgba(212, 175, 55, 0.2), 0 0 20px rgba(212, 175, 55, 0.15);
+      }
+      .luxury-team-card--owner:hover {
+        box-shadow: 0 22px 55px rgba(212, 175, 55, 0.35), 0 0 45px rgba(255, 215, 0, 0.3);
+      }
+      .team-shimmer-sweep {
+        position: absolute;
+        top: 0; left: -100%; width: 50%; height: 100%;
+        background: linear-gradient(to right, transparent, rgba(255,255,255,0.06), transparent);
+        transform: skewX(-25deg);
+        transition: left 0.75s ease;
+        pointer-events: none;
+      }
+      .luxury-team-card:hover .team-shimmer-sweep {
+        left: 150%;
+      }
+      .team-avatar-halo {
+        width: 145px;
+        height: 145px;
+        margin: 0.5rem auto 1.4rem;
+        border-radius: 50%;
+        padding: 4.5px;
+        background: linear-gradient(135deg, #ffd700, #b8860b);
+        box-shadow: 0 0 25px rgba(212, 175, 55, 0.45);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.4s ease;
+        animation: avatarHaloPulse 4s ease-in-out infinite alternate;
+      }
+      @keyframes avatarHaloPulse {
+        0% { transform: scale(1); box-shadow: 0 0 20px rgba(212, 175, 55, 0.35); }
+        100% { transform: scale(1.03); box-shadow: 0 0 35px rgba(255, 215, 0, 0.6); }
+      }
+      .luxury-team-card:hover .team-avatar-halo {
+        transform: scale(1.06);
+        box-shadow: 0 0 40px rgba(255, 215, 0, 0.7);
+      }
+      .team-avatar-halo img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: top center;
+        border-radius: 50%;
+        background: #0f1117;
+        transition: transform 0.4s ease;
+      }
+      .luxury-team-card:hover .team-avatar-halo img {
+        transform: scale(1.04);
+      }
+      .owner-badge-floating {
+        position: absolute;
+        top: -1px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: linear-gradient(135deg, #ffd700, #b8860b);
+        color: #0b0d12;
+        padding: 0.35rem 1.25rem;
+        border-radius: 0 0 16px 16px;
+        font-size: 0.74rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        display: flex;
+        align-items: center;
+        gap: 0.45rem;
+        box-shadow: 0 4px 18px rgba(212, 175, 55, 0.5);
+      }
+      .team-chip-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        background: rgba(212, 175, 55, 0.1);
+        border: 1px solid rgba(212, 175, 55, 0.25);
+        color: #ffd700;
+        font-size: 0.76rem;
+        font-weight: 700;
+        margin-bottom: 0.75rem;
+      }
+    </style>
+
+    <div class="team-grid-animated">
       {% for b in barbers %}
-      <div class="team-card{% if 'Ganesh' in b.name %} team-card--owner{% endif %}" data-animate="fade-up" style="background: linear-gradient(145deg, rgba(22, 26, 36, 0.95), rgba(12, 14, 20, 0.98)); border: 1.5px solid {% if 'Ganesh' in b.name %}#d4af37{% else %}rgba(255,255,255,0.1){% endif %}; border-radius: 24px; padding: 2.2rem 1.75rem; text-align: center; position: relative; box-shadow: {% if 'Ganesh' in b.name %}0 12px 35px rgba(212,175,55,0.22){% else %}0 10px 30px rgba(0,0,0,0.5){% endif %}; transition: transform 0.3s ease, box-shadow 0.3s ease;">
+      <div class="luxury-team-card{% if 'Prashant' in b.name %} luxury-team-card--owner{% endif %}" data-animate="fade-up">
+        <div class="team-shimmer-sweep"></div>
         
-        {% if 'Ganesh' in b.name %}
-        <div style="position: absolute; top: -14px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #d4af37, #b8860b); color: #0b0d12; padding: 0.3rem 1.1rem; border-radius: 20px; font-size: 0.76rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; display: flex; align-items: center; gap: 0.4rem; box-shadow: 0 4px 15px rgba(212,175,55,0.4);">
+        {% if 'Prashant' in b.name %}
+        <div class="owner-badge-floating">
           <i class="fa-solid fa-crown"></i> Founder & Owner
         </div>
         {% endif %}
 
-        <div class="team-avatar-wrap" style="width: 140px; height: 140px; margin: 0.5rem auto 1.5rem; border-radius: 50%; padding: 4px; background: linear-gradient(135deg, #d4af37, rgba(212,175,55,0.2)); box-shadow: 0 0 25px rgba(212,175,55,0.35); overflow: hidden; display: flex; align-items: center; justify-content: center;">
+        <div class="team-avatar-halo">
           {% if b.photo %}
-            <img src="{{ b.photo.url }}" alt="{{ b.name }}" style="width: 100%; height: 100%; object-fit: cover; object-position: top center; border-radius: 50%; background: #0f1117;" />
+            <img src="{{ b.photo.url }}" alt="{{ b.name }}" loading="eager" />
           {% else %}
             <div style="font-size: 2.4rem; color: #ffd700; font-weight: 800;">{{ b.initials }}</div>
           {% endif %}
         </div>
 
-        <h3 style="font-size: 1.35rem; font-weight: 800; color: var(--white); margin-bottom: 0.25rem;">
+        <span class="team-chip-badge">
+          <i class="fa-solid fa-scissors"></i> {% if 'Prashant' in b.name %}Founder & Owner{% else %}Senior Master Barber{% endif %}
+        </span>
+
+        <h3 style="font-size: 1.4rem; font-weight: 800; color: var(--white); margin-bottom: 0.35rem; letter-spacing: -0.01em;">
           {{ b.name }}
         </h3>
         
-        <p style="color: #ffd700; font-size: 0.88rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.85rem;">
-          {% if 'Ganesh' in b.name %}Shop Owner & Master Barber{% else %}{{ b.title|default:"Master Barber" }}{% endif %}
-        </p>
-
-        <p style="color: var(--gray-400); font-size: 0.9rem; line-height: 1.55; margin-bottom: 1.25rem;">
+        <p style="color: var(--gray-400); font-size: 0.9rem; line-height: 1.55; margin-bottom: 1.4rem;">
           {{ b.bio|default:"Dedicated to precision cuts and luxury grooming." }}
         </p>
 
-        <div style="display: flex; align-items: center; justify-content: center; gap: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.08); font-size: 0.82rem; color: var(--gray-400);">
-          <span><i class="fa-solid fa-star text-gold"></i> {{ b.rating }} Rating</span>
+        <div style="display: flex; align-items: center; justify-content: center; gap: 1.2rem; padding-top: 1.1rem; border-top: 1px solid rgba(255,255,255,0.08); font-size: 0.84rem; color: var(--gray-400);">
+          <span style="display: inline-flex; align-items: center; gap: 0.35rem;"><i class="fa-solid fa-star text-gold"></i> <strong style="color:#fff;">{{ b.rating }}</strong> Rating</span>
           <span>•</span>
-          <span><i class="fa-regular fa-calendar text-gold"></i> {{ b.experience_years }} Yrs Exp</span>
+          <span style="display: inline-flex; align-items: center; gap: 0.35rem;"><i class="fa-regular fa-calendar text-gold"></i> <strong style="color:#fff;">{{ b.experience_years }}</strong> Yrs Exp</span>
         </div>
       </div>
       {% endfor %}
