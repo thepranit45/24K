@@ -48,7 +48,7 @@
     <ul class="nav-links" id="navLinks">
       <li><a href="{% url 'home' %}" class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">Home</a></li>
       <li><a href="{% url 'home' %}#services" class="nav-link">Services</a></li>
-      <li><a href="{% url 'booking_list' %}" class="nav-link {% if 'booking' in request.resolver_match.url_name %}active{% endif %}">My Bookings</a></li>
+      <li><a href="{% url 'booking_list' %}" class="nav-link {% if 'booking' in request.resolver_match.url_name %}active{% endif %}">Bookings</a></li>
       <li><a href="{% url 'about' %}" class="nav-link {% if request.resolver_match.url_name == 'about' %}active{% endif %}">About</a></li>
     </ul>
 
@@ -71,7 +71,7 @@
   <ul>
     <li><a href="{% url 'home' %}" class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}"><i class="fa-solid fa-house"></i> Home</a></li>
     <li><a href="{% url 'home' %}#services"><i class="fa-solid fa-scissors"></i> Services</a></li>
-    <li><a href="{% url 'booking_list' %}" class="{% if 'booking' in request.resolver_match.url_name %}active{% endif %}"><i class="fa-solid fa-calendar-check"></i> My Bookings</a></li>
+    <li><a href="{% url 'booking_list' %}" class="{% if 'booking' in request.resolver_match.url_name %}active{% endif %}"><i class="fa-solid fa-calendar-check"></i> Bookings</a></li>
     <li><a href="{% url 'about' %}" class="{% if request.resolver_match.url_name == 'about' %}active{% endif %}"><i class="fa-solid fa-store"></i> About</a></li>
   </ul>
 </div>
@@ -133,7 +133,7 @@
       <ul>
         <li><a href="{% url 'home' %}">Home</a></li>
         <li><a href="{% url 'home' %}#services">Services</a></li>
-        <li><a href="{% url 'booking_list' %}">My Bookings</a></li>
+        <li><a href="{% url 'booking_list' %}">Bookings</a></li>
         <li><a href="{% url 'barber_agenda' %}" target="_blank"><i class="fa-solid fa-layer-group text-gold"></i> Barber Stack (Live Agenda)</a></li>
         <li><a href="{% url 'about' %}">About Us</a></li>
       </ul>
