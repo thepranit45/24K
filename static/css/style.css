@@ -3211,8 +3211,8 @@ img { max-width: 100%; display: block; }
   box-shadow: none !important;
   background: transparent !important;
   filter: none !important;
-  -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 95%);
-  mask-image: linear-gradient(to bottom, black 70%, transparent 95%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 50%, rgba(0,0,0,0.85) 65%, rgba(0,0,0,0.3) 80%, transparent 92%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 50%, rgba(0,0,0,0.85) 65%, rgba(0,0,0,0.3) 80%, transparent 92%);
 }
 .barber-hero-initials {
   width: 120px;
