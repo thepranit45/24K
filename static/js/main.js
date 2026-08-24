@@ -254,6 +254,24 @@ function pickWizardService(card) {
   // Update highlight in list
   highlightSelectedWizardService();
 
+  // Update header text in the dropdown
+  const wsshTitle = document.getElementById('wsshTitle');
+  if (wsshTitle) {
+    wsshTitle.textContent = wizard.serviceName;
+  }
+
+  // Automatically close/collapse the service dropdown list popup
+  setTimeout(() => {
+    const container = document.getElementById('wizardServiceDropdownContainer');
+    const header = document.getElementById('wizardServiceSelectHeader');
+    if (container) {
+      container.classList.add('collapsed');
+    }
+    if (header) {
+      header.setAttribute('aria-expanded', 'false');
+    }
+  }, 180);
+
   // Update summary fields if needed
   const sumService = document.getElementById('sum-service');
   const sumDuration = document.getElementById('sum-duration');
