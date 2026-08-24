@@ -1120,13 +1120,21 @@ function initBarberWheel() {
   };
 
   w._onClick = (e) => {
-    const btn = e.target.closest('.barber-wheel__select-btn');
-    if (btn) {
-      const card = btn.closest('.barber-wheel__card');
-      if (card && w.cards.indexOf(card) === w.active) {
-        e.preventDefault();
-        w.applySelection(false, true);
-      }
+    const card = e.target.closest('.barber-wheel__card');
+    if (!card) return;
+    const cardIdx = w.cards.indexOf(card);
+    
+    // If it's a side card, bring it to center first
+    if (cardIdx !== -1 && cardIdx !== w.active) {
+      e.preventDefault();
+      w.snap(cardIdx, true);
+      return;
+    }
+    
+    // If user clicked the center active card or its Select Barber button, select and advance to step 4
+    if (cardIdx === w.active) {
+      e.preventDefault();
+      w.applySelection(false, true);
     }
   };
 
