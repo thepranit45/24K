@@ -603,6 +603,11 @@ function selectTimeSlot(btn) {
 
   const btnNext = document.getElementById('btnTimeNext');
   if (btnNext) btnNext.disabled = false;
+
+  // Auto-advance to Step 5 (Customer Details) smoothly after selection
+  setTimeout(() => {
+    wizardGoTo(5);
+  }, 220);
 }
 
 // ── Details validation ────────────────────────────────────────
