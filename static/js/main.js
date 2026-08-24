@@ -452,14 +452,52 @@ function selectBarber(card, id, name) {
     c.classList.remove('selected');
     c.setAttribute('aria-checked', 'false');
   });
-  card.classList.add('selected');
-  card.setAttribute('aria-checked', 'true');
+  if (card) {
+    card.classList.add('selected');
+    card.setAttribute('aria-checked', 'true');
+  }
   wizard.barberId   = id || '';
   wizard.barberName = name || 'Any Available Barber';
 
   if (wizard.date) {
     loadTimeSlots();
   }
+}
+
+/** Direct trigger when clicking 'Select Barber' button */
+function chooseBarberFromCard(btn, id, name) {
+  const card = btn.closest('.barber-wheel__card') || document.querySelector(`.barber-wheel__card[data-barber-id="${id}"]`);
+  
+  if (window.__barberWheel && card) {
+    const idx = window.__barberWheel.cards.indexOf(card);
+    if (idx !== -1 && idx !== window.__barberWheel.active) {
+      window.__barberWheel.snap(idx, false);
+    }
+  }
+
+  selectBarber(card, id, name);
+
+  if (btn) {
+    btn.innerHTML = '<i class="fa-solid fa-check"></i> Selected';
+  }
+
+  if (window._barberNextTimer) clearTimeout(window._barberNextTimer);
+  window._barberNextTimer = setTimeout(() => {
+    wizardGoTo(4);
+  }, 160);
+}
+
+/** Direct trigger for the bottom 'Select Barber ->' navigation button */
+function chooseCurrentWheelBarber() {
+  if (window.__barberWheel) {
+    const card = window.__barberWheel.cards[window.__barberWheel.active];
+    if (card) {
+      const id = card.dataset.barberId || '';
+      const name = card.dataset.barberName || 'Any Available Barber';
+      selectBarber(card, id, name);
+    }
+  }
+  wizardGoTo(4);
 }
 
 function openBookingWizard() {

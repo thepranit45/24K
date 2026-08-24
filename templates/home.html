@@ -387,7 +387,7 @@
                 {% endif %}
               </div>
               <div class="barber-wheel__footer">
-                <button type="button" class="barber-wheel__select-btn"><i class="fa-solid fa-scissors"></i> Select Barber</button>
+                <button type="button" class="barber-wheel__select-btn" onclick="chooseBarberFromCard(this, '{{ b.id }}', '{{ b.name|escapejs }}')"><i class="fa-solid fa-scissors"></i> Select Barber</button>
               </div>
               <div class="wheel-sheen" aria-hidden="true"></div>
             </div>
@@ -410,7 +410,7 @@
                 <p class="barber-wheel__any-desc">We'll match you with the earliest available expert.</p>
               </div>
               <div class="barber-wheel__footer">
-                <button type="button" class="barber-wheel__select-btn"><i class="fa-solid fa-scissors"></i> Select Barber</button>
+                <button type="button" class="barber-wheel__select-btn" onclick="chooseBarberFromCard(this, '', 'Any Available Barber')"><i class="fa-solid fa-scissors"></i> Select Barber</button>
               </div>
               <div class="wheel-sheen" aria-hidden="true"></div>
             </div>
@@ -427,7 +427,7 @@
 
       <div class="wizard-nav">
         <button class="btn-wizard-back" onclick="wizardGoTo(2)"><i class="fa-solid fa-arrow-left"></i> Back</button>
-        <button class="btn-wizard-next" onclick="wizardGoTo(4)">
+        <button class="btn-wizard-next" onclick="chooseCurrentWheelBarber()">
           Select Barber <i class="fa-solid fa-arrow-right"></i>
         </button>
       </div>
