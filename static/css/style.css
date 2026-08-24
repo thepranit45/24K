@@ -658,8 +658,8 @@ img { max-width: 100%; display: block; }
   transform: translateY(-1px);
 }
 
-/* Category Filter Tabs & Counter Bar */
-.wizard-tabs-and-counter {
+/* Gender & Category Custom Dropdown Filter */
+.wizard-dropdown-filter-container {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -667,66 +667,112 @@ img { max-width: 100%; display: block; }
   margin-bottom: 1rem;
   padding-bottom: 0.75rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  position: relative;
+  z-index: 20;
 }
-.wizard-service-category-tabs {
-  display: flex;
-  gap: 0.5rem;
-  overflow-x: auto;
-  scrollbar-width: none;
+.wizard-gender-dropdown {
+  position: relative;
+  flex: 1;
+  max-width: 320px;
 }
-.wizard-service-category-tabs::-webkit-scrollbar {
-  display: none;
-}
-.wso-live-counter {
-  font-size: 0.76rem;
-  color: var(--gray-400);
+.wizard-dropdown-toggle {
+  width: 100%;
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  white-space: nowrap;
-  font-weight: 600;
-}
-.wizard-service-category-tabs::-webkit-scrollbar {
-  display: none;
-}
-.wiz-cat-tab {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  border-radius: 24px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1.5px solid rgba(255, 255, 255, 0.08);
-  color: var(--gray-300);
-  font-size: 0.85rem;
+  justify-content: space-between;
+  padding: 0.65rem 1rem;
+  background: rgba(18, 21, 28, 0.95);
+  border: 1.5px solid rgba(212, 175, 55, 0.35);
+  border-radius: 12px;
+  color: var(--white);
+  font-size: 0.88rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
-  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: all 0.22s ease;
 }
-.wiz-cat-tab:hover {
-  color: var(--white);
-  border-color: rgba(212, 175, 55, 0.45);
-  background: rgba(212, 175, 55, 0.08);
-}
-.wiz-cat-tab.active {
-  background: linear-gradient(135deg, #d4af37, #b8860b);
-  color: #0b0d12;
+.wizard-dropdown-toggle:hover {
   border-color: #ffd700;
-  font-weight: 800;
-  box-shadow: 0 4px 14px rgba(212, 175, 55, 0.35);
+  background: rgba(26, 30, 40, 0.98);
+  box-shadow: 0 0 12px rgba(212, 175, 55, 0.25);
 }
-.tab-count {
-  font-size: 0.72rem;
-  opacity: 0.9;
-  background: rgba(0, 0, 0, 0.25);
-  padding: 0.12rem 0.45rem;
+.wdd-selected-label {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+.wdd-arrow {
+  font-size: 0.78rem;
+  color: #d4af37;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.wizard-gender-dropdown.open .wdd-arrow {
+  transform: rotate(180deg);
+}
+.wizard-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  width: 100%;
+  background: #0f1219;
+  border: 1.5px solid rgba(212, 175, 55, 0.4);
+  border-radius: 14px;
+  padding: 0.35rem;
+  display: none;
+  flex-direction: column;
+  gap: 0.25rem;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.7), 0 0 20px rgba(212, 175, 55, 0.15);
+  z-index: 30;
+  backdrop-filter: blur(12px);
+  animation: dropDownSlide 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+@keyframes dropDownSlide {
+  0% { opacity: 0; transform: translateY(-8px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.wizard-gender-dropdown.open .wizard-dropdown-menu {
+  display: flex;
+}
+.wizard-dropdown-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.65rem 0.85rem;
   border-radius: 10px;
-  font-weight: 800;
+  color: var(--gray-300);
+  font-size: 0.86rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  border: 1px solid transparent;
 }
-.wiz-cat-tab.active .tab-count {
-  background: rgba(0, 0, 0, 0.3);
-  color: #000;
+.wizard-dropdown-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--white);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+.wizard-dropdown-item.active {
+  background: rgba(212, 175, 55, 0.15);
+  border: 1px solid rgba(212, 175, 55, 0.5);
+  color: #ffd700;
+  font-weight: 700;
+}
+.wdd-item-text {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+.wdd-item-count {
+  font-size: 0.72rem;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 0.15rem 0.45rem;
+  border-radius: 8px;
+  color: var(--gray-400);
+  font-weight: 700;
+}
+.wizard-dropdown-item.active .wdd-item-count {
+  background: #d4af37;
+  color: #0b0d12;
 }
 
 /* Services Scroll Grid */
