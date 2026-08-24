@@ -27,26 +27,11 @@
   <meta name="apple-mobile-web-app-title" content="24K Salon" />
   <link rel="apple-touch-icon" sizes="180x180" href="{% static 'images/pwa/apple-touch-icon.png' %}" />
   <link rel="stylesheet" href="{% static 'css/style.css' %}?v={% now 'U' %}" />
-  <link rel="stylesheet" href="{% static 'css/animations.css' %}?v={% now 'U' %}" />
 
   {% block extra_css %}{% endblock %}
   {% block extra_head %}{% endblock %}
 </head>
 <body class="{% block body_class %}{% endblock %}">
-
-<!-- Scroll Progress Bar -->
-<div id="scrollProgressBar"></div>
-
-<!-- Page Load Curtain -->
-<div id="pageCurtain">
-  <div>
-    <div class="curtain-logo">24 K</div>
-    <div class="curtain-bar"></div>
-  </div>
-</div>
-
-<!-- Gold Particle Canvas -->
-<canvas id="particleCanvas" aria-hidden="true"></canvas>
 
 <!-- ══════════════════════════════════════
      NAVBAR
@@ -212,7 +197,6 @@
 
 {% load static %}
 <script src="{% static 'js/main.js' %}?v={% now 'U' %}"></script>
-<script src="{% static 'js/animations.js' %}?v={% now 'U' %}" defer></script>
 {% block extra_js %}{% endblock %}
 </body>
 </html>
