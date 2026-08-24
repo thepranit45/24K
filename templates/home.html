@@ -3,6 +3,13 @@
 
 {% block title %}24 K | Book Your Premium Appointment{% endblock %}
 {% block meta_description %}Book a premium haircut, beard styling or grooming appointment at 24 K — Sangamner's finest barbershop.{% endblock %}
+{% block extra_head %}
+  {% for b in barbers %}
+    {% if b.photo %}
+      <link rel="preload" as="image" href="{{ b.photo.url }}" fetchpriority="high" />
+    {% endif %}
+  {% endfor %}
+{% endblock %}
 
 {% block content %}
 
@@ -309,7 +316,7 @@
               <div class="barber-wheel__avatar">
                 <div class="barber-hero-cutout">
                   {% if b.photo %}
-                    <img src="{{ b.photo.url }}" alt="{{ b.name }}" loading="lazy" />
+                    <img src="{{ b.photo.url }}" alt="{{ b.name }}" loading="eager" fetchpriority="high" decoding="async" />
                   {% else %}
                     <div class="barber-hero-initials">{{ b.initials }}</div>
                   {% endif %}
