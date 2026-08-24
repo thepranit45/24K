@@ -233,20 +233,23 @@
                  data-service-name="{{ s.name }}"
                  data-service-price="{{ s.price|floatformat:0 }}"
                  data-service-duration="{{ s.duration }}"
+                 data-service-image="{% if s.image %}{{ s.image.url }}{% endif %}"
                  onclick="pickWizardService(this)">
-              <div class="wso-icon-wrap">
-                <i class="fa-solid fa-scissors"></i>
+              <div class="wso-thumb-wrap">
+                {% if s.image %}
+                  <img src="{{ s.image.url }}" alt="{{ s.name }}" class="wso-thumb-img" loading="eager" />
+                {% else %}
+                  <div class="wso-thumb-placeholder"><i class="fa-solid fa-scissors"></i></div>
+                {% endif %}
               </div>
               <div class="wso-body">
                 <div class="wso-name">{{ s.name }}</div>
                 <div class="wso-meta">
                   <span class="wso-duration"><i class="fa-regular fa-clock"></i> {{ s.duration }} min</span>
-                  <span class="wso-category wso-cat-male">Men's Care</span>
                 </div>
               </div>
               <div class="wso-right">
                 <div class="wso-price">₹{{ s.price|floatformat:0 }}</div>
-                <div class="wso-check"><i class="fa-solid fa-check"></i></div>
               </div>
             </div>
             {% endfor %}
@@ -257,20 +260,23 @@
                  data-service-name="{{ s.name }}"
                  data-service-price="{{ s.price|floatformat:0 }}"
                  data-service-duration="{{ s.duration }}"
+                 data-service-image="{% if s.image %}{{ s.image.url }}{% endif %}"
                  onclick="pickWizardService(this)">
-              <div class="wso-icon-wrap wso-icon-female">
-                <i class="fa-solid fa-wand-magic-sparkles"></i>
+              <div class="wso-thumb-wrap">
+                {% if s.image %}
+                  <img src="{{ s.image.url }}" alt="{{ s.name }}" class="wso-thumb-img" loading="eager" />
+                {% else %}
+                  <div class="wso-thumb-placeholder"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+                {% endif %}
               </div>
               <div class="wso-body">
                 <div class="wso-name">{{ s.name }}</div>
                 <div class="wso-meta">
                   <span class="wso-duration"><i class="fa-regular fa-clock"></i> {{ s.duration }} min</span>
-                  <span class="wso-category wso-cat-female">Women's Care</span>
                 </div>
               </div>
               <div class="wso-right">
                 <div class="wso-price">₹{{ s.price|floatformat:0 }}</div>
-                <div class="wso-check"><i class="fa-solid fa-check"></i></div>
               </div>
             </div>
             {% endfor %}
@@ -287,7 +293,13 @@
       <div class="wizard-step1-bottom-bar">
         <div class="selected-service-summary-pill" id="step1ServicePill">
           <div class="ssp-left">
-            <span class="ssp-icon"><i class="fa-solid fa-check text-gold"></i></span>
+            <span class="ssp-icon" id="sspServiceIcon">
+              {% if male_services.0.image %}
+                <img src="{{ male_services.0.image.url }}" alt="{{ male_services.0.name }}" id="sspServiceImg" class="ssp-thumb-img" />
+              {% else %}
+                <i class="fa-solid fa-scissors text-gold" id="sspFallbackIcon"></i>
+              {% endif %}
+            </span>
             <div class="ssp-info">
               <span class="ssp-name" id="wiz-service-name">{% if male_services %}{{ male_services.0.name }}{% else %}Select a service{% endif %}</span>
               <span class="ssp-duration" id="wiz-service-duration"><i class="fa-regular fa-clock"></i> {% if male_services %}{{ male_services.0.duration }}{% else %}0{% endif %} min</span>

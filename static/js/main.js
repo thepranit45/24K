@@ -254,6 +254,17 @@ function pickWizardService(card) {
   // Update highlight in list
   highlightSelectedWizardService();
 
+  // Update thumbnail in bottom pill
+  const sspIcon = document.getElementById('sspServiceIcon');
+  if (sspIcon) {
+    const serviceImgUrl = card.dataset.serviceImage;
+    if (serviceImgUrl) {
+      sspIcon.innerHTML = `<img src="${serviceImgUrl}" alt="${wizard.serviceName}" class="ssp-thumb-img" />`;
+    } else {
+      sspIcon.innerHTML = `<i class="fa-solid fa-scissors text-gold"></i>`;
+    }
+  }
+
   // Update header text in the dropdown
   const wsshTitle = document.getElementById('wsshTitle');
   if (wsshTitle) {
