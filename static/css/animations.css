@@ -1,0 +1,508 @@
+/* ═══════════════════════════════════════════════════════════════
+   24 K — Premium Animations
+   Scroll-reveal, micro-interactions, particles, shimmer, luxury
+ ═══════════════════════════════════════════════════════════════ */
+
+/* ─── Core Keyframes ────────────────────────────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(40px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeDown {
+  from { opacity: 0; transform: translateY(-30px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeLeft {
+  from { opacity: 0; transform: translateX(50px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes fadeRight {
+  from { opacity: 0; transform: translateX(-50px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.85); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes revealMask {
+  from { clip-path: inset(0 100% 0 0); opacity: 0; }
+  to   { clip-path: inset(0 0 0 0); opacity: 1; }
+}
+
+/* Gold shimmer sweep */
+@keyframes goldShimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+/* Floating bob */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-10px); }
+}
+
+/* Pulse glow ring */
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.5); }
+  50%       { box-shadow: 0 0 0 14px rgba(212, 175, 55, 0); }
+}
+@keyframes pulseGlowText {
+  0%, 100% { text-shadow: 0 0 10px rgba(212, 175, 55, 0.3); }
+  50%       { text-shadow: 0 0 30px rgba(212, 175, 55, 0.8), 0 0 60px rgba(212, 175, 55, 0.4); }
+}
+
+/* Spinning scissors */
+@keyframes rotateScissors {
+  0%   { transform: rotate(0deg); }
+  25%  { transform: rotate(-15deg); }
+  75%  { transform: rotate(15deg); }
+  100% { transform: rotate(0deg); }
+}
+
+/* Border travel shimmer */
+@keyframes borderTravel {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Stagger cascade */
+@keyframes cascadeIn {
+  from { opacity: 0; transform: translateY(20px) scale(0.95); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Number count up shimmer */
+@keyframes countShimmer {
+  0%   { color: #d4af37; }
+  50%  { color: #ffd700; text-shadow: 0 0 20px rgba(255,215,0,0.8); }
+  100% { color: #d4af37; }
+}
+
+/* Particle drift */
+@keyframes particleDrift {
+  0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(-100vh) rotate(720deg); opacity: 0; }
+}
+
+/* Wave ripple */
+@keyframes waveRipple {
+  0%   { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
+
+/* Slide up reveal */
+@keyframes slideUpReveal {
+  from { transform: translateY(100%); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+
+/* Typewriter cursor blink */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+/* Card tilt shimmer overlay */
+@keyframes tiltShimmer {
+  0%   { left: -100%; }
+  100% { left: 150%; }
+}
+
+/* Gold line draw */
+@keyframes drawLine {
+  from { width: 0; opacity: 0; }
+  to   { width: 80px; opacity: 1; }
+}
+
+/* Heartbeat scale */
+@keyframes heartbeat {
+  0%, 100% { transform: scale(1); }
+  14%  { transform: scale(1.08); }
+  28%  { transform: scale(1); }
+  42%  { transform: scale(1.04); }
+  70%  { transform: scale(1); }
+}
+
+/* ─── Scroll Reveal Base Classes ────────────────────────────── */
+.reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal.reveal--left {
+  transform: translateX(-50px);
+}
+.reveal.reveal--right {
+  transform: translateX(50px);
+}
+.reveal.reveal--scale {
+  transform: scale(0.88);
+  transform-origin: center bottom;
+}
+.reveal.reveal--mask {
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+              opacity 0.4s ease;
+}
+.reveal.in-view {
+  opacity: 1;
+  transform: none;
+  clip-path: inset(0 0 0 0);
+}
+
+/* Stagger delays */
+.reveal.delay-1 { transition-delay: 0.1s; }
+.reveal.delay-2 { transition-delay: 0.2s; }
+.reveal.delay-3 { transition-delay: 0.3s; }
+.reveal.delay-4 { transition-delay: 0.4s; }
+.reveal.delay-5 { transition-delay: 0.5s; }
+.reveal.delay-6 { transition-delay: 0.6s; }
+.reveal.delay-7 { transition-delay: 0.7s; }
+.reveal.delay-8 { transition-delay: 0.8s; }
+
+/* ─── Particle Canvas ───────────────────────────────────────── */
+#particleCanvas {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.4;
+}
+
+/* ─── Gold Shimmer Underline ────────────────────────────────── */
+.shimmer-underline {
+  position: relative;
+  display: inline-block;
+}
+.shimmer-underline::after {
+  content: '';
+  position: absolute;
+  bottom: -4px; left: 0;
+  height: 2px; width: 0;
+  background: linear-gradient(90deg, transparent, #d4af37, #ffd700, #d4af37, transparent);
+  background-size: 200% auto;
+  border-radius: 2px;
+  transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.in-view .shimmer-underline::after,
+.shimmer-underline.in-view::after {
+  width: 100%;
+  animation: goldShimmer 3s linear infinite;
+}
+
+/* ─── Floating Gold Particles (CSS-only small ones) ─────────── */
+.gold-particle {
+  position: absolute;
+  width: 4px; height: 4px;
+  background: #d4af37;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: particleDrift linear infinite;
+  opacity: 0.7;
+}
+
+/* ─── Animated Section Divider ──────────────────────────────── */
+.anim-divider {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 0 auto 3rem;
+  justify-content: center;
+}
+.anim-divider-line {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #d4af37, transparent);
+  flex: 1;
+  max-width: 120px;
+  animation: goldShimmer 4s ease infinite;
+  background-size: 300% auto;
+}
+.anim-divider-icon {
+  color: #d4af37;
+  font-size: 1.2rem;
+  animation: rotateScissors 3s ease-in-out infinite;
+}
+
+/* ─── Service Card Hover Effects ────────────────────────────── */
+.mockup-service-card {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow 0.35s ease !important;
+}
+.mockup-service-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 60%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(212,175,55,0.12), transparent);
+  transform: skewX(-20deg);
+  transition: left 0s;
+  z-index: 2;
+  pointer-events: none;
+}
+.mockup-service-card:hover::before {
+  left: 150%;
+  transition: left 0.6s ease;
+}
+.mockup-service-card:hover {
+  transform: translateY(-6px) scale(1.02) !important;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.5), 0 0 30px rgba(212,175,55,0.2) !important;
+}
+
+/* ─── Barber Card Entrance Animation ────────────────────────── */
+.barber-wheel__card {
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow 0.4s ease !important;
+}
+
+/* ─── Button Shimmer ────────────────────────────────────────── */
+.btn-hero {
+  position: relative;
+  overflow: hidden;
+}
+.btn-hero::after {
+  content: '';
+  position: absolute;
+  top: -50%; left: -100%;
+  width: 60%; height: 200%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+  transform: skewX(-20deg);
+  animation: tiltShimmer 3s ease-in-out infinite;
+}
+
+/* ─── Navbar Link Underline Animation ───────────────────────── */
+.nav-link {
+  position: relative;
+}
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: -2px; left: 50%;
+  width: 0; height: 2px;
+  background: linear-gradient(90deg, #d4af37, #ffd700);
+  border-radius: 2px;
+  transition: width 0.3s ease, left 0.3s ease;
+}
+.nav-link:hover::after,
+.nav-link.active::after {
+  width: 100%;
+  left: 0;
+}
+
+/* ─── Trust Badge Float ─────────────────────────────────────── */
+.trust-item:nth-child(1) { animation: float 5s ease-in-out infinite; }
+.trust-item:nth-child(3) { animation: float 5s ease-in-out infinite; animation-delay: 1.5s; }
+.trust-item:nth-child(5) { animation: float 5s ease-in-out infinite; animation-delay: 3s; }
+
+/* ─── Hero Logo Pulse ────────────────────────────────────────── */
+.hero-crest-img {
+  animation: float 4s ease-in-out infinite, pulseGlow 3s ease-in-out infinite !important;
+}
+
+/* ─── Animated Counter Numbers ──────────────────────────────── */
+.trust-number {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #d4af37;
+  animation: countShimmer 4s ease-in-out infinite;
+}
+
+/* ─── Wizard Panel Transitions ──────────────────────────────── */
+.wizard-panel {
+  transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+.wizard-panel:not(.active) {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(30px);
+}
+.wizard-panel.active {
+  opacity: 1;
+  transform: translateX(0);
+}
+.wizard-panel.slide-out-left {
+  transform: translateX(-40px) !important;
+  opacity: 0 !important;
+}
+.wizard-panel.slide-in-right {
+  animation: fadeLeft 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* ─── Gender Card Entrance ───────────────────────────────────── */
+.gender-hero-card {
+  animation: scaleIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.gender-hero-card:nth-child(1) { animation-delay: 0.1s; }
+.gender-hero-card:nth-child(2) { animation-delay: 0.25s; }
+
+/* ─── Booking Wizard Open Animation ────────────────────────── */
+.booking-wizard.open {
+  animation: slideUpReveal 0.45s cubic-bezier(0.16, 1, 0.3, 1) both !important;
+}
+
+/* ─── Ripple Effect on Buttons ──────────────────────────────── */
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(212, 175, 55, 0.35);
+  transform: scale(0);
+  animation: rippleAnim 0.7s linear;
+  pointer-events: none;
+}
+@keyframes rippleAnim {
+  to { transform: scale(4); opacity: 0; }
+}
+
+/* ─── Scissors Decoration Animation ────────────────────────── */
+.scissors-deco {
+  display: inline-block;
+  animation: rotateScissors 3s ease-in-out infinite;
+  color: #d4af37;
+}
+
+/* ─── Animated Gold Dot Indicator ───────────────────────────── */
+.pulse-dot {
+  display: inline-block;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #10b981;
+  animation: pulseGlow 2s ease-in-out infinite;
+  box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5);
+}
+
+/* ─── Staggered Grid Children ───────────────────────────────── */
+.stagger-grid > * {
+  opacity: 0;
+  transform: translateY(25px);
+  transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.stagger-grid.in-view > *:nth-child(1)  { opacity: 1; transform: none; transition-delay: 0.05s; }
+.stagger-grid.in-view > *:nth-child(2)  { opacity: 1; transform: none; transition-delay: 0.12s; }
+.stagger-grid.in-view > *:nth-child(3)  { opacity: 1; transform: none; transition-delay: 0.19s; }
+.stagger-grid.in-view > *:nth-child(4)  { opacity: 1; transform: none; transition-delay: 0.26s; }
+.stagger-grid.in-view > *:nth-child(5)  { opacity: 1; transform: none; transition-delay: 0.33s; }
+.stagger-grid.in-view > *:nth-child(6)  { opacity: 1; transform: none; transition-delay: 0.40s; }
+.stagger-grid.in-view > *:nth-child(7)  { opacity: 1; transform: none; transition-delay: 0.47s; }
+.stagger-grid.in-view > *:nth-child(8)  { opacity: 1; transform: none; transition-delay: 0.54s; }
+.stagger-grid.in-view > *:nth-child(9)  { opacity: 1; transform: none; transition-delay: 0.61s; }
+.stagger-grid.in-view > *:nth-child(10) { opacity: 1; transform: none; transition-delay: 0.68s; }
+.stagger-grid.in-view > *:nth-child(n+11) { opacity: 1; transform: none; transition-delay: 0.7s; }
+
+/* ─── Scroll Progress Bar ───────────────────────────────────── */
+#scrollProgressBar {
+  position: fixed;
+  top: 0; left: 0;
+  height: 3px;
+  width: 0%;
+  background: linear-gradient(90deg, #d4af37, #ffd700, #d4af37);
+  background-size: 200% auto;
+  animation: goldShimmer 3s linear infinite;
+  z-index: 9999;
+  transition: width 0.1s ease;
+  border-radius: 0 2px 2px 0;
+}
+
+/* ─── Section Heading Gold Line Decoration ───────────────────── */
+.section-heading-anim {
+  position: relative;
+  display: inline-block;
+}
+.section-heading-anim::before {
+  content: '';
+  position: absolute;
+  bottom: -8px; left: 50%; transform: translateX(-50%);
+  height: 3px; width: 0;
+  background: linear-gradient(90deg, #d4af37, #ffd700);
+  border-radius: 2px;
+  transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s;
+}
+.section-heading-anim.in-view::before {
+  width: 70px;
+}
+
+/* ─── Magnetic Button Hover ─────────────────────────────────── */
+.btn-magnetic {
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+.btn-magnetic:hover {
+  transform: scale(1.05) translateY(-2px) !important;
+}
+.btn-magnetic:active {
+  transform: scale(0.97) translateY(1px) !important;
+}
+
+/* ─── Floating Action Button Bounce ────────────────────────── */
+.fab-bounce {
+  animation: heartbeat 2.5s ease-in-out infinite;
+}
+
+/* ─── Animated Background Gradient ─────────────────────────── */
+@keyframes bgGradientShift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.animated-bg {
+  background: linear-gradient(135deg, #07080a 0%, #0d0e12 30%, #12141c 50%, #07080a 100%);
+  background-size: 400% 400%;
+  animation: bgGradientShift 15s ease infinite;
+}
+
+/* ─── Loading Skeleton Shimmer ──────────────────────────────── */
+.skeleton {
+  background: linear-gradient(90deg, #12141c 25%, #1e2230 50%, #12141c 75%);
+  background-size: 200% 100%;
+  animation: goldShimmer 1.5s infinite;
+  border-radius: 8px;
+}
+
+/* ─── Page Load Curtain ─────────────────────────────────────── */
+#pageCurtain {
+  position: fixed;
+  inset: 0;
+  background: #07080a;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  transition: opacity 0.5s ease 0.5s, visibility 0.5s ease 0.5s;
+}
+#pageCurtain.hidden {
+  opacity: 0;
+  visibility: hidden;
+}
+#pageCurtain .curtain-logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 3rem;
+  font-weight: 800;
+  background: linear-gradient(110deg, #fff 0%, #ffd700 40%, #d4af37 70%, #fff 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: goldShimmer 2s linear infinite;
+  letter-spacing: 0.1em;
+}
+#pageCurtain .curtain-bar {
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #d4af37, #ffd700);
+  border-radius: 2px;
+  margin: 1rem auto 0;
+  animation: drawLine 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
+}
+
+/* ─── Prefers Reduced Motion Respect ────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

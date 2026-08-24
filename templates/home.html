@@ -49,8 +49,8 @@
       <span class="hero-title-gold">ZERO COMPROMISE.</span>
     </h1>
     <p class="hero-subtitle">The sharpest cuts in Sangamner, booked in seconds.</p>
-    <a href="#services" class="btn-hero" onclick="handleBookAppointmentHero(event)">
-      <i class="fa-solid fa-scissors"></i>
+    <a href="#services" class="btn-hero btn-magnetic" onclick="handleBookAppointmentHero(event)">
+      <i class="fa-solid fa-scissors scissors-deco" style="margin-right:8px"></i>
       Book Appointment
     </a>
   </div>
@@ -83,13 +83,13 @@
     
     <!-- Male Services -->
     {% if male_services %}
-    <div class="mockup-category-header">
-      <i class="fa-solid fa-scissors mockup-gold"></i>
-      <span class="mockup-category-title">Male Services</span>
+    <div class="mockup-category-header reveal">
+      <i class="fa-solid fa-scissors mockup-gold scissors-deco"></i>
+      <span class="mockup-category-title shimmer-underline">Male Services</span>
       <div class="mockup-gold-line"></div>
     </div>
     
-    <div class="mockup-services-grid">
+    <div class="mockup-services-grid stagger-grid">
       {% for service in male_services %}
       <div class="mockup-service-card" onclick="selectService(this)"
            data-service-id="{{ service.pk }}"
@@ -117,13 +117,13 @@
 
     <!-- Female Services -->
     {% if female_services %}
-    <div class="mockup-category-header" style="margin-top: 2rem;">
+    <div class="mockup-category-header reveal" style="margin-top: 2rem;">
       <i class="fa-regular fa-user mockup-gold"></i>
-      <span class="mockup-category-title">Female Services</span>
+      <span class="mockup-category-title shimmer-underline">Female Services</span>
       <div class="mockup-gold-line"></div>
     </div>
     
-    <div class="mockup-services-grid female-grid">
+    <div class="mockup-services-grid female-grid stagger-grid">
       {% for service in female_services %}
       <div class="mockup-service-card" onclick="selectService(this)"
            data-service-id="{{ service.pk }}"
