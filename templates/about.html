@@ -63,8 +63,62 @@
   </div>
 </section>
 
+<!-- Master Team Section -->
+<section class="section team-section bg-dark-alt">
+  <div class="container">
+    <div class="section-header" data-animate="fade-up" style="text-align: center; margin-bottom: 3.5rem;">
+      <p class="section-eyebrow" style="color: #d4af37; text-transform: uppercase; font-size: 0.85rem; font-weight: 700; letter-spacing: 0.1em; margin-bottom: 0.5rem;">Master Artisans</p>
+      <h2 class="section-title" style="font-family: var(--font-heading); font-size: clamp(2rem, 4vw, 2.7rem); color: var(--white); font-weight: 800;">
+        Meet The <span class="text-gold">24 K Team</span>
+      </h2>
+      <p style="color: var(--gray-400); max-width: 600px; margin: 0.5rem auto 0; font-size: 1rem;">
+        Led by owner Ganesh, our dedicated team of master barbers delivers unrivaled craftsmanship.
+      </p>
+    </div>
+
+    <div class="team-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; max-width: 900px; margin: 0 auto;">
+      {% for b in barbers %}
+      <div class="team-card{% if 'Ganesh' in b.name %} team-card--owner{% endif %}" data-animate="fade-up" style="background: linear-gradient(145deg, rgba(22, 26, 36, 0.95), rgba(12, 14, 20, 0.98)); border: 1.5px solid {% if 'Ganesh' in b.name %}#d4af37{% else %}rgba(255,255,255,0.1){% endif %}; border-radius: 24px; padding: 2.2rem 1.75rem; text-align: center; position: relative; box-shadow: {% if 'Ganesh' in b.name %}0 12px 35px rgba(212,175,55,0.22){% else %}0 10px 30px rgba(0,0,0,0.5){% endif %}; transition: transform 0.3s ease, box-shadow 0.3s ease;">
+        
+        {% if 'Ganesh' in b.name %}
+        <div style="position: absolute; top: -14px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #d4af37, #b8860b); color: #0b0d12; padding: 0.3rem 1.1rem; border-radius: 20px; font-size: 0.76rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; display: flex; align-items: center; gap: 0.4rem; box-shadow: 0 4px 15px rgba(212,175,55,0.4);">
+          <i class="fa-solid fa-crown"></i> Founder & Owner
+        </div>
+        {% endif %}
+
+        <div class="team-avatar-wrap" style="width: 140px; height: 140px; margin: 0.5rem auto 1.5rem; border-radius: 50%; padding: 4px; background: linear-gradient(135deg, #d4af37, rgba(212,175,55,0.2)); box-shadow: 0 0 25px rgba(212,175,55,0.35); overflow: hidden; display: flex; align-items: center; justify-content: center;">
+          {% if b.photo %}
+            <img src="{{ b.photo.url }}" alt="{{ b.name }}" style="width: 100%; height: 100%; object-fit: cover; object-position: top center; border-radius: 50%; background: #0f1117;" />
+          {% else %}
+            <div style="font-size: 2.4rem; color: #ffd700; font-weight: 800;">{{ b.initials }}</div>
+          {% endif %}
+        </div>
+
+        <h3 style="font-size: 1.35rem; font-weight: 800; color: var(--white); margin-bottom: 0.25rem;">
+          {{ b.name }}
+        </h3>
+        
+        <p style="color: #ffd700; font-size: 0.88rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.85rem;">
+          {% if 'Ganesh' in b.name %}Shop Owner & Master Barber{% else %}{{ b.title|default:"Master Barber" }}{% endif %}
+        </p>
+
+        <p style="color: var(--gray-400); font-size: 0.9rem; line-height: 1.55; margin-bottom: 1.25rem;">
+          {{ b.bio|default:"Dedicated to precision cuts and luxury grooming." }}
+        </p>
+
+        <div style="display: flex; align-items: center; justify-content: center; gap: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.08); font-size: 0.82rem; color: var(--gray-400);">
+          <span><i class="fa-solid fa-star text-gold"></i> {{ b.rating }} Rating</span>
+          <span>•</span>
+          <span><i class="fa-regular fa-calendar text-gold"></i> {{ b.experience_years }} Yrs Exp</span>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
 <!-- Why Choose Us -->
-<section class="section bg-dark-alt">
+<section class="section">
   <div class="container">
     <div class="section-header" data-animate="fade-up">
       <p class="section-eyebrow">Why Choose Us</p>
