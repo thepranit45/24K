@@ -158,13 +158,10 @@ function selectService(btn) {
   wizard.barberId        = '';
   wizard.barberName      = 'Any Available Barber';
 
-  const preferredBarber = document.querySelector('[data-preferred-barber]');
-  const anyAvailableBarber = document.querySelector('.barber-select-card--any');
-  if (preferredBarber) {
-    selectBarber(preferredBarber, preferredBarber.dataset.barberId, preferredBarber.dataset.barberName);
-  } else if (anyAvailableBarber) {
-    selectBarber(anyAvailableBarber, '', 'Any Available Barber');
-  }
+  // Clear any dangling auto-advance timers
+  if (window._serviceNextTimer) clearTimeout(window._serviceNextTimer);
+  if (window._barberNextTimer) clearTimeout(window._barberNextTimer);
+  if (window._dateNextTimer) clearTimeout(window._dateNextTimer);
 
   // Prefill user details if available
   if (window._userData) {
@@ -177,10 +174,16 @@ function selectService(btn) {
     if (inpPhone && !inpPhone.value && u.phone) inpPhone.value = u.phone;
   }
 
-  // Pre-select first date chip if date is not selected yet
+  // Pre-fill initial date without firing auto-advance timer
   const dateChip = document.querySelector('.date-chip.selected') || document.querySelector('.date-chip');
   if (dateChip) {
-    selectDate(dateChip);
+    document.querySelectorAll('.date-chip').forEach(c => c.classList.remove('selected'));
+    dateChip.classList.add('selected');
+    wizard.date = dateChip.dataset.date;
+    const d = new Date(wizard.date + 'T00:00:00');
+    wizard.dateDisplay = d.toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    const labelEl = document.getElementById('selectedDateLabel');
+    if (labelEl) labelEl.textContent = wizard.dateDisplay;
   }
 
   // Update selection highlight in options list
@@ -937,7 +940,7 @@ function initBarberWheel() {
       }
     },
 
-    applySelection(initialSelect) {
+    applySelection(initialSelect, userTriggered) {
       const card = this.cards[this.active];
       if (!card) return;
       const id = card.dataset.barberId || '';
@@ -960,12 +963,12 @@ function initBarberWheel() {
         selectBarber(card, id, name);
       }
 
-      // Smooth auto-advance to Step 4 (Date selection) on user selection
-      if (!initialSelect) {
+      // Only auto-advance if user explicitly clicked/tapped Select or card in Step 3
+      if (userTriggered && currentStepIndex === 3) {
         if (window._barberNextTimer) clearTimeout(window._barberNextTimer);
         window._barberNextTimer = setTimeout(() => {
           wizardGoTo(4);
-        }, 260);
+        }, 220);
       }
     },
 
@@ -1100,7 +1103,7 @@ function initBarberWheel() {
       w.snap(w.active + (e.key === 'ArrowRight' ? 1 : -1), true);
     } else if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
-      w.applySelection();
+      w.applySelection(false, true);
     }
   };
 
@@ -1110,7 +1113,7 @@ function initBarberWheel() {
       const card = btn.closest('.barber-wheel__card');
       if (card && w.cards.indexOf(card) === w.active) {
         e.preventDefault();
-        w.applySelection();
+        w.applySelection(false, true);
       }
     }
   };
