@@ -167,7 +167,9 @@ def home(request):
 
 def about(request):
     business_hours = BusinessHour.objects.all()
-    barbers = Barber.objects.filter(is_active=True)
+    # Order so Founder & Owner (Prashant Borhade) appears first (left card)
+    barbers = list(Barber.objects.filter(is_active=True))
+    barbers.sort(key=lambda b: (0 if 'Prashant' in b.name else 1, b.name))
     return render(request, 'about.html', {'business_hours': business_hours, 'barbers': barbers})
 
 
