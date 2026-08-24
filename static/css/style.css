@@ -884,14 +884,50 @@ img { max-width: 100%; display: block; }
   box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
 }
 
-/* Step 1 Live Selection Summary Bar */
+/* Wizard Panel Inner Layout */
+.wizard-panel {
+  display: none;
+  flex: 1;
+  opacity: 0;
+  transform: scale(0.98);
+  transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  min-height: 0;
+}
+.wizard-panel.active {
+  display: flex;
+  flex-direction: column;
+  opacity: 1;
+  transform: scale(1);
+  animation: slideInRight 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+#wizard-panel-1 .wizard-panel-inner {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  padding-bottom: 1.25rem;
+}
+#wizard-panel-1 .wizard-services-grid {
+  flex: 1 1 auto;
+  min-height: 180px;
+  max-height: calc(100vh - 360px);
+  overflow-y: auto;
+  margin-bottom: 0.5rem;
+}
+
+/* Step 1 Live Selection Summary Bar - Always visible at bottom */
 .wizard-step1-bottom-bar {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  margin-top: 0.5rem;
+  margin-top: auto;
   padding-top: 0.85rem;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
+  position: sticky;
+  bottom: 0;
+  background: #0f1116;
+  z-index: 5;
 }
 .selected-service-summary-pill {
   display: flex;
