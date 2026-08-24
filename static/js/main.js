@@ -470,17 +470,8 @@ function wizardGoTo(step) {
     panel.classList.add('active', animClass);
     panel.scrollTop = 0;
 
-    // Trigger stagger animation for date chips on step 3
+    // Stagger the barber wheel entrance and settle wheel positions on step 3
     if (step === 3) {
-      document.querySelectorAll('#dateStrip .date-chip').forEach((chip, idx) => {
-        chip.style.animation = 'none';
-        chip.offsetHeight; // trigger reflow
-        chip.style.animation = `chipStaggerIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) ${0.04 * idx}s forwards`;
-      });
-    }
-
-    // Stagger the barber wheel entrance and settle wheel positions on step 2
-    if (step === 2) {
       if (window.__barberWheel) {
         requestAnimationFrame(() => window.__barberWheel.render(true));
       }
@@ -490,10 +481,19 @@ function wizardGoTo(step) {
         el.style.animation = '';
       });
     }
+
+    // Trigger stagger animation for date chips on step 4
+    if (step === 4) {
+      document.querySelectorAll('#dateStrip .date-chip').forEach((chip, idx) => {
+        chip.style.animation = 'none';
+        chip.offsetHeight; // trigger reflow
+        chip.style.animation = `chipStaggerIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) ${0.04 * idx}s forwards`;
+      });
+    }
   }
 
-  // Load time slots when going to step 4 (Time)
-  if (step === 4) {
+  // Load time slots when going to step 5 (Time)
+  if (step === 5) {
     loadTimeSlots();
   }
 }

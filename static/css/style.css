@@ -3245,17 +3245,17 @@ img { max-width: 100%; display: block; }
    Exact Luxury Mockup Match: Breaking-the-Frame Card Architecture
 --------------------------------------------------------------- */
 .barber-wheel { 
-  margin: 8.5rem 0 1rem; 
-  --wheel-w: min(395px, calc(100vw - 36px)); 
+  margin: 5.2rem 0 0.5rem; 
+  --wheel-w: min(380px, calc(100vw - 32px)); 
   position: relative;
 }
 .barber-wheel__stage {
   cursor: grab; 
-  height: 600px; 
-  min-height: 590px; 
+  height: 490px; 
+  min-height: 480px; 
   outline: none; 
   overflow: visible !important;
-  padding: 0 0 20px; 
+  padding: 0 0 10px; 
   perspective: 1000px; 
   perspective-origin: 50% 34%;
   position: relative; 
@@ -3274,20 +3274,20 @@ img { max-width: 100%; display: block; }
   align-items: stretch; 
   background: #0f1117;
   border: 2px solid #e5b84c; 
-  border-radius: 30px; 
+  border-radius: 24px; 
   box-sizing: border-box;
   color: #fff; 
   display: flex; 
   flex-direction: column; 
   justify-content: space-between;
-  gap: 12px; 
-  height: 520px;
-  min-height: 510px;
+  gap: 8px; 
+  height: 440px;
+  min-height: 430px;
   left: 50%; 
   overflow: visible !important; 
-  padding: 215px 22px 20px 22px; 
+  padding: 135px 18px 14px 18px; 
   position: absolute;
-  top: 70px; 
+  top: 40px; 
   transform-style: preserve-3d; 
   text-align: left; 
   width: var(--wheel-w);
@@ -3314,11 +3314,11 @@ img { max-width: 100%; display: block; }
 .barber-wheel__avatar { 
   margin: 0;
   position: absolute; 
-  top: -135px; 
+  top: -95px; 
   left: 50%;
   transform: translateX(-50%);
-  width: 290px; 
-  height: 330px; 
+  width: 220px; 
+  height: 235px; 
   z-index: 15;
   display: flex;
   align-items: center;
@@ -3591,42 +3591,42 @@ img { max-width: 100%; display: block; }
 /* 8. Mobile & Responsive Refinements */
 @media (max-width: 768px) {
   .barber-wheel { 
-    margin: 7.5rem 0 1rem; 
-    --wheel-w: calc(100vw - 36px); 
+    margin: 4.8rem 0 0.5rem; 
+    --wheel-w: calc(100vw - 32px); 
   }
   .barber-wheel__stage {
-    height: 560px; 
-    min-height: 550px; 
-    padding: 0 0 15px; 
+    height: 450px; 
+    min-height: 440px; 
+    padding: 0 0 10px; 
   }
   .barber-wheel__card {
-    top: 50px;
-    height: 500px;
-    min-height: 490px;
-    padding: 180px 18px 18px 18px;
-    gap: 8px;
-    border-radius: 26px;
+    top: 32px;
+    height: 405px;
+    min-height: 400px;
+    padding: 120px 14px 12px 14px;
+    gap: 6px;
+    border-radius: 20px;
   }
   .barber-wheel__avatar {
-    top: -145px;
-    width: 270px;
-    height: 320px;
+    top: -80px;
+    width: 190px;
+    height: 210px;
   }
   .barber-wheel__body h4 {
-    font-size: 1.25rem;
+    font-size: 1.15rem;
   }
   .b-role {
-    font-size: 0.95rem;
+    font-size: 0.85rem;
   }
   .barber-spec-chip {
-    padding: 0.25rem 0.65rem;
-    font-size: 0.74rem;
+    padding: 0.2rem 0.55rem;
+    font-size: 0.72rem;
   }
 }
 @media (prefers-reduced-motion: reduce) {
   .barber-wheel__card { transition: opacity 0.3s ease, filter 0.3s ease !important; }
   .barber-wheel__card .barber-halo-ring, .barber-wheel__card .wheel-sheen, .barber-wheel__card .barber-wheel__body > *,
-  #wizard-panel-2.active .barber-wheel, #wizard-panel-2.active .barber-wheel__controls, .wheel-dot.active {
+  #wizard-panel-3.active .barber-wheel, #wizard-panel-3.active .barber-wheel__controls, .wheel-dot.active {
     animation: none !important;
   }
 }
