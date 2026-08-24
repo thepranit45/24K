@@ -127,18 +127,21 @@ img { max-width: 100%; display: block; }
   color:var(--white); white-space:nowrap;
 }
 .nav-logo .logo-text, .footer-logo span {
-  font-family: 'Bodoni Moda', 'Cormorant Garamond', 'Playfair Display', serif;
-  font-weight: 800;
+  font-family: 'Playfair Display', 'Cormorant', 'Prata', serif;
+  font-weight: 900;
   font-style: normal;
-  letter-spacing: -0.01em;
-  font-size: 1.55rem;
-  background: linear-gradient(110deg, #ffffff 0%, #f3d86a 30%, #ffffff 55%, #d4af37 80%, #ffffff 100%);
+  letter-spacing: 0.02em;
+  font-size: 1.6rem;
+  color: #ffd700;
+  background: linear-gradient(110deg, #ffffff 0%, #fff0a8 25%, #ffd700 50%, #d4af37 75%, #ffffff 100%);
   background-size: 220% auto;
-  -webkit-background-clip: text; background-clip: text;
-  -webkit-text-fill-color: transparent; color: transparent;
-  animation: qcShine 6s linear infinite;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: qcShine 5s linear infinite;
   display: inline-block;
-  text-shadow: 0 0 24px rgba(212, 175, 55, 0.25);
+  filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.65)) drop-shadow(0 0 20px rgba(212, 175, 55, 0.4));
+  -webkit-text-stroke: 0.35px rgba(255, 215, 0, 0.4);
 }
 .nav-logo:hover .logo-icon img {
   transform: rotate(12deg) scale(1.08);
