@@ -389,7 +389,23 @@
           </section>
 
           <section class="receipt-details" aria-label="Appointment details">
-            <div class="receipt-detail"><span class="receipt-detail-icon navy"><i class="fa-solid fa-scissors"></i></span><div><p class="receipt-detail-label">Service(s)</p><p class="receipt-detail-value">{{ booking.service_names_display }}</p><p class="receipt-detail-sub">{{ booking.total_duration_minutes }} minute appointment</p></div></div>
+            <div class="receipt-detail">
+              <span class="receipt-detail-icon navy"><i class="fa-solid fa-scissors"></i></span>
+              <div style="flex:1;">
+                <p class="receipt-detail-label">Service(s) &amp; Required Time</p>
+                <p class="receipt-detail-value">{{ booking.service_names_display }}</p>
+                {% if booking.services.all %}
+                  <div style="display:flex; flex-wrap:wrap; gap:0.4rem; margin-top:0.35rem;">
+                    {% for s in booking.services.all %}
+                      <span style="display:inline-flex; align-items:center; gap:0.3rem; font-size:0.75rem; background:rgba(212,175,55,0.12); color:#ffd700; border:1px solid rgba(212,175,55,0.3); border-radius:6px; padding:0.15rem 0.5rem; font-weight:600;">
+                        {{ s.name }} <small style="color:#94a3b8; font-weight:normal;">({{ s.duration }} min · ₹{{ s.price|floatformat:0 }})</small>
+                      </span>
+                    {% endfor %}
+                  </div>
+                {% endif %}
+                <p class="receipt-detail-sub" style="margin-top:0.35rem;"><i class="fa-regular fa-clock"></i> <strong>{{ booking.total_duration_minutes }} minutes total required appointment</strong></p>
+              </div>
+            </div>
             <div class="receipt-detail"><span class="receipt-detail-icon gold"><i class="fa-regular fa-calendar"></i></span><div><p class="receipt-detail-label">Date &amp; time</p><p class="receipt-detail-value">{{ booking.booking_date|date:"l, d F Y" }}</p><p class="receipt-detail-sub">{{ booking.booking_time|time:"g:i A" }} · {{ booking.total_duration_minutes }} minutes</p></div></div>
             <div class="receipt-detail"><span class="receipt-detail-icon emerald"><i class="fa-solid fa-user-tie"></i></span><div><p class="receipt-detail-label">Barber</p><p class="receipt-detail-value">{{ booking.barber.name|default:"Any Master Barber" }}</p><p class="receipt-detail-sub">24 K professional grooming</p></div></div>
           </section>

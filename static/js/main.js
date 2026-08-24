@@ -621,11 +621,31 @@ function goToReview() {
   if (!valid) return;
 
   // Build summary
-  document.getElementById('sum-service').textContent  = wizard.serviceName;
+  const sumServiceEl = document.getElementById('sum-service');
+  const sumBreakdownEl = document.getElementById('sum-services-breakdown');
+  
+  if (sumServiceEl) {
+    sumServiceEl.textContent = wizard.serviceName;
+  }
+  
+  if (sumBreakdownEl) {
+    if (wizard.selectedServices && wizard.selectedServices.length > 0) {
+      sumBreakdownEl.innerHTML = wizard.selectedServices.map(s => `
+        <div style="font-size:0.8rem; color:#9ca3af; display:flex; align-items:center; justify-content:flex-end; gap:0.5rem;">
+          <span style="color:#e2e8f0;">${s.name}</span>
+          <span style="background:rgba(212,175,55,0.15); color:#ffd700; padding:0.1rem 0.4rem; border-radius:4px; font-size:0.75rem;"><i class="fa-regular fa-clock"></i> ${s.duration} min</span>
+          <span style="color:#60a5fa; font-weight:600;">₹${s.price}</span>
+        </div>
+      `).join('');
+    } else {
+      sumBreakdownEl.innerHTML = '';
+    }
+  }
+
   document.getElementById('sum-barber').textContent   = wizard.barberName;
   document.getElementById('sum-date').textContent     = wizard.dateDisplay;
   document.getElementById('sum-time').textContent     = wizard.timeDisplay;
-  document.getElementById('sum-duration').textContent = wizard.serviceDuration + ' minutes';
+  document.getElementById('sum-duration').textContent = wizard.serviceDuration + ' minutes (Total)';
   document.getElementById('sum-name').textContent     = name;
   document.getElementById('sum-phone').textContent    = phone;
   document.getElementById('sum-total').textContent    = '₹' + wizard.servicePrice;
