@@ -1009,16 +1009,15 @@ function initBarberWheel() {
         card.offsetHeight;
         card.classList.add('wheel-just-selected');
       }
-      if (wizard.barberId !== id || wizard.barberName !== name) {
-        selectBarber(card, id, name);
-      }
+      
+      selectBarber(card, id, name);
 
       // When user clicks 'Select Barber', transition directly to Step 4 (Date)
       if (userTriggered) {
         if (window._barberNextTimer) clearTimeout(window._barberNextTimer);
         window._barberNextTimer = setTimeout(() => {
           wizardGoTo(4);
-        }, 180);
+        }, 160);
       }
     },
 
