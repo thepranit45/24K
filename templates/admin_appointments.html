@@ -92,8 +92,8 @@
                 </div>
               </td>
               <td>
-                <span class="service-name-tag">{{ booking.service.name }}</span>
-                <span class="service-dur">({{ booking.service.duration }} min)</span>
+                <span class="service-name-tag">{{ booking.service_names_display }}</span>
+                <span class="service-dur">({{ booking.total_duration_minutes }} min)</span>
               </td>
               <td>
                 {% if booking.barber %}

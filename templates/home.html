@@ -235,6 +235,9 @@
                  data-service-duration="{{ s.duration }}"
                  data-service-image="{% if s.image %}{{ s.image.url }}{% endif %}"
                  onclick="pickWizardService(this)">
+              <div class="wso-checkbox">
+                <i class="fa-solid fa-check"></i>
+              </div>
               <div class="wso-thumb-wrap">
                 {% if s.image %}
                   <img src="{{ s.image.url }}" alt="{{ s.name }}" class="wso-thumb-img" loading="eager" />
@@ -262,6 +265,9 @@
                  data-service-duration="{{ s.duration }}"
                  data-service-image="{% if s.image %}{{ s.image.url }}{% endif %}"
                  onclick="pickWizardService(this)">
+              <div class="wso-checkbox">
+                <i class="fa-solid fa-check"></i>
+              </div>
               <div class="wso-thumb-wrap">
                 {% if s.image %}
                   <img src="{{ s.image.url }}" alt="{{ s.name }}" class="wso-thumb-img" loading="eager" />

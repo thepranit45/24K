@@ -856,6 +856,27 @@ img { max-width: 100%; display: block; }
   box-shadow: 0 0 12px rgba(59, 130, 246, 0.25);
 }
 
+.wso-checkbox {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: transparent;
+  font-size: 0.72rem;
+  transition: all 0.2s ease;
+}
+.wizard-service-option.selected .wso-checkbox {
+  background: #3b82f6;
+  border-color: #3b82f6;
+  color: #ffffff;
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.5);
+}
+
 .wso-thumb-wrap {
   width: 42px;
   height: 42px;

@@ -122,7 +122,7 @@
               <time>{{ booking.booking_time|time:"g:i A" }}</time>
               <div>
                 <strong>{{ booking.customer_name }}</strong>
-                <span>{{ booking.service.name }}{% if booking.barber %} · {{ booking.barber.name }}{% endif %}</span>
+                <span>{{ booking.service_names_display }}{% if booking.barber %} · {{ booking.barber.name }}{% endif %}</span>
               </div>
               <span class="status-badge status-{{ booking.status|lower }}">{{ booking.get_status_display }}</span>
             </div>

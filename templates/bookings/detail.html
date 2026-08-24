@@ -22,7 +22,7 @@
         <div class="detail-card">
           <div class="detail-card-header">
             <div>
-              <h2 class="detail-service">{{ booking.service.name }}</h2>
+              <h2 class="detail-service">{{ booking.service_names_display }}</h2>
               <p class="detail-booking-id">Booking ID: <strong>{{ booking.booking_id }}</strong></p>
             </div>
             <div class="status-badge status-{{ booking.status|lower }}">{{ booking.status }}</div>
@@ -70,8 +70,8 @@
             <div class="detail-item">
               <div class="detail-icon"><i class="fa-regular fa-hourglass"></i></div>
               <div>
-                <div class="detail-label">Duration</div>
-                <div class="detail-value">{{ booking.service.duration }} minutes</div>
+                <div class="detail-label">Total Duration</div>
+                <div class="detail-value">{{ booking.total_duration_minutes }} minutes</div>
               </div>
             </div>
             <div class="detail-item">

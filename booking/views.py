@@ -46,13 +46,13 @@ def _booked_times(booking_date: date, barber_id=None):
     if barber_id:
         qs = qs.filter(barber_id=barber_id)
         
-    bookings = qs.select_related('service')
+    bookings = qs.select_related('service').prefetch_related('services')
 
     step = slot_step_minutes()
     booked_slots = set()
     for b in bookings:
         current_time = datetime.combine(booking_date, b.booking_time)
-        end_time = current_time + timedelta(minutes=b.service.duration)
+        end_time = current_time + timedelta(minutes=b.total_duration_minutes)
         
         while current_time < end_time:
             booked_slots.add(current_time.time())
@@ -180,6 +180,7 @@ def about(request):
 def get_time_slots(request):
     date_str = request.GET.get('date')
     service_id = request.GET.get('service_id')
+    service_ids = request.GET.getlist('service_ids') or (request.GET.get('service_ids', '').split(',') if request.GET.get('service_ids') else [])
     barber_id = request.GET.get('barber_id')
     
     if not date_str:
@@ -203,7 +204,14 @@ def get_time_slots(request):
         })
         
     duration = 30
-    if service_id:
+    # Calculate combined duration if multiple services provided
+    valid_ids = [int(sid) for sid in service_ids if str(sid).isdigit()]
+    if valid_ids:
+        services_qs = Service.objects.filter(pk__in=valid_ids, is_active=True)
+        total_d = sum(s.duration for s in services_qs)
+        if total_d > 0:
+            duration = total_d
+    elif service_id:
         try:
             service = Service.objects.get(pk=service_id, is_active=True)
             duration = service.duration
@@ -268,6 +276,7 @@ def create_booking(request):
         return JsonResponse({'error': 'Invalid JSON payload.'}, status=400)
 
     service_id      = data.get('service_id')
+    service_ids     = data.get('service_ids') or []
     barber_id       = data.get('barber_id')
     date_str        = data.get('booking_date')
     time_str        = data.get('booking_time')
@@ -276,11 +285,25 @@ def create_booking(request):
     email           = data.get('email', '').strip()
     special_request = data.get('special_request', '').strip()
 
-    # ── Validate service ───────────────────────────────────────
-    try:
-        service = Service.objects.get(pk=service_id, is_active=True)
-    except Service.DoesNotExist:
-        return JsonResponse({'error': 'Service not found or inactive.'}, status=400)
+    # ── Validate services ──────────────────────────────────────
+    selected_services = []
+    if service_ids and isinstance(service_ids, list):
+        valid_ids = [int(sid) for sid in service_ids if str(sid).isdigit()]
+        if valid_ids:
+            selected_services = list(Service.objects.filter(pk__in=valid_ids, is_active=True))
+    
+    if not selected_services:
+        if not service_id:
+            return JsonResponse({'error': 'Please select at least one service.'}, status=400)
+        try:
+            single_s = Service.objects.get(pk=service_id, is_active=True)
+            selected_services = [single_s]
+        except Service.DoesNotExist:
+            return JsonResponse({'error': 'Service not found or inactive.'}, status=400)
+
+    primary_service = selected_services[0]
+    total_amount = sum(s.price for s in selected_services)
+    total_duration = sum(s.duration for s in selected_services)
 
     # ── Validate barber if provided ───────────────────────────
     selected_barber = None
@@ -316,8 +339,15 @@ def create_booking(request):
     except (ValueError, TypeError):
         return JsonResponse({'error': 'Invalid time format.'}, status=400)
 
-    if not (bh.opening_time <= booking_time < bh.closing_time):
+    closing_dt = datetime.combine(booking_date, bh.closing_time)
+    booking_start_dt = datetime.combine(booking_date, booking_time)
+    booking_end_dt = booking_start_dt + timedelta(minutes=total_duration)
+
+    if not (bh.opening_time <= booking_time):
         return JsonResponse({'error': 'Selected time is outside business hours.'}, status=400)
+
+    if booking_end_dt > closing_dt:
+        return JsonResponse({'error': f'Combined services duration ({total_duration} mins) exceeds shop closing time.'}, status=400)
 
     if booking_date == today:
         now_local = timezone.localtime(timezone.now())
@@ -325,16 +355,13 @@ def create_booking(request):
             return JsonResponse({'error': 'Please select a future time slot.'}, status=400)
 
     # ── Double-booking check ───────────────────────────────────
-    check_qs = Booking.objects.filter(
-        booking_date=booking_date,
-        booking_time=booking_time,
-        status__in=[Booking.STATUS_PENDING, Booking.STATUS_CONFIRMED]
-    )
-    if selected_barber:
-        check_qs = check_qs.filter(barber=selected_barber)
-
-    if check_qs.exists():
-        return JsonResponse({'error': 'This slot is already booked. Please choose another slot.'}, status=409)
+    step = slot_step_minutes()
+    booked = _booked_times(booking_date, barber_id=selected_barber.id if selected_barber else None)
+    curr_check = booking_start_dt
+    while curr_check < booking_end_dt:
+        if curr_check.time() in booked:
+            return JsonResponse({'error': 'One or more required time slots for your services are already booked. Please choose another start time.'}, status=409)
+        curr_check += timedelta(minutes=step)
 
     # ── Validate customer details ──────────────────────────────
     if not full_name:
@@ -345,7 +372,7 @@ def create_booking(request):
     # ── Create Booking + Payment ───────────────────────────────
     booking = Booking.objects.create(
         user=request.user if request.user.is_authenticated else None,
-        service=service,
+        service=primary_service,
         barber=selected_barber,
         booking_date=booking_date,
         booking_time=booking_time,
@@ -353,13 +380,14 @@ def create_booking(request):
         customer_phone=phone,
         customer_email=email,
         special_request=special_request,
-        amount=service.price,
+        amount=total_amount,
         status=Booking.STATUS_PENDING,
     )
+    booking.services.set(selected_services)
 
     Payment.objects.create(
         booking=booking,
-        amount=service.price,
+        amount=total_amount,
         payment_method='MOCK' if settings.PAYMENT_MODE == 'MOCK' else 'ONLINE',
         status=Payment.STATUS_PENDING,
     )

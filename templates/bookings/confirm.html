@@ -365,7 +365,7 @@
       <div class="thermal-preview" id="receiptPreview">
         <p class="preview-line">24 K BARBERSHOP</p>
         <p class="preview-line">BOOKING CONFIRMED</p>
-        <p class="preview-line">{{ booking.service.name }}</p>
+        <p class="preview-line">{{ booking.service_names_display }}</p>
         <p class="preview-line">{{ booking.booking_date|date:"D, d M Y" }} · {{ booking.booking_time|time:"g:i A" }}</p>
         <p class="preview-line">Booking: {{ booking.booking_id }}</p>
         <p class="preview-line">Payable: &#8377;{{ booking.amount|floatformat:0 }} (At Counter)</p>
@@ -389,8 +389,8 @@
           </section>
 
           <section class="receipt-details" aria-label="Appointment details">
-            <div class="receipt-detail"><span class="receipt-detail-icon navy"><i class="fa-solid fa-scissors"></i></span><div><p class="receipt-detail-label">Service</p><p class="receipt-detail-value">{{ booking.service.name }}</p><p class="receipt-detail-sub">{{ booking.service.duration }} minute appointment</p></div></div>
-            <div class="receipt-detail"><span class="receipt-detail-icon gold"><i class="fa-regular fa-calendar"></i></span><div><p class="receipt-detail-label">Date &amp; time</p><p class="receipt-detail-value">{{ booking.booking_date|date:"l, d F Y" }}</p><p class="receipt-detail-sub">{{ booking.booking_time|time:"g:i A" }} · {{ booking.service.duration }} minutes</p></div></div>
+            <div class="receipt-detail"><span class="receipt-detail-icon navy"><i class="fa-solid fa-scissors"></i></span><div><p class="receipt-detail-label">Service(s)</p><p class="receipt-detail-value">{{ booking.service_names_display }}</p><p class="receipt-detail-sub">{{ booking.total_duration_minutes }} minute appointment</p></div></div>
+            <div class="receipt-detail"><span class="receipt-detail-icon gold"><i class="fa-regular fa-calendar"></i></span><div><p class="receipt-detail-label">Date &amp; time</p><p class="receipt-detail-value">{{ booking.booking_date|date:"l, d F Y" }}</p><p class="receipt-detail-sub">{{ booking.booking_time|time:"g:i A" }} · {{ booking.total_duration_minutes }} minutes</p></div></div>
             <div class="receipt-detail"><span class="receipt-detail-icon emerald"><i class="fa-solid fa-user-tie"></i></span><div><p class="receipt-detail-label">Barber</p><p class="receipt-detail-value">{{ booking.barber.name|default:"Any Master Barber" }}</p><p class="receipt-detail-sub">24 K professional grooming</p></div></div>
           </section>
 
@@ -406,7 +406,7 @@
 
           <a class="receipt-map-link" href="https://maps.app.goo.gl/61eA3wFErnLmcgUD9" target="_blank" rel="noopener noreferrer" aria-label="Get directions to 24 K Barbershop"><i class="receipt-map-road horizontal"></i><i class="receipt-map-road vertical"></i><span class="receipt-map-pin"><i class="fa-solid fa-location-dot"></i></span></a>
           <p class="receipt-reminder"><i class="fa-solid fa-bell"></i><span>Please arrive <strong>5 minutes early</strong>. Show your booking ID <strong>{{ booking.booking_id }}</strong> at the counter.</span></p>
-          <div class="receipt-meta"><span><i class="fa-solid fa-store"></i> Pay at Salon Counter</span><span><i class="fa-solid fa-lock"></i> Reserved Seat</span><span>{{ booking.service.duration }} min service</span></div>
+          <div class="receipt-meta"><span><i class="fa-solid fa-store"></i> Pay at Salon Counter</span><span><i class="fa-solid fa-lock"></i> Reserved Seat</span><span>{{ booking.total_duration_minutes }} min service</span></div>
 
           <div class="receipt-quick-actions" aria-label="Receipt tools">
             <button class="receipt-quick-action" id="shareReceipt" type="button"><i class="fa-solid fa-share-nodes"></i><span><b>Share</b><small>Booking</small></span></button>

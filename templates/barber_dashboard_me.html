@@ -113,8 +113,8 @@
             {{ next_appointment.customer_name }}
           </strong>
           <div style="color: #cbd5e1; font-size: 0.85rem; display: flex; align-items: center; gap: 0.8rem; margin-top: 0.2rem;">
-            <span><i class="fa-solid fa-scissors text-gold"></i> {{ next_appointment.service.name }}</span>
-            <span><i class="fa-regular fa-clock"></i> {{ next_appointment.service.duration }} min</span>
+            <span><i class="fa-solid fa-scissors text-gold"></i> {{ next_appointment.service_names_display }}</span>
+            <span><i class="fa-regular fa-clock"></i> {{ next_appointment.total_duration_minutes }} min</span>
             <a href="tel:{{ next_appointment.customer_phone }}" style="color: #93c5fd; text-decoration: none;"><i class="fa-solid fa-phone"></i> {{ next_appointment.customer_phone }}</a>
           </div>
         </div>
@@ -128,7 +128,7 @@
           <time>{{ b.booking_time|time:"g:i A" }}</time>
           <div>
             <strong>{{ b.customer_name }}</strong>
-            <span>{{ b.service.name }} · ₹{{ b.amount|floatformat:0 }} · <a href="tel:{{ b.customer_phone }}" style="color:#93c5fd; text-decoration:none;">{{ b.customer_phone }}</a></span>
+            <span>{{ b.service_names_display }} ({{ b.total_duration_minutes }} min) · ₹{{ b.amount|floatformat:0 }} · <a href="tel:{{ b.customer_phone }}" style="color:#93c5fd; text-decoration:none;">{{ b.customer_phone }}</a></span>
           </div>
           <span class="status-badge status-{{ b.status|lower }}">{{ b.get_status_display }}</span>
         </div>

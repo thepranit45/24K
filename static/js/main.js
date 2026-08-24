@@ -8,16 +8,17 @@
 // GLOBAL STATE
 // ──────────────────────────────────────────────────────────────
 const wizard = {
-  serviceId:    null,
-  serviceName:  null,
-  servicePrice: null,
+  serviceId:       null,
+  serviceName:     null,
+  servicePrice:    null,
   serviceDuration: null,
-  barberId:     '',
-  barberName:   'Any Available Barber',
-  date:         null,       // 'YYYY-MM-DD'
-  dateDisplay:  null,       // 'Mon 10 Aug'
-  time:         null,       // '10:00'
-  timeDisplay:  null,       // '10:00 AM'
+  selectedServices: [], // Array of { id, name, price, duration, image }
+  barberId:        '',
+  barberName:      'Any Available Barber',
+  date:            null,       // 'YYYY-MM-DD'
+  dateDisplay:     null,       // 'Mon 10 Aug'
+  time:            null,       // '10:00'
+  timeDisplay:     null,       // '10:00 AM'
 };
 
 // ──────────────────────────────────────────────────────────────
@@ -140,13 +141,20 @@ function handleBookAppointmentHero(e) {
   }
 }
 
-/** Open wizard with a selected service */
+/** Open wizard with an initial service */
 function selectService(btn) {
   if (!btn) return;
-  wizard.serviceId       = btn.dataset.serviceId;
-  wizard.serviceName     = btn.dataset.serviceName;
-  wizard.servicePrice    = btn.dataset.servicePrice;
-  wizard.serviceDuration = btn.dataset.serviceDuration;
+  const initialService = {
+    id: String(btn.dataset.serviceId),
+    name: btn.dataset.serviceName,
+    price: parseFloat(btn.dataset.servicePrice) || 0,
+    duration: parseInt(btn.dataset.serviceDuration, 10) || 30,
+    image: btn.dataset.serviceImage || ''
+  };
+
+  wizard.selectedServices = [initialService];
+  syncWizardServicesState();
+
   wizard.barberId        = '';
   wizard.barberName      = 'Any Available Barber';
 
@@ -157,14 +165,6 @@ function selectService(btn) {
   } else if (anyAvailableBarber) {
     selectBarber(anyAvailableBarber, '', 'Any Available Barber');
   }
-
-  // Populate step 1 if elements exist
-  const nameEl  = document.getElementById('wiz-service-name');
-  const durEl   = document.getElementById('wiz-service-duration');
-  const priceEl = document.getElementById('wiz-service-price');
-  if (nameEl)  nameEl.textContent = wizard.serviceName;
-  if (durEl)   durEl.textContent = wizard.serviceDuration + ' min';
-  if (priceEl) priceEl.textContent = '₹' + wizard.servicePrice;
 
   // Prefill user details if available
   if (window._userData) {
@@ -192,35 +192,72 @@ function selectService(btn) {
 
 let currentWizardCategory = 'all';
 
-/** Toggle full service list in wizard Step 1 */
-function toggleWizardServices() {
-  const container = document.getElementById('wizardAllServicesList');
-  const arrow = document.getElementById('viewAllServicesArrow');
-  const btnText = document.getElementById('viewAllBtnText');
-  if (!container) return;
-
-  const isOpen = container.style.display !== 'none';
-  if (isOpen) {
-    container.style.display = 'none';
-    if (arrow) arrow.style.transform = 'rotate(0deg)';
-    if (btnText) btnText.textContent = 'Browse All Services';
+/** Recalculate combined totals from wizard.selectedServices and update UI */
+function syncWizardServicesState() {
+  if (!wizard.selectedServices || wizard.selectedServices.length === 0) {
+    wizard.serviceId = null;
+    wizard.serviceName = 'Select a service';
+    wizard.servicePrice = 0;
+    wizard.serviceDuration = 0;
   } else {
-    container.style.display = 'block';
-    if (arrow) arrow.style.transform = 'rotate(180deg)';
-    if (btnText) btnText.textContent = 'Close Service Menu';
-    highlightSelectedWizardService();
-    // Focus search or scroll list smoothly into view
-    const searchInp = document.getElementById('wizardServiceSearchInput');
-    if (searchInp) {
-      setTimeout(() => searchInp.focus(), 150);
+    wizard.serviceId = wizard.selectedServices[0].id;
+    const names = wizard.selectedServices.map(s => s.name);
+    wizard.serviceName = names.join(' + ');
+    wizard.servicePrice = wizard.selectedServices.reduce((sum, s) => sum + s.price, 0);
+    wizard.serviceDuration = wizard.selectedServices.reduce((sum, s) => sum + s.duration, 0);
+  }
+
+  // Update step 1 bottom summary pill
+  const nameEl  = document.getElementById('wiz-service-name');
+  const durEl   = document.getElementById('wiz-service-duration');
+  const priceEl = document.getElementById('wiz-service-price');
+  if (nameEl)  nameEl.textContent = wizard.serviceName;
+  if (durEl)   durEl.innerHTML = `<i class="fa-regular fa-clock"></i> ${wizard.serviceDuration} min`;
+  if (priceEl) priceEl.textContent = '₹' + wizard.servicePrice;
+
+  // Update bottom pill icon (use first selected service image or default)
+  const sspIcon = document.getElementById('sspServiceIcon');
+  if (sspIcon) {
+    const firstImg = wizard.selectedServices.find(s => s.image)?.image;
+    if (firstImg) {
+      sspIcon.innerHTML = `<img src="${firstImg}" alt="${wizard.serviceName}" class="ssp-thumb-img" />`;
+    } else {
+      sspIcon.innerHTML = `<i class="fa-solid fa-scissors text-gold"></i>`;
     }
+  }
+
+  // Update dropdown header title
+  const wsshTitle = document.getElementById('wsshTitle');
+  if (wsshTitle) {
+    if (wizard.selectedServices.length === 0) {
+      wsshTitle.textContent = 'Select Your Services';
+    } else if (wizard.selectedServices.length === 1) {
+      wsshTitle.textContent = wizard.selectedServices[0].name;
+    } else {
+      wsshTitle.textContent = `${wizard.selectedServices.length} Services Selected (₹${wizard.servicePrice})`;
+    }
+  }
+
+  // Update Step 6 Review summary fields
+  const sumService = document.getElementById('sum-service');
+  const sumDuration = document.getElementById('sum-duration');
+  const sumTotal = document.getElementById('sum-total');
+  if (sumService) sumService.textContent = wizard.serviceName;
+  if (sumDuration) sumDuration.textContent = `${wizard.serviceDuration} minutes`;
+  if (sumTotal) sumTotal.textContent = '₹' + wizard.servicePrice;
+
+  // Enable/disable next button in step 1
+  const btnNext = document.getElementById('btnServiceNext');
+  if (btnNext) {
+    btnNext.disabled = (wizard.selectedServices.length === 0);
   }
 }
 
-/** Highlight selected service option in wizard Step 1 */
+/** Highlight selected service options in wizard Step 1 */
 function highlightSelectedWizardService() {
+  const selectedIds = new Set((wizard.selectedServices || []).map(s => String(s.id)));
   document.querySelectorAll('.wizard-service-option').forEach(opt => {
-    if (String(opt.dataset.serviceId) === String(wizard.serviceId)) {
+    if (selectedIds.has(String(opt.dataset.serviceId))) {
       opt.classList.add('selected');
     } else {
       opt.classList.remove('selected');
@@ -228,68 +265,43 @@ function highlightSelectedWizardService() {
   });
 }
 
-/** Select a service from the wizard Step 1 options list */
+/** Pick/Toggle a service from the wizard Step 1 options list */
 function pickWizardService(card) {
   if (!card) return;
-  wizard.serviceId       = card.dataset.serviceId;
-  wizard.serviceName     = card.dataset.serviceName;
-  wizard.servicePrice    = card.dataset.servicePrice;
-  wizard.serviceDuration = card.dataset.serviceDuration;
+  const sId = String(card.dataset.serviceId);
+  const sName = card.dataset.serviceName;
+  const sPrice = parseFloat(card.dataset.servicePrice) || 0;
+  const sDur = parseInt(card.dataset.serviceDuration, 10) || 30;
+  const sImg = card.dataset.serviceImage || '';
 
-  // Update selected service preview card
-  const nameEl = document.getElementById('wiz-service-name');
-  const durEl  = document.getElementById('wiz-service-duration');
-  const priceEl = document.getElementById('wiz-service-price');
-  if (nameEl) nameEl.textContent = wizard.serviceName;
-  if (durEl) durEl.innerHTML = `<i class="fa-regular fa-clock"></i> ${wizard.serviceDuration} min`;
-  if (priceEl) priceEl.textContent = '₹' + wizard.servicePrice;
-
-  // Pulse animation on the selected service card
-  const ssc = document.querySelector('.selected-service-card');
-  if (ssc) {
-    ssc.style.transform = 'scale(1.02)';
-    setTimeout(() => { ssc.style.transform = ''; }, 200);
+  if (!wizard.selectedServices) {
+    wizard.selectedServices = [];
   }
 
-  // Update highlight in list
+  const existingIdx = wizard.selectedServices.findIndex(s => String(s.id) === sId);
+  if (existingIdx >= 0) {
+    // If it's the only one selected, don't deselect completely on click, or allow toggle
+    if (wizard.selectedServices.length > 1) {
+      wizard.selectedServices.splice(existingIdx, 1);
+    }
+  } else {
+    // Add new service
+    wizard.selectedServices.push({
+      id: sId,
+      name: sName,
+      price: sPrice,
+      duration: sDur,
+      image: sImg
+    });
+  }
+
+  syncWizardServicesState();
   highlightSelectedWizardService();
 
-  // Update thumbnail in bottom pill
-  const sspIcon = document.getElementById('sspServiceIcon');
-  if (sspIcon) {
-    const serviceImgUrl = card.dataset.serviceImage;
-    if (serviceImgUrl) {
-      sspIcon.innerHTML = `<img src="${serviceImgUrl}" alt="${wizard.serviceName}" class="ssp-thumb-img" />`;
-    } else {
-      sspIcon.innerHTML = `<i class="fa-solid fa-scissors text-gold"></i>`;
-    }
+  // If time slots are already displayed on step 4, refresh them with new total duration
+  if (wizard.date) {
+    loadTimeSlots();
   }
-
-  // Update header text in the dropdown
-  const wsshTitle = document.getElementById('wsshTitle');
-  if (wsshTitle) {
-    wsshTitle.textContent = wizard.serviceName;
-  }
-
-  // Automatically close/collapse the service dropdown list popup
-  setTimeout(() => {
-    const container = document.getElementById('wizardServiceDropdownContainer');
-    const header = document.getElementById('wizardServiceSelectHeader');
-    if (container) {
-      container.classList.add('collapsed');
-    }
-    if (header) {
-      header.setAttribute('aria-expanded', 'false');
-    }
-  }, 180);
-
-  // Update summary fields if needed
-  const sumService = document.getElementById('sum-service');
-  const sumDuration = document.getElementById('sum-duration');
-  const sumTotal = document.getElementById('sum-total');
-  if (sumService) sumService.textContent = wizard.serviceName;
-  if (sumDuration) sumDuration.textContent = wizard.serviceDuration + ' min';
-  if (sumTotal) sumTotal.textContent = '₹' + wizard.servicePrice;
 }
 
 /** Select Gender at Top of Step 1 (Men / Women) */
@@ -542,7 +554,10 @@ async function loadTimeSlots() {
 
   try {
     const slotsBaseUrl = window.SLOTS_URL || '/api/slots/';
-    const url = `${slotsBaseUrl}?date=${wizard.date}&service_id=${wizard.serviceId || ''}&barber_id=${wizard.barberId || ''}`;
+    const serviceIdsParam = (wizard.selectedServices && wizard.selectedServices.length > 0)
+      ? wizard.selectedServices.map(s => s.id).join(',')
+      : (wizard.serviceId || '');
+    const url = `${slotsBaseUrl}?date=${wizard.date}&service_id=${wizard.serviceId || ''}&service_ids=${serviceIdsParam}&barber_id=${wizard.barberId || ''}`;
     const res = await fetch(url);
     const data = await res.json();
 
@@ -662,8 +677,13 @@ async function submitBooking() {
   if (errEl) errEl.style.display = 'none';
   if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner-inline"></span> Processing…'; }
 
+  const selectedIds = (wizard.selectedServices && wizard.selectedServices.length > 0)
+    ? wizard.selectedServices.map(s => s.id)
+    : (wizard.serviceId ? [wizard.serviceId] : []);
+
   const payload = {
     service_id:    wizard.serviceId,
+    service_ids:   selectedIds,
     barber_id:     wizard.barberId,
     booking_date:  wizard.date,
     booking_time:  wizard.time,

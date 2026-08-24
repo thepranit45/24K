@@ -378,14 +378,14 @@
             {{ booking.booking_time|time:"g:i" }}<span class="stack-time-ampm">{{ booking.booking_time|time:"A" }}</span>
           </div>
           <span class="stack-duration-badge">
-            <i class="fa-regular fa-clock"></i> {{ booking.service.duration }} min
+            <i class="fa-regular fa-clock"></i> {{ booking.total_duration_minutes }} min
           </span>
         </div>
 
         <!-- Details Block -->
         <div class="stack-details-block">
           <h3>
-            <i class="fa-solid fa-scissors"></i> {{ booking.service.name }}
+            <i class="fa-solid fa-scissors"></i> {{ booking.service_names_display }}
           </h3>
           <div class="stack-meta-items">
             <div class="stack-meta-item">

@@ -178,7 +178,8 @@ class Booking(models.Model):
 
     booking_id = models.CharField(max_length=20, unique=True, editable=False)
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='bookings')
-    service = models.ForeignKey(Service, on_delete=models.PROTECT, related_name='bookings')
+    service = models.ForeignKey(Service, on_delete=models.PROTECT, related_name='bookings', help_text="Primary service")
+    services = models.ManyToManyField(Service, blank=True, related_name='multi_bookings', help_text="All selected services")
     barber = models.ForeignKey(Barber, on_delete=models.SET_NULL, null=True, blank=True, related_name='bookings')
 
     booking_date = models.DateField()
@@ -214,7 +215,25 @@ class Booking(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.booking_id} | {self.customer_name} | {self.service.name} | {self.booking_date}"
+        return f"{self.booking_id} | {self.customer_name} | {self.service_names_display} | {self.booking_date}"
+
+    @property
+    def service_names_display(self):
+        """Comma-separated list of services or primary service name."""
+        if self.pk:
+            all_s = list(self.services.all())
+            if all_s:
+                return ", ".join(s.name for s in all_s)
+        return self.service.name if self.service else "Custom Service"
+
+    @property
+    def total_duration_minutes(self):
+        """Combined duration of all services booked."""
+        if self.pk:
+            total = sum(s.duration for s in self.services.all())
+            if total > 0:
+                return total
+        return self.service.duration if self.service else 30
 
     @property
     def amount_display(self):
