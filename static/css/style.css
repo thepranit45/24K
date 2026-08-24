@@ -1470,10 +1470,26 @@ img { max-width: 100%; display: block; }
   color:var(--white); font-size:1rem; font-family:var(--font-body);
   transition:all var(--transition); outline:none; box-shadow: var(--shadow-sm);
 }
-.form-control:focus { border-color:var(--gold); box-shadow: 0 0 12px rgba(212, 175, 55, 0.15); }
-.form-control::placeholder { color:var(--gray-500); }
-textarea.form-control { resize:vertical; min-height:100px; }
-.field-error { font-size:0.85rem; color:var(--danger); margin-top:0.4rem; }
+.form-control.is-invalid {
+  border-color: #ef4444 !important;
+  background: rgba(239, 68, 68, 0.06) !important;
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.25) !important;
+}
+.field-error { 
+  font-size: 0.82rem; 
+  color: #f87171; 
+  margin-top: 0.45rem; 
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+.field-error:not(:empty)::before {
+  content: "\f06a";
+  font-family: "Font Awesome 6 Free";
+  font-weight: 900;
+  font-size: 0.85rem;
+}
 
 /* ═══════════════════════════════════════════════════════════════
    AUTH

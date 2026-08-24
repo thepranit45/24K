@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}404 - Page Not Found | 24 K{% endblock %}
+{% block meta_description %}The page or appointment link you are looking for is unavailable or invalid.{% endblock %}
+
+{% block content %}
+<section class="section error-page-section" style="min-height: 75vh; display: flex; align-items: center; justify-content: center; padding: 6rem 1.5rem 4rem; text-align: center;">
+  <div class="error-page-card" style="max-width: 580px; width: 100%; background: linear-gradient(135deg, rgba(22, 26, 36, 0.95), rgba(13, 15, 22, 0.98)); border: 1.5px solid rgba(212, 175, 55, 0.35); border-radius: 24px; padding: 3rem 2rem; box-shadow: 0 16px 40px rgba(0,0,0,0.6), 0 0 25px rgba(212, 175, 55, 0.15);">
+    
+    <div class="error-badge" style="width: 84px; height: 84px; border-radius: 50%; background: rgba(239, 68, 68, 0.12); border: 2px solid rgba(239, 68, 68, 0.35); color: #f87171; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; margin: 0 auto 1.5rem;">
+      <i class="fa-solid fa-triangle-exclamation"></i>
+    </div>
+
+    <span style="font-size: 0.82rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: #d4af37; background: rgba(212, 175, 55, 0.1); padding: 0.25rem 0.85rem; border-radius: 20px; border: 1px solid rgba(212, 175, 55, 0.25);">
+      Error 404
+    </span>
+
+    <h1 style="font-family: var(--font-heading); font-size: clamp(1.8rem, 4vw, 2.3rem); color: var(--white); margin: 1rem 0 0.6rem; font-weight: 800;">
+      Page Or Service Unavailable
+    </h1>
+
+    <p style="color: var(--gray-400); font-size: 0.98rem; line-height: 1.6; margin-bottom: 2rem;">
+      The page, booking ID, or resource you requested could not be found or the link has expired.
+    </p>
+
+    <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+      <a href="{% url 'home' %}" class="btn-primary" style="padding: 0.85rem 1.75rem; border-radius: 30px; background: linear-gradient(135deg, #d4af37, #b8860b); color: #0b0d12; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);">
+        <i class="fa-solid fa-house"></i> Return Home
+      </a>
+      <a href="{% url 'home' %}#bookingWizard" onclick="openBookingWizard()" class="btn-secondary" style="padding: 0.85rem 1.75rem; border-radius: 30px; background: rgba(255,255,255,0.06); border: 1.5px solid rgba(255,255,255,0.15); color: var(--white); font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;">
+        <i class="fa-solid fa-scissors text-gold"></i> Book Appointment
+      </a>
+    </div>
+
+  </div>
+</section>
+{% endblock %}

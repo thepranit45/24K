@@ -619,6 +619,10 @@ function goToReview() {
 }
 
 function clearErrors() {
+  ['inp-name', 'inp-phone', 'inp-email'].forEach(id => {
+    const inp = document.getElementById(id);
+    if (inp) inp.classList.remove('is-invalid');
+  });
   ['err-name', 'err-phone', 'err-email'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.textContent = '';
@@ -628,6 +632,9 @@ function clearErrors() {
 function showError(id, msg) {
   const el = document.getElementById(id);
   if (el) el.textContent = msg;
+  const inputId = id.replace('err-', 'inp-');
+  const inp = document.getElementById(inputId);
+  if (inp) inp.classList.add('is-invalid');
 }
 
 function getCsrfToken() {
