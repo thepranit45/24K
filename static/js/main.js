@@ -298,9 +298,17 @@ function pickWizardService(card) {
   syncWizardServicesState();
   highlightSelectedWizardService();
 
-  // If time slots are already displayed on step 4, refresh them with new total duration
+  // If time slots are already displayed on step 4/5, refresh them with new total duration
   if (wizard.date) {
     loadTimeSlots();
+  }
+
+  // Smooth auto-advance to Step 3 (Choose Barber) when a service is selected
+  if (wizard.selectedServices && wizard.selectedServices.length > 0) {
+    if (window._serviceNextTimer) clearTimeout(window._serviceNextTimer);
+    window._serviceNextTimer = setTimeout(() => {
+      wizardGoTo(3);
+    }, 280);
   }
 }
 
@@ -540,6 +548,12 @@ function selectDate(chip) {
 
   // Immediately load time slots for this date
   loadTimeSlots();
+
+  // Auto-advance to Step 5 (Time Slots) smoothly after selecting date
+  if (window._dateNextTimer) clearTimeout(window._dateNextTimer);
+  window._dateNextTimer = setTimeout(() => {
+    wizardGoTo(5);
+  }, 220);
 }
 
 function scrollDates(dir) {
@@ -944,6 +958,14 @@ function initBarberWheel() {
       }
       if (wizard.barberId !== id || wizard.barberName !== name) {
         selectBarber(card, id, name);
+      }
+
+      // Smooth auto-advance to Step 4 (Date selection) on user selection
+      if (!initialSelect) {
+        if (window._barberNextTimer) clearTimeout(window._barberNextTimer);
+        window._barberNextTimer = setTimeout(() => {
+          wizardGoTo(4);
+        }, 260);
       }
     },
 
