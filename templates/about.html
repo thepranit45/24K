@@ -17,17 +17,21 @@
 </div>
 
 <!-- About Story -->
-<section class="section">
+<section class="section about-hero-story">
   <div class="container">
     <div class="about-grid">
       <div class="about-image" data-animate="fade-up">
-        <div class="about-img-wrapper">
-          <div class="about-img-placeholder">
-            <i class="fa-solid fa-scissors"></i>
+        <div class="about-img-wrapper" style="position: relative; border-radius: 28px; overflow: hidden; border: 2px solid rgba(212, 175, 55, 0.35); box-shadow: 0 16px 40px rgba(0,0,0,0.6), 0 0 30px rgba(212, 175, 55, 0.15); background: linear-gradient(145deg, #161922, #0d0f16); padding: 2.5rem 1.5rem; text-align: center;">
+          <div style="width: 140px; height: 140px; margin: 0 auto 1.5rem; border-radius: 50%; border: 3px solid #d4af37; padding: 4px; box-shadow: 0 0 30px rgba(212, 175, 55, 0.4); display: flex; align-items: center; justify-content: center; background: #0f1117;">
+            <img src="{% static 'images/logo_crest.jpg' %}" alt="24 K Crest" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" />
           </div>
-          <div class="about-badge">
-            <div class="about-badge-num">10+</div>
-            <div class="about-badge-text">Years of Excellence</div>
+          <h3 style="font-family: var(--font-heading); font-size: 1.5rem; color: #ffd700; margin-bottom: 0.5rem; font-weight: 800; letter-spacing: 0.02em;">
+            24 K HAIR STUDIO
+          </h3>
+          <p style="color: var(--gray-400); font-size: 0.92rem; margin-bottom: 1.5rem;">Sangamner's Premier Luxury Grooming Destination</p>
+          <div class="about-badge" style="display: inline-flex; align-items: center; gap: 0.75rem; background: rgba(212, 175, 55, 0.12); border: 1.5px solid rgba(212, 175, 55, 0.4); border-radius: 20px; padding: 0.6rem 1.4rem;">
+            <div class="about-badge-num" style="color: #ffd700; font-size: 1.3rem; font-weight: 800;">10+</div>
+            <div class="about-badge-text" style="color: #fff; font-size: 0.85rem; font-weight: 700; text-align: left; line-height: 1.2;">Years of<br>Excellence</div>
           </div>
         </div>
       </div>
@@ -35,7 +39,7 @@
         <p class="section-eyebrow">Our Story</p>
         <h2 class="section-title">More Than Just a <span class="text-gold">Haircut</span></h2>
         <p class="about-desc">
-          Founded in the heart of Sangamner, 24 K Hair Studio was born from a single belief:
+          Founded in the heart of Sangamner by <strong>Prashant Borhade</strong>, 24 K Hair Studio was born from a single belief:
           every client deserves to look and feel their absolute best. What started as a vision for bespoke
           grooming has grown into Sangamner's most trusted luxury hair studio.
         </p>
@@ -50,8 +54,8 @@
             <div class="about-stat-label">Happy Clients</div>
           </div>
           <div class="about-stat">
-            <div class="about-stat-num">8</div>
-            <div class="about-stat-label">Expert Barbers</div>
+            <div class="about-stat-num">100%</div>
+            <div class="about-stat-label">Hygienic Tools</div>
           </div>
           <div class="about-stat">
             <div class="about-stat-num">4.9★</div>
