@@ -321,12 +321,28 @@ function selectWizardGender(gender) {
   const badgeText = document.getElementById('currentGenderBadgeText');
   
   if (gender === 'MALE') {
-    if (cardMale) cardMale.classList.add('active');
-    if (cardFemale) cardFemale.classList.remove('active');
+    if (cardMale) {
+      cardMale.classList.add('active');
+      const btn = cardMale.querySelector('.ghc-select-btn');
+      if (btn) btn.innerHTML = '<i class="fa-solid fa-check"></i> <span class="ghc-btn-txt">Selected</span>';
+    }
+    if (cardFemale) {
+      cardFemale.classList.remove('active');
+      const btn = cardFemale.querySelector('.ghc-select-btn');
+      if (btn) btn.innerHTML = '<i class="fa-solid fa-arrow-right"></i> <span class="ghc-btn-txt">Select</span>';
+    }
     if (badgeText) badgeText.innerHTML = '<i class="fa-solid fa-mars"></i> Men';
   } else {
-    if (cardFemale) cardFemale.classList.add('active');
-    if (cardMale) cardMale.classList.remove('active');
+    if (cardFemale) {
+      cardFemale.classList.add('active');
+      const btn = cardFemale.querySelector('.ghc-select-btn');
+      if (btn) btn.innerHTML = '<i class="fa-solid fa-check"></i> <span class="ghc-btn-txt">Selected</span>';
+    }
+    if (cardMale) {
+      cardMale.classList.remove('active');
+      const btn = cardMale.querySelector('.ghc-select-btn');
+      if (btn) btn.innerHTML = '<i class="fa-solid fa-arrow-right"></i> <span class="ghc-btn-txt">Select</span>';
+    }
     if (badgeText) badgeText.innerHTML = '<i class="fa-solid fa-venus"></i> Women';
   }
 

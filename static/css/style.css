@@ -681,8 +681,8 @@ img { max-width: 100%; display: block; }
 .wizard-gender-hero-cards {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1.15rem;
-  margin-top: 1rem;
+  gap: 1.25rem;
+  margin: 1.5rem 0 1rem;
 }
 .gender-hero-card {
   position: relative;
@@ -690,94 +690,164 @@ img { max-width: 100%; display: block; }
   flex-direction: column;
   align-items: center;
   text-align: center;
-  padding: 2rem 1.25rem 1.75rem;
-  background: linear-gradient(145deg, rgba(22, 26, 38, 0.98), rgba(12, 14, 20, 0.98));
-  border: 2px solid rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
+  padding: 2.4rem 1.4rem 1.6rem;
+  background: radial-gradient(circle at 50% 0%, rgba(30, 36, 52, 0.6) 0%, rgba(13, 16, 23, 0.95) 75%);
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45);
   overflow: hidden;
+  user-select: none;
+}
+.gender-hero-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: transparent;
+  transition: background 0.3s;
 }
 .gender-hero-card:hover {
-  border-color: rgba(212, 175, 55, 0.6);
   transform: translateY(-4px);
-  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.6), 0 0 20px rgba(212, 175, 55, 0.2);
+  border-color: rgba(212, 175, 55, 0.5);
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.65), 0 0 25px rgba(212, 175, 55, 0.15);
 }
-.gender-hero-card.active {
+.gender-hero-card.gender-hero-card--male.active {
   border-color: #ffd700;
-  background: linear-gradient(145deg, rgba(38, 32, 14, 0.95), rgba(16, 18, 26, 0.98));
-  box-shadow: 0 0 30px rgba(212, 175, 55, 0.35), 0 12px 30px rgba(0,0,0,0.6);
+  background: radial-gradient(circle at 50% 0%, rgba(212, 175, 55, 0.18) 0%, rgba(15, 17, 24, 0.98) 75%);
+  box-shadow: 0 0 35px rgba(212, 175, 55, 0.3), 0 14px 40px rgba(0, 0, 0, 0.7);
 }
+.gender-hero-card.gender-hero-card--male.active::before {
+  background: linear-gradient(90deg, #e5b84c, #ffd700);
+}
+.gender-hero-card.gender-hero-card--female.active {
+  border-color: #f472b6;
+  background: radial-gradient(circle at 50% 0%, rgba(244, 114, 182, 0.18) 0%, rgba(18, 14, 24, 0.98) 75%);
+  box-shadow: 0 0 35px rgba(244, 114, 182, 0.3), 0 14px 40px rgba(0, 0, 0, 0.7);
+}
+.gender-hero-card.gender-hero-card--female.active::before {
+  background: linear-gradient(90deg, #ec4899, #f472b6);
+}
+
 .ghc-badge {
   position: absolute;
-  top: 0.85rem;
-  right: 0.85rem;
-  font-size: 0.72rem;
-  font-weight: 700;
-  padding: 0.2rem 0.55rem;
-  border-radius: 12px;
-  background: rgba(0, 0, 0, 0.45);
-  color: var(--gray-400);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
-.gender-hero-card.active .ghc-badge {
-  background: #d4af37;
-  color: #000;
+  top: 0.9rem;
+  right: 0.9rem;
+  font-size: 0.74rem;
   font-weight: 800;
-  border-color: #d4af37;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--gray-400);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  letter-spacing: 0.02em;
+  transition: all 0.3s;
 }
+.gender-hero-card.gender-hero-card--male.active .ghc-badge {
+  background: linear-gradient(135deg, #ffd700, #d4af37);
+  color: #0b0d12;
+  border-color: #ffd700;
+  box-shadow: 0 2px 10px rgba(212, 175, 55, 0.4);
+}
+.gender-hero-card.gender-hero-card--female.active .ghc-badge {
+  background: linear-gradient(135deg, #f472b6, #ec4899);
+  color: #0b0d12;
+  border-color: #f472b6;
+  box-shadow: 0 2px 10px rgba(244, 114, 182, 0.4);
+}
+
 .ghc-icon-wrap {
-  width: 68px;
-  height: 68px;
+  width: 76px;
+  height: 76px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1.5px solid rgba(255, 255, 255, 0.12);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.75rem;
-  color: var(--gray-300);
-  margin-bottom: 1.25rem;
-  transition: all 0.3s ease;
+  font-size: 1.95rem;
+  color: var(--gray-400);
+  margin-bottom: 1.3rem;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.gender-hero-card.active .ghc-icon-wrap {
-  background: linear-gradient(135deg, #f59e0b, #d97706);
-  color: #000;
+.gender-hero-card.gender-hero-card--male.active .ghc-icon-wrap {
+  background: linear-gradient(135deg, #ffd700 0%, #ca9e2e 100%);
+  color: #0c0e14;
   border-color: #ffd700;
-  box-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
-  transform: scale(1.08);
+  box-shadow: 0 0 26px rgba(212, 175, 55, 0.55);
+  transform: scale(1.1);
 }
+.gender-hero-card.gender-hero-card--female.active .ghc-icon-wrap {
+  background: linear-gradient(135deg, #f472b6 0%, #db2777 100%);
+  color: #ffffff;
+  border-color: #f472b6;
+  box-shadow: 0 0 26px rgba(244, 114, 182, 0.55);
+  transform: scale(1.1);
+}
+
 .ghc-title {
   font-family: var(--font-heading);
-  font-size: 1.35rem;
+  font-size: 1.55rem;
   font-weight: 800;
   color: var(--white);
-  margin-bottom: 0.45rem;
+  margin-bottom: 0.4rem;
+  letter-spacing: -0.01em;
+  transition: color 0.3s;
 }
-.gender-hero-card.active .ghc-title {
+.gender-hero-card.gender-hero-card--male.active .ghc-title {
   color: #ffd700;
 }
-.ghc-sub {
-  font-size: 0.8rem;
-  color: var(--gray-400);
-  line-height: 1.4;
-  margin-bottom: 1.1rem;
+.gender-hero-card.gender-hero-card--female.active .ghc-title {
+  color: #f472b6;
 }
-.ghc-check {
-  font-size: 0.76rem;
-  font-weight: 700;
-  color: var(--gray-500);
+
+.ghc-sub {
+  font-size: 0.84rem;
+  color: #9ca3af;
+  line-height: 1.45;
+  margin-bottom: 1.35rem;
+  min-height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ghc-select-btn {
+  width: 100%;
+  padding: 0.65rem 1rem;
+  border-radius: 999px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 800;
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
-  padding: 0.25rem 0.65rem;
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.04);
+  justify-content: center;
+  gap: 0.45rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #9ca3af;
+  cursor: pointer;
+  transition: all 0.25s ease;
 }
-.gender-hero-card.active .ghc-check {
-  color: #10b981;
-  background: rgba(16, 185, 129, 0.15);
+.gender-hero-card:hover .ghc-select-btn {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.25);
+}
+.gender-hero-card.gender-hero-card--male.active .ghc-select-btn {
+  background: #10b981;
+  color: #ffffff;
+  border-color: #10b981;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+}
+.gender-hero-card.gender-hero-card--female.active .ghc-select-btn {
+  background: #10b981;
+  color: #ffffff;
+  border-color: #10b981;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
 }
 
 .btn-change-gender-badge {

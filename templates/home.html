@@ -183,24 +183,24 @@
       <p class="wizard-step-desc">Choose your grooming category to view tailored salon services.</p>
 
       <div class="wizard-gender-hero-cards">
-        <div class="gender-hero-card active" id="genderCardMale" onclick="pickGenderStep('MALE')">
+        <div class="gender-hero-card gender-hero-card--male active" id="genderCardMale" onclick="pickGenderStep('MALE')">
           <div class="ghc-badge"><i class="fa-solid fa-mars"></i> {{ male_services|length }} Services</div>
           <div class="ghc-icon-wrap male">
             <i class="fa-solid fa-scissors"></i>
           </div>
           <div class="ghc-title">Men</div>
-          <div class="ghc-sub">Haircut, Beard Styling, Hair Design, Facials &amp; Grooming</div>
-          <div class="ghc-check"><i class="fa-solid fa-check"></i> Selected</div>
+          <div class="ghc-sub">Haircut, Beard Grooming, Design, Facials &amp; Head Massage</div>
+          <button type="button" class="ghc-select-btn"><i class="fa-solid fa-check"></i> <span class="ghc-btn-txt">Selected</span></button>
         </div>
 
-        <div class="gender-hero-card" id="genderCardFemale" onclick="pickGenderStep('FEMALE')">
+        <div class="gender-hero-card gender-hero-card--female" id="genderCardFemale" onclick="pickGenderStep('FEMALE')">
           <div class="ghc-badge"><i class="fa-solid fa-venus"></i> {{ female_services|length }} Services</div>
           <div class="ghc-icon-wrap female">
             <i class="fa-solid fa-wand-magic-sparkles"></i>
           </div>
           <div class="ghc-title">Women</div>
-          <div class="ghc-sub">Hair Spa, Styling, Bridal &amp; Luxury Beauty Care</div>
-          <div class="ghc-check"><i class="fa-solid fa-check"></i> Selected</div>
+          <div class="ghc-sub">Hair Spa, Styling, Highlights, Facials &amp; Bridal Care</div>
+          <button type="button" class="ghc-select-btn"><i class="fa-solid fa-arrow-right"></i> <span class="ghc-btn-txt">Select</span></button>
         </div>
       </div>
 
